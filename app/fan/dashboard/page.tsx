@@ -151,17 +151,30 @@ function DashboardContent() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-card border border-border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Music className="w-5 h-5" />
+              Your Playlists
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Create and manage custom playlists to listen at home
+            </p>
+            <Link href="/fan/playlists">
+              <Button>View Playlists</Button>
+            </Link>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Heart className="w-5 h-5" />
               Your Library
             </h2>
             <p className="text-muted-foreground mb-4">
               All your favorite tracks and purchases in one place
             </p>
             <Link href="/fan/library">
-              <Button>View Library</Button>
+              <Button variant="outline">View Library</Button>
             </Link>
           </div>
 
