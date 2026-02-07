@@ -4,11 +4,15 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+type RouteContext = {
+  params: Promise<{ trackId: string }>
+}
+
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ trackId: string }> }
+  { params }: RouteContext
 ) {
-  const { trackId } = await context.params
+  const { trackId } = await params
 
   try {
     // Fetch track
