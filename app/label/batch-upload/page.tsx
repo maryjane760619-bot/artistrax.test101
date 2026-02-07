@@ -1,0 +1,487 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { LabelAuthProvider, useLabelAuth } from '@/lib/label-auth-context'
+import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Upload, Music, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import Link from 'next/link'
+
+type UploadFile = {
+  file: File
+  title: string
+  artistId: string
+  status: 'pending' | 'uploading' | 'success' | 'error'
+  progress: number
+  error?: string
+}
+
+type Artist = {
+  id: string
+  display_name: string
+  username: string
+}
+
+function LabelBatchUploadContent() {
+  const router = useRouter()
+  const { user, loading: authLoading } = useLabelAuth()
+  
+  const [files, setFiles] = useState<UploadFile[]>([])
+  const [artists, setArtists] = useState<Artist[]>([])
+  const [defaultArtistId, setDefaultArtistId] = useState<string>('')
+  const [uploading, setUploading] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/label/login')
+    }
+  }, [user, authLoading])
+
+  useEffect(() => {
+    if (user) {
+      loadArtists()
+    }
+  }, [user])
+
+  const loadArtists = async () => {
+    // Load all artists (labels can assign tracks to any artist)
+    const { data } = await supabase
+      .from('artists')
+      .select('id, display_name, username')
+      .order('display_name')
+
+    if (data) {
+      setArtists(data)
+      // Set DJ Halo as default if available
+      const djHalo = data.find(a => a.username === 'halo')
+      if (djHalo) {
+        setDefaultArtistId(djHalo.id)
+      } else if (data.length > 0) {
+        setDefaultArtistId(data[0].id)
+      }
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    const audioFiles = selectedFiles.filter(file => 
+      file.type.includes('audio') || file.name.match(/\.(mp3|wav|flac)$/i)
+    )
+
+    const uploadFiles: UploadFile[] = audioFiles.map(file => ({
+      file,
+      title: file.name.replace(/\.(mp3|wav|flac)$/i, ''),
+      artistId: defaultArtistId,
+      status: 'pending',
+      progress: 0,
+    }))
+
+    setFiles(prev => [...prev, ...uploadFiles])
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    const droppedFiles = Array.from(e.dataTransfer.files)
+    const audioFiles = droppedFiles.filter(file => 
+      file.type.includes('audio') || file.name.match(/\.(mp3|wav|flac)$/i)
+    )
+
+    const uploadFiles: UploadFile[] = audioFiles.map(file => ({
+      file,
+      title: file.name.replace(/\.(mp3|wav|flac)$/i, ''),
+      artistId: defaultArtistId,
+      status: 'pending',
+      progress: 0,
+    }))
+
+    setFiles(prev => [...prev, ...uploadFiles])
+  }
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const updateFileArtist = (index: number, artistId: string) => {
+    setFiles(prev => prev.map((f, i) => 
+      i === index ? { ...f, artistId } : f
+    ))
+  }
+
+  const applyArtistToAll = (artistId: string) => {
+    setFiles(prev => prev.map(f => ({ ...f, artistId })))
+  }
+
+  const generateSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
+
+  const getAudioDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const audio = document.createElement('audio')
+      audio.src = URL.createObjectURL(file)
+      audio.addEventListener('loadedmetadata', () => {
+        resolve(audio.duration)
+      })
+      audio.addEventListener('error', () => {
+        resolve(0) // Return 0 if we can't get duration
+      })
+    })
+  }
+
+  const uploadSingleFile = async (uploadFile: UploadFile, index: number) => {
+    if (!user) return
+
+    // Update status to uploading
+    setFiles(prev => prev.map((f, i) => 
+      i === index ? { ...f, status: 'uploading' as const, progress: 10 } : f
+    ))
+
+    try {
+      const { file, title, artistId } = uploadFile
+      const audioExt = file.name.split('.').pop()
+      const audioPath = `${user.id}/${Date.now()}-${generateSlug(title)}.${audioExt}`
+      
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('audio')
+        .upload(audioPath, file)
+
+      if (uploadError) throw uploadError
+
+      setFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, progress: 50 } : f
+      ))
+
+      // Get duration
+      const duration = await getAudioDuration(file)
+
+      // Get public URL
+      const { data: audioData } = supabase.storage
+        .from('audio')
+        .getPublicUrl(audioPath)
+
+      setFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, progress: 70 } : f
+      ))
+
+      // Save to database with both label_id and artist_id
+      const { error: dbError } = await supabase.from('tracks').insert({
+        label_id: user.id,
+        artist_id: artistId,
+        title,
+        slug: generateSlug(title),
+        audio_url: audioData.publicUrl,
+        duration: Math.floor(duration),
+        file_size: file.size,
+        format: audioExt as 'mp3' | 'flac' | 'wav',
+        price: 0,
+        is_free: true,
+      })
+
+      if (dbError) throw dbError
+
+      // Success!
+      setFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, status: 'success' as const, progress: 100 } : f
+      ))
+
+    } catch (err: any) {
+      setFiles(prev => prev.map((f, i) => 
+        i === index ? { 
+          ...f, 
+          status: 'error' as const, 
+          progress: 0,
+          error: err.message || 'Upload failed'
+        } : f
+      ))
+    }
+  }
+
+  const handleUploadAll = async () => {
+    if (!user || files.length === 0) return
+
+    setUploading(true)
+    setCurrentIndex(0)
+
+    // Upload files sequentially (could be parallel but safer this way)
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].status === 'pending') {
+        setCurrentIndex(i)
+        await uploadSingleFile(files[i], i)
+      }
+    }
+
+    setUploading(false)
+
+    // Check if all succeeded
+    const allSuccess = files.every(f => f.status === 'success')
+    if (allSuccess) {
+      setTimeout(() => {
+        router.push('/label/dashboard')
+      }, 1000)
+    }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!user) return null
+
+  const pendingCount = files.filter(f => f.status === 'pending').length
+  const successCount = files.filter(f => f.status === 'success').length
+  const errorCount = files.filter(f => f.status === 'error').length
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/label/dashboard" className="text-2xl font-serif font-semibold">
+              artistrax
+            </Link>
+            <Link href="/label/dashboard">
+              <Button variant="ghost" size="sm">
+                Back to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-serif font-semibold mb-2">Label Batch Upload</h1>
+          <p className="text-muted-foreground">
+            Upload multiple tracks at once and assign to artists
+          </p>
+        </div>
+
+        {/* Drop Zone */}
+        {files.length === 0 && (
+          <div
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onClick={() => fileInputRef.current?.click()}
+            className="border-2 border-dashed border-border rounded-lg p-12 text-center cursor-pointer hover:border-primary transition-colors mb-8"
+          >
+            <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-lg font-medium mb-2">
+              Drop your audio files here or click to browse
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Select multiple MP3, WAV, or FLAC files
+            </p>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/mpeg,audio/wav,audio/flac,.mp3,.wav,.flac"
+          multiple
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        {/* Files List */}
+        {files.length > 0 && (
+          <>
+            {/* Summary & Bulk Artist Selection */}
+            <div className="bg-card border border-border rounded-lg p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">Ready to Upload</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {files.length} tracks • All will be set as free downloads (edit later)
+                  </p>
+                </div>
+                {!uploading && pendingCount > 0 && (
+                  <Button onClick={() => fileInputRef.current?.click()} variant="outline">
+                    Add More Files
+                  </Button>
+                )}
+              </div>
+
+              {/* Apply Artist to All */}
+              {!uploading && pendingCount > 0 && artists.length > 0 && (
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <label className="text-sm font-medium whitespace-nowrap">
+                    Apply to all:
+                  </label>
+                  <select
+                    value={defaultArtistId}
+                    onChange={(e) => {
+                      setDefaultArtistId(e.target.value)
+                      applyArtistToAll(e.target.value)
+                    }}
+                    className="flex-1 px-3 py-2 bg-background border border-border rounded-md"
+                  >
+                    {artists.map(artist => (
+                      <option key={artist.id} value={artist.id}>
+                        {artist.display_name} (@{artist.username})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(successCount > 0 || errorCount > 0) && (
+                <div className="mt-4 flex gap-4 text-sm">
+                  {successCount > 0 && (
+                    <span className="text-green-600 dark:text-green-400">
+                      ✓ {successCount} uploaded
+                    </span>
+                  )}
+                  {errorCount > 0 && (
+                    <span className="text-destructive">
+                      ✗ {errorCount} failed
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Files */}
+            <div className="space-y-3 mb-8">
+              {files.map((uploadFile, index) => (
+                <div
+                  key={index}
+                  className="bg-card border border-border rounded-lg p-4"
+                >
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="flex-shrink-0">
+                      {uploadFile.status === 'pending' && (
+                        <Music className="w-5 h-5 text-muted-foreground" />
+                      )}
+                      {uploadFile.status === 'uploading' && (
+                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                      )}
+                      {uploadFile.status === 'success' && (
+                        <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      )}
+                      {uploadFile.status === 'error' && (
+                        <AlertCircle className="w-5 h-5 text-destructive" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{uploadFile.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {(uploadFile.file.size / 1024 / 1024).toFixed(2)} MB
+                        {uploadFile.error && (
+                          <span className="text-destructive ml-2">• {uploadFile.error}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {uploadFile.status === 'pending' && !uploading && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Artist Selection */}
+                  {uploadFile.status === 'pending' && !uploading && artists.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      <label className="text-sm text-muted-foreground whitespace-nowrap">
+                        Artist:
+                      </label>
+                      <select
+                        value={uploadFile.artistId}
+                        onChange={(e) => updateFileArtist(index, e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-sm bg-background border border-border rounded-md"
+                      >
+                        {artists.map(artist => (
+                          <option key={artist.id} value={artist.id}>
+                            {artist.display_name} (@{artist.username})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {uploadFile.status === 'success' && (
+                    <div className="text-sm text-green-600 dark:text-green-400">
+                      ✓ Uploaded to {artists.find(a => a.id === uploadFile.artistId)?.display_name}
+                    </div>
+                  )}
+
+                  {uploadFile.status === 'uploading' && (
+                    <div className="mt-2 w-full bg-muted rounded-full h-1">
+                      <div
+                        className="bg-primary h-1 rounded-full transition-all"
+                        style={{ width: `${uploadFile.progress}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Upload Button */}
+            {pendingCount > 0 && (
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleUploadAll}
+                  disabled={uploading}
+                  size="lg"
+                  className="flex-1"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Uploading {currentIndex + 1} of {files.length}...
+                    </>
+                  ) : (
+                    `Upload All ${files.length} Tracks`
+                  )}
+                </Button>
+                {!uploading && (
+                  <Link href="/label/dashboard">
+                    <Button variant="outline" size="lg">
+                      Cancel
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+
+            {successCount === files.length && errorCount === 0 && (
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 p-4 rounded-lg text-center">
+                <CheckCircle className="w-6 h-6 mx-auto mb-2" />
+                <p className="font-semibold">All tracks uploaded successfully!</p>
+                <p className="text-sm mt-1">Redirecting to dashboard...</p>
+              </div>
+            )}
+          </>
+        )}
+      </main>
+    </div>
+  )
+}
+
+export default function LabelBatchUploadPage() {
+  return (
+    <LabelAuthProvider>
+      <LabelBatchUploadContent />
+    </LabelAuthProvider>
+  )
+}
