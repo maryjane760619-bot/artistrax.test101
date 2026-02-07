@@ -15,7 +15,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/artists', label: 'Artists' },
   { href: '/labels/siestarecords', label: 'Labels' },
-  { href: '/bundles', label: 'Bundles' },
+  { href: '/about', label: 'About' },
 ]
 
 export function Header() {
