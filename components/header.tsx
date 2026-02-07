@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ShoppingCart, Menu, LayoutDashboard, LogIn, ChevronDown, Heart, Music, Building2 } from 'lucide-react'
+import { ShoppingCart, Menu, LayoutDashboard, LogIn, Heart, Music, Building2 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
@@ -11,12 +11,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 const navLinks = [
   { href: '/', label: 'Home' },
