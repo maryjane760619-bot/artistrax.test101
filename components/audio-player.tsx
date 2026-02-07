@@ -103,6 +103,7 @@ export function AudioPlayer({ track, queue = [], onTrackChange, className }: Aud
     // Keyboard shortcuts
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (!wavesurfer) return
       
       switch(e.key) {
         case ' ':
@@ -111,11 +112,19 @@ export function AudioPlayer({ track, queue = [], onTrackChange, className }: Aud
           break
         case 'ArrowLeft':
           e.preventDefault()
-          wavesurfer.skip(-5)
+          try {
+            wavesurfer.skip(-5)
+          } catch (err) {
+            // Ignore errors during skip
+          }
           break
         case 'ArrowRight':
           e.preventDefault()
-          wavesurfer.skip(5)
+          try {
+            wavesurfer.skip(5)
+          } catch (err) {
+            // Ignore errors during skip
+          }
           break
         case 'm':
           e.preventDefault()
