@@ -257,6 +257,8 @@ function DJChartsSection({ charts }: { charts: DJChart[] }) {
 }
 
 function TopTracksSidebar({ tracks }: { tracks: Track[] }) {
+  const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
+
   return (
     <div className="sticky top-24">
       <div className="flex items-center gap-2 mb-6">
@@ -271,39 +273,54 @@ function TopTracksSidebar({ tracks }: { tracks: Track[] }) {
       ) : (
         <div className="space-y-3">
           {tracks.map((track, index) => (
-            <div key={track.id} className="bg-card border border-border rounded-lg p-3 hover:bg-muted/50 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
-                  {index + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold truncate mb-1">
-                    {track.title}
-                  </h3>
-                  <div className="text-xs text-muted-foreground">
-                    {track.artists && (
-                      <Link 
-                        href={`/${track.artists.username}`}
-                        className="text-primary hover:underline"
-                      >
-                        {track.artists.display_name}
-                      </Link>
-                    )}
-                    {track.labels && track.artists && <span> • </span>}
-                    {track.labels && (
-                      <Link 
-                        href={`/labels/${track.labels.slug}`}
-                        className="hover:underline"
-                      >
-                        {track.labels.name}
-                      </Link>
-                    )}
+            <div key={track.id} className="bg-card border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setExpandedTrack(expandedTrack === track.id ? null : track.id)}
+                className="w-full p-3 hover:bg-muted/50 transition-colors text-left"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
+                    {index + 1}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {track.download_count} downloads
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold truncate mb-1">
+                      {track.title}
+                    </h3>
+                    <div className="text-xs text-muted-foreground">
+                      {track.artists && (
+                        <span className="text-primary">
+                          {track.artists.display_name}
+                        </span>
+                      )}
+                      {track.labels && track.artists && <span> • </span>}
+                      {track.labels && (
+                        <span>
+                          {track.labels.name}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {track.download_count} downloads
+                    </div>
                   </div>
+                  <Play className={`w-4 h-4 flex-shrink-0 ${expandedTrack === track.id ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
-              </div>
+              </button>
+              
+              {expandedTrack === track.id && (
+                <div className="px-3 pb-3 border-t border-border pt-3">
+                  <AudioPlayer
+                    track={{
+                      id: track.id,
+                      title: track.title,
+                      artist: track.artists?.display_name || track.labels?.name || 'Unknown',
+                      audioUrl: track.audio_url,
+                      coverUrl: track.cover_url || undefined,
+                      duration: track.duration || undefined,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
