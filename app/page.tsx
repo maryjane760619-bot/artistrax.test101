@@ -6,7 +6,6 @@ import { ArrowRight, Play, TrendingUp, Clock, ListMusic, Music, Building2, Heart
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { CartProvider } from '@/lib/cart-context'
 import { supabase } from '@/lib/supabase'
 import { AudioPlayer } from '@/components/audio-player'
 
@@ -421,7 +420,7 @@ export default function HomePage() {
   }
 
   return (
-    <CartProvider>
+    <>
       <Header />
       <main className="min-h-screen">
         <HeroSection />
@@ -510,7 +509,7 @@ export default function HomePage() {
         </section>
       </main>
       <Footer />
-    </CartProvider>
+    </>
   )
 }
 
