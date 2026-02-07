@@ -55,37 +55,14 @@ export function Header() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
-            {/* Login Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden sm:inline">Login</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href="/fan/login" className="flex items-center gap-2 cursor-pointer">
-                    <Heart className="w-4 h-4" />
-                    Fan Login
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/artist/login" className="flex items-center gap-2 cursor-pointer">
-                    <Music className="w-4 h-4" />
-                    Artist Login
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/label/login" className="flex items-center gap-2 cursor-pointer">
-                    <Building2 className="w-4 h-4" />
-                    Label Login
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center gap-2">
+            {/* Login Button - Opens to Fan Login (most common) */}
+            <Link href="/fan/login">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Login</span>
+              </Button>
+            </Link>
 
             {user && (
               <Link href="/artist/dashboard">
