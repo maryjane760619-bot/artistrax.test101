@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ShoppingCart, Menu, LayoutDashboard, LogIn, Heart, Music, Building2 } from 'lucide-react'
-import { useCart } from '@/lib/cart-context'
+import { Menu, LayoutDashboard, LogIn, Heart, Music, Building2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,7 +19,6 @@ const navLinks = [
 ]
 
 export function Header() {
-  const { totalItems } = useCart()
   const { user } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -66,14 +64,6 @@ export function Header() {
                 </Button>
               </Link>
             )}
-            <Link href="/cart" className="relative">
-              <ShoppingCart className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-foreground text-background text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
 
             {/* Mobile menu button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
