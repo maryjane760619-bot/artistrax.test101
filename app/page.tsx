@@ -3,17 +3,13 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Heart, Music, Building2 } from 'lucide-react'
+import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/" className="text-2xl font-serif font-semibold">
-            artistrax
-          </Link>
-        </div>
-      </header>
+    <>
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
@@ -69,6 +65,7 @@ export default function HomePage() {
           </Link>
         </div>
       </main>
-    </div>
+      <Footer />
+    </>
   )
 }
