@@ -14,7 +14,7 @@ import {
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/artists', label: 'Artists' },
-  { href: '/releases', label: 'Releases' },
+  { href: '/labels/siestarecords', label: 'Labels' },
   { href: '/bundles', label: 'Bundles' },
 ]
 
