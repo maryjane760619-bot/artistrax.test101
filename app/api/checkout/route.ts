@@ -1,0 +1,65 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { stripe } from '@/lib/stripe'
+import { supabase } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+export async function POST(request: NextRequest) {
+  try {
+    const { trackId, fanEmail } = await request.json()
+
+    if (!trackId) {
+      return NextResponse.json({ error: 'Track ID required' }, { status: 400 })
+    }
+
+    // Fetch track details
+    const { data: track, error: trackError } = await supabase
+      .from('tracks')
+      .select('*, artists(display_name), labels(name)')
+      .eq('id', trackId)
+      .single()
+
+    if (trackError || !track) {
+      return NextResponse.json({ error: 'Track not found' }, { status: 404 })
+    }
+
+    // Check if track is free
+    if (track.is_free) {
+      return NextResponse.json({ error: 'This track is free' }, { status: 400 })
+    }
+
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: track.title,
+              description: track.artists?.display_name || track.labels?.name || 'Unknown Artist',
+              images: track.cover_url ? [track.cover_url] : undefined,
+            },
+            unit_amount: Math.round(track.price * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      customer_email: fanEmail || undefined,
+      metadata: {
+        trackId: track.id,
+        artistId: track.artist_id,
+        labelId: track.label_id || '',
+      },
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}`,
+    })
+
+    return NextResponse.json({ sessionId: session.id, url: session.url })
+  } catch (error: any) {
+    console.error('Checkout error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
