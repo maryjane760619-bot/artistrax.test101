@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Play, TrendingUp, Clock, ListMusic } from 'lucide-react'
+import { ArrowRight, Play, TrendingUp, Clock, ListMusic, Music, Building2, Heart } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
@@ -63,18 +63,63 @@ function HeroSection() {
             Premium digital downloads from independent artists & labels. High-quality audio, direct to you.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button asChild size="lg" className="px-8">
-              <Link href="/artist/signup">
-                Join as Artist
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="px-8">
-              <Link href="/label/signup">
-                Join as Label
-              </Link>
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
+            {/* Fan Signup */}
+            <Link 
+              href="/fan/signup"
+              className="bg-card border-2 border-primary rounded-lg p-6 hover:bg-primary/10 transition-colors group"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+                  <Heart className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Join as Fan</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Discover music, build your collection
+                </p>
+                <Button size="sm" className="w-full">
+                  Sign Up Free
+                </Button>
+              </div>
+            </Link>
+
+            {/* Artist Signup */}
+            <Link 
+              href="/artist/signup"
+              className="bg-card border-2 border-border rounded-lg p-6 hover:border-primary transition-colors group"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Music className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Join as Artist</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Upload tracks, get paid directly
+                </p>
+                <Button variant="outline" size="sm" className="w-full">
+                  Get Started
+                </Button>
+              </div>
+            </Link>
+
+            {/* Label Signup */}
+            <Link 
+              href="/label/signup"
+              className="bg-card border-2 border-border rounded-lg p-6 hover:border-primary transition-colors group"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Building2 className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Join as Label</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Manage artists, distribute music
+                </p>
+                <Button variant="outline" size="sm" className="w-full">
+                  Get Started
+                </Button>
+              </div>
+            </Link>
           </div>
         </div>
       </div>
