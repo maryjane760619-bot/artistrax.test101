@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { AudioPlayer } from '@/components/audio-player'
+import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
 import { ListMusic, Calendar, User2 } from 'lucide-react'
 
@@ -160,14 +160,13 @@ export function DJChartPage({ chart }: Props) {
                 </div>
 
                 {/* Audio Player */}
-                <AudioPlayer
+                <SimpleAudioPlayer
                   track={{
                     id: item.tracks.id,
                     title: item.tracks.title,
                     artist: item.tracks.artists?.display_name || 'Unknown',
                     audioUrl: item.tracks.audio_url,
                     coverUrl: item.tracks.cover_url || undefined,
-                    duration: item.tracks.duration || undefined,
                   }}
                   className="mb-4"
                 />

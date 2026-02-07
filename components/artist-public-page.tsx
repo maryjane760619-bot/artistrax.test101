@@ -1,6 +1,6 @@
 'use client'
 
-import { AudioPlayer } from '@/components/audio-player'
+import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
 import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink } from 'lucide-react'
 
@@ -214,14 +214,13 @@ export function ArtistPublicPage({ artist, tracks }: Props) {
                     </div>
 
                     {/* Audio Player */}
-                    <AudioPlayer
+                    <SimpleAudioPlayer
                       track={{
                         id: track.id,
                         title: track.title,
                         artist: artist.display_name,
                         audioUrl: track.audio_url,
                         coverUrl: track.cover_url || undefined,
-                        duration: track.duration || undefined,
                       }}
                       className="mb-4"
                     />
