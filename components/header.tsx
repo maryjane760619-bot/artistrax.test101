@@ -50,6 +50,11 @@ export function Header() {
 
           {/* Right side */}
           <div className="flex items-center gap-4">
+            <Link href="/fan/login" className="hidden md:block">
+              <Button variant="ghost" size="sm">
+                Fan Login
+              </Button>
+            </Link>
             {user && (
               <Link href="/artist/dashboard">
                 <Button variant="ghost" size="sm" className="gap-2">
