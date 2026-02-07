@@ -100,10 +100,23 @@ export function AudioPlayer({ track, queue = [], onTrackChange, className }: Aud
       setCurrentTime(progress * wavesurfer.getDuration())
     })
 
-    // Keyboard shortcuts
+    return () => {
+      try {
+        if (wavesurfer && !wavesurfer.isDestroyed) {
+          wavesurfer.destroy()
+        }
+      } catch (err) {
+        // Ignore abort errors during cleanup
+        console.debug('WaveSurfer cleanup:', err)
+      }
+    }
+  }, [track.audioUrl])
+
+  // Keyboard shortcuts - separate effect that depends on isPlaying
+  useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      if (!wavesurfer) return
+      if (!isPlaying || !wavesurferRef.current) return // Only respond if THIS player is playing
       
       switch(e.key) {
         case ' ':
@@ -113,7 +126,7 @@ export function AudioPlayer({ track, queue = [], onTrackChange, className }: Aud
         case 'ArrowLeft':
           e.preventDefault()
           try {
-            wavesurfer.skip(-5)
+            wavesurferRef.current.skip(-5)
           } catch (err) {
             // Ignore errors during skip
           }
@@ -121,7 +134,7 @@ export function AudioPlayer({ track, queue = [], onTrackChange, className }: Aud
         case 'ArrowRight':
           e.preventDefault()
           try {
-            wavesurfer.skip(5)
+            wavesurferRef.current.skip(5)
           } catch (err) {
             // Ignore errors during skip
           }
@@ -133,17 +146,14 @@ export function AudioPlayer({ track, queue = [], onTrackChange, className }: Aud
       }
     }
 
-    window.addEventListener('keydown', handleKeyPress)
+    if (isPlaying) {
+      window.addEventListener('keydown', handleKeyPress)
+    }
 
     return () => {
-      try {
-        wavesurfer.destroy()
-      } catch (err) {
-        // Ignore abort errors during cleanup
-      }
       window.removeEventListener('keydown', handleKeyPress)
     }
-  }, [track.audioUrl])
+  }, [isPlaying, togglePlay, toggleMute])
 
   // Update volume
   useEffect(() => {
