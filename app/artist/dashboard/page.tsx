@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Upload, Music, TrendingUp, DollarSign, Download, User, ListMusic } from 'lucide-react'
+import { Upload, Music, TrendingUp, DollarSign, Download, User, ListMusic, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
 
@@ -159,10 +159,10 @@ export default function ArtistDashboard() {
               <span className="text-lg">Batch Upload</span>
             </Button>
           </Link>
-          <Link href="/artist/create-chart">
-            <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2 border-accent text-accent hover:bg-accent/10">
-              <ListMusic className="w-8 h-8" />
-              <span className="text-lg">Create DJ Chart</span>
+          <Link href="/artist/links">
+            <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
+              <LinkIcon className="w-8 h-8" />
+              <span className="text-lg">Manage Links</span>
             </Button>
           </Link>
           <Link href="/artist/profile">

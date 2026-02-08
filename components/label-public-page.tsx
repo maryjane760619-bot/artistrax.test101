@@ -4,6 +4,7 @@ import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
 import { Download, Globe, Instagram, Twitter, Music2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { SocialLinksDisplay } from '@/components/social-links-display'
 
 type Label = {
   id: string
@@ -162,6 +163,11 @@ export function LabelPublicPage({ label, tracks }: Props) {
               )}
             </div>
           )}
+        </div>
+
+        {/* New Social Links Section */}
+        <div className="mb-12 max-w-md mx-auto">
+          <SocialLinksDisplay labelId={label.id} />
         </div>
 
         {/* Catalog */}

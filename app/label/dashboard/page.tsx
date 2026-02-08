@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { LabelAuthProvider, useLabelAuth } from '@/lib/label-auth-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Upload, Music, TrendingUp, DollarSign, Download, Users } from 'lucide-react'
+import { Upload, Music, TrendingUp, DollarSign, Download, Users, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
 
@@ -133,7 +133,7 @@ function DashboardContent() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Link href="/label/upload">
             <Button className="w-full h-auto py-6 flex-col gap-2">
               <Upload className="w-8 h-8" />
@@ -144,6 +144,12 @@ function DashboardContent() {
             <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
               <Upload className="w-8 h-8" />
               <span className="text-lg">Batch Upload</span>
+            </Button>
+          </Link>
+          <Link href="/label/links">
+            <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
+              <LinkIcon className="w-8 h-8" />
+              <span className="text-lg">Manage Links</span>
             </Button>
           </Link>
           <Link href="/label/profile">

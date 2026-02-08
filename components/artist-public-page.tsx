@@ -3,6 +3,7 @@
 import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
 import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink } from 'lucide-react'
+import { SocialLinksDisplay } from '@/components/social-links-display'
 
 type Artist = {
   id: string
@@ -159,6 +160,11 @@ export function ArtistPublicPage({ artist, tracks }: Props) {
               )}
             </div>
           )}
+        </div>
+
+        {/* New Social Links Section */}
+        <div className="mb-12 max-w-md mx-auto">
+          <SocialLinksDisplay artistId={artist.id} />
         </div>
 
         {/* Tracks Section */}
