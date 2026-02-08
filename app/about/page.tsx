@@ -79,7 +79,7 @@ export default function AboutPage() {
                 artistrax was born from Siesta Records, an independent electronic music label based in Encinitas, California. After years of navigating the challenges of digital distribution, we built the platform we wished existed.
               </p>
               <p className="text-lg text-muted-foreground mb-4">
-                Founded by Bert Porcayo, Siesta Records represents the laid-back beach vibes of Southern California while pushing the boundaries of electronic music. From deep house to progressive beats, we believe music should be felt, not just heard.
+                Siesta Records represents the laid-back beach vibes of Southern California while pushing the boundaries of electronic music. From deep house to progressive beats, we believe music should be felt, not just heard.
               </p>
               <p className="text-lg text-muted-foreground mb-6">
                 Now, we're opening the doors for artists and labels worldwide to benefit from what we've built. Welcome to the family.
