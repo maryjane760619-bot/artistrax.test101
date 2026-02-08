@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
-// Initialize Resend with API key from environment
-export const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with API key from environment (safe initialization)
+export const resend = new Resend(process.env.RESEND_API_KEY || 'placeholder_key');
 
 // From address
 export const FROM_EMAIL = 'Artistrax <support@artistrax.com>';

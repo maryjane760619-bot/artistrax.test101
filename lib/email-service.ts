@@ -3,6 +3,12 @@ import { emailTemplates } from './email-templates';
 
 // Helper function to send emails
 async function sendEmail(to: string, subject: string, html: string) {
+  // Skip if Resend is not configured
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_api_key_here') {
+    console.log('Resend not configured, skipping email to:', to);
+    return { success: false, error: 'Resend not configured' };
+  }
+
   try {
     const data = await resend.emails.send({
       from: FROM_EMAIL,
