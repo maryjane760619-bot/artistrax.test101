@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Upload, Music, TrendingUp, DollarSign, Download, User, ListMusic } from 'lucide-react'
 import Link from 'next/link'
+import { SubscriptionBanner } from '@/components/subscription-banner'
 
 export default function ArtistDashboard() {
   const router = useRouter()
@@ -35,7 +36,7 @@ export default function ArtistDashboard() {
 
     const { data } = await supabase
       .from('artists')
-      .select('*')
+      .select('*, subscription_status, subscription_tier, trial_ends_at, subscription_expires_at')
       .eq('id', user.id)
       .single()
 
@@ -131,6 +132,17 @@ export default function ArtistDashboard() {
           <p className="text-muted-foreground">
             Welcome back, {artistData.display_name}
           </p>
+        </div>
+
+        {/* Subscription Banner */}
+        <div className="mb-8">
+          <SubscriptionBanner
+            accountType="artist"
+            subscriptionStatus={artistData.subscription_status}
+            subscriptionTier={artistData.subscription_tier}
+            trialEndsAt={artistData.trial_ends_at}
+            subscriptionExpiresAt={artistData.subscription_expires_at}
+          />
         </div>
 
         {/* Quick Actions */}

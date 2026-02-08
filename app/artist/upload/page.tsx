@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload, Music, Image as ImageIcon, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { SubscriptionGate } from '@/components/subscription-gate'
 
 export default function UploadTrackPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
+  const [subscriptionData, setSubscriptionData] = useState<any>(null)
   
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
@@ -35,7 +37,23 @@ export default function UploadTrackPage() {
     if (!authLoading && !user) {
       router.push('/artist/login')
     }
+    
+    if (user) {
+      fetchSubscriptionData()
+    }
   }, [user, authLoading])
+  
+  const fetchSubscriptionData = async () => {
+    if (!user) return
+    
+    const { data } = await supabase
+      .from('artists')
+      .select('subscription_status, subscription_tier, trial_ends_at, subscription_expires_at')
+      .eq('id', user.id)
+      .single()
+    
+    setSubscriptionData(data)
+  }
 
   const handleAudioDrop = (e: React.DragEvent) => {
     e.preventDefault()
@@ -215,7 +233,13 @@ export default function UploadTrackPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <SubscriptionGate
+          accountType="artist"
+          subscriptionStatus={subscriptionData?.subscription_status}
+          trialEndsAt={subscriptionData?.trial_ends_at}
+          subscriptionExpiresAt={subscriptionData?.subscription_expires_at}
+        >
+          <form onSubmit={handleSubmit} className="space-y-8">
           {error && (
             <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md text-sm">
               {error}
@@ -424,6 +448,7 @@ export default function UploadTrackPage() {
             </Link>
           </div>
         </form>
+        </SubscriptionGate>
       </main>
     </div>
   )

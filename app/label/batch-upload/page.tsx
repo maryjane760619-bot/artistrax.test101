@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Upload, Music, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { SubscriptionGate } from '@/components/subscription-gate'
 
 type UploadFile = {
   file: File
@@ -26,6 +27,7 @@ type Artist = {
 function LabelBatchUploadContent() {
   const router = useRouter()
   const { user, loading: authLoading } = useLabelAuth()
+  const [subscriptionData, setSubscriptionData] = useState<any>(null)
   
   const [files, setFiles] = useState<UploadFile[]>([])
   const [artists, setArtists] = useState<Artist[]>([])
@@ -39,6 +41,10 @@ function LabelBatchUploadContent() {
     if (!authLoading && !user) {
       router.push('/label/login')
     }
+    
+    if (user) {
+      fetchSubscriptionData()
+    }
   }, [user, authLoading])
 
   useEffect(() => {
@@ -46,6 +52,18 @@ function LabelBatchUploadContent() {
       loadArtists()
     }
   }, [user])
+  
+  const fetchSubscriptionData = async () => {
+    if (!user) return
+    
+    const { data } = await supabase
+      .from('labels')
+      .select('subscription_status, subscription_tier, trial_ends_at, subscription_expires_at')
+      .eq('id', user.id)
+      .single()
+    
+    setSubscriptionData(data)
+  }
 
   const loadArtists = async () => {
     // Load all artists (labels can assign tracks to any artist)
@@ -269,6 +287,12 @@ function LabelBatchUploadContent() {
           </p>
         </div>
 
+        <SubscriptionGate
+          accountType="label"
+          subscriptionStatus={subscriptionData?.subscription_status}
+          trialEndsAt={subscriptionData?.trial_ends_at}
+          subscriptionExpiresAt={subscriptionData?.subscription_expires_at}
+        >
         {/* Drop Zone */}
         {files.length === 0 && (
           <div
@@ -473,6 +497,7 @@ function LabelBatchUploadContent() {
             )}
           </>
         )}
+        </SubscriptionGate>
       </main>
     </div>
   )

@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Upload, Music, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { SubscriptionGate } from '@/components/subscription-gate'
 
 type UploadFile = {
   file: File
@@ -19,6 +20,7 @@ type UploadFile = {
 export default function BatchUploadPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
+  const [subscriptionData, setSubscriptionData] = useState<any>(null)
   
   const [files, setFiles] = useState<UploadFile[]>([])
   const [uploading, setUploading] = useState(false)
@@ -30,7 +32,23 @@ export default function BatchUploadPage() {
     if (!authLoading && !user) {
       router.push('/artist/login')
     }
+    
+    if (user) {
+      fetchSubscriptionData()
+    }
   }, [user, authLoading])
+  
+  const fetchSubscriptionData = async () => {
+    if (!user) return
+    
+    const { data } = await supabase
+      .from('artists')
+      .select('subscription_status, subscription_tier, trial_ends_at, subscription_expires_at')
+      .eq('id', user.id)
+      .single()
+    
+    setSubscriptionData(data)
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || [])
@@ -222,6 +240,12 @@ export default function BatchUploadPage() {
           </p>
         </div>
 
+        <SubscriptionGate
+          accountType="artist"
+          subscriptionStatus={subscriptionData?.subscription_status}
+          trialEndsAt={subscriptionData?.trial_ends_at}
+          subscriptionExpiresAt={subscriptionData?.subscription_expires_at}
+        >
         {/* Drop Zone */}
         {files.length === 0 && (
           <div
@@ -374,6 +398,7 @@ export default function BatchUploadPage() {
             )}
           </>
         )}
+        </SubscriptionGate>
       </main>
     </div>
   )

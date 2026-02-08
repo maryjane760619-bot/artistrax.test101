@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Heart, Download, Music, TrendingUp, User } from 'lucide-react'
 import Link from 'next/link'
+import { PointsBalanceCard } from '@/components/points-balance-card'
 
 function DashboardContent() {
   const router = useRouter()
@@ -34,7 +35,7 @@ function DashboardContent() {
 
     const { data } = await supabase
       .from('fans')
-      .select('*')
+      .select('*, points_balance')
       .eq('id', user.id)
       .single()
 
@@ -123,6 +124,11 @@ function DashboardContent() {
           <p className="text-muted-foreground">
             Your music collection and downloads
           </p>
+        </div>
+
+        {/* Points Balance Card */}
+        <div className="mb-8">
+          <PointsBalanceCard pointsBalance={fanData.points_balance || 0} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
