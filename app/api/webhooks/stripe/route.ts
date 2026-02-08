@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { supabase } from '@/lib/supabase'
 import Stripe from 'stripe'
 import { POINTS_CONFIG } from '@/lib/points-config'
+import { sendSubscriptionNotification } from '@/lib/email-service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -204,15 +205,26 @@ export async function POST(request: NextRequest) {
           if (accountType && accountId) {
             const tableName = accountType === 'artist' ? 'artists' : 'labels'
             
-            const { error } = await supabase
+            const { error, data: accountData } = await supabase
               .from(tableName)
               .update({
                 subscription_status: 'active',
               })
               .eq('id', accountId)
+              .select('email, display_name, name')
+              .single()
 
             if (!error) {
               console.log(`Payment succeeded for ${accountType} ${accountId}`)
+              
+              // Send notification email to admin (non-blocking)
+              const name = accountData?.display_name || accountData?.name || 'Unknown'
+              const email = accountData?.email || 'unknown@email.com'
+              const tier = subscription.items.data[0]?.price.recurring?.interval === 'year' ? 'Annual' : 'Monthly'
+              const amount = `$${(invoice.amount_paid / 100).toFixed(2)}`
+              
+              sendSubscriptionNotification(accountType, name, email, tier, amount)
+                .catch(err => console.error('Failed to send subscription notification:', err))
             }
           }
         }

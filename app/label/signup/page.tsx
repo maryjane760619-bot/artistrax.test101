@@ -45,6 +45,18 @@ function SignupForm() {
       setError(signUpError.message)
       setLoading(false)
     } else {
+      // Send welcome email (non-blocking)
+      fetch('/api/email/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountType: 'label',
+          name: name,
+          email: email,
+          slug: slug,
+        }),
+      }).catch(err => console.error('Failed to send welcome email:', err));
+      
       router.push('/label/dashboard')
     }
   }

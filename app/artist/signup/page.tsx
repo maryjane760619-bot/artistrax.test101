@@ -46,6 +46,18 @@ export default function ArtistSignupPage() {
       setError(signUpError.message)
       setLoading(false)
     } else {
+      // Send welcome email (non-blocking)
+      fetch('/api/email/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountType: 'artist',
+          name: displayName,
+          email: email,
+          username: username,
+        }),
+      }).catch(err => console.error('Failed to send welcome email:', err));
+      
       // Success! Redirect to dashboard
       router.push('/artist/dashboard')
     }
