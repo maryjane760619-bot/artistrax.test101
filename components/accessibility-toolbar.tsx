@@ -12,7 +12,9 @@ import {
   Maximize2,
   X,
   Settings,
+  Languages,
 } from 'lucide-react';
+import { t, type Language, setLanguage, getLanguage } from '@/lib/translations';
 
 type AccessibilitySettings = {
   highContrast: boolean;
@@ -24,6 +26,7 @@ type AccessibilitySettings = {
 
 export function AccessibilityToolbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [language, setLanguageState] = useState<Language>('en');
   const [settings, setSettings] = useState<AccessibilitySettings>({
     highContrast: false,
     largeText: false,
@@ -42,6 +45,9 @@ export function AccessibilityToolbar() {
         console.error('Failed to load accessibility settings:', e);
       }
     }
+    
+    // Load language preference
+    setLanguageState(getLanguage());
   }, []);
 
   // Apply settings to DOM
@@ -135,6 +141,16 @@ export function AccessibilityToolbar() {
     });
   };
 
+  const handleLanguageChange = (newLang: Language) => {
+    setLanguageState(newLang);
+    setLanguage(newLang);
+    const langName = newLang === 'es' ? 'Español' : 'English';
+    speakText(`${t('language', newLang)} ${langName}`);
+    
+    // Trigger page reload to update all text
+    window.location.reload();
+  };
+
   if (!isOpen) {
     return (
       <button
@@ -157,18 +173,48 @@ export function AccessibilityToolbar() {
       <div className="flex items-center justify-between mb-4 pb-3 border-b">
         <div className="flex items-center gap-2">
           <Eye className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold">Accessibility</h3>
+          <h3 className="font-semibold">{t('accessibilityTools', language)}</h3>
         </div>
         <button
           onClick={() => {
             setIsOpen(false);
-            speakText('Accessibility tools closed');
+            speakText(t('accessibilityTools', language) + ' closed');
           }}
           className="hover:bg-gray-100 p-1 rounded transition-colors"
           aria-label="Close accessibility tools"
         >
           <X className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Language Selector */}
+      <div className="mb-4 pb-4 border-b">
+        <div className="flex items-center gap-2 mb-3">
+          <Languages className="w-5 h-5 text-blue-600" />
+          <span className="font-medium text-sm">{t('language', language)}</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => handleLanguageChange('en')}
+            className={`p-3 rounded-lg border-2 transition-all ${
+              language === 'en'
+                ? 'bg-blue-50 border-blue-600 font-semibold'
+                : 'bg-white border-gray-200 hover:border-blue-300'
+            }`}
+          >
+            🇺🇸 {t('english', language)}
+          </button>
+          <button
+            onClick={() => handleLanguageChange('es')}
+            className={`p-3 rounded-lg border-2 transition-all ${
+              language === 'es'
+                ? 'bg-blue-50 border-blue-600 font-semibold'
+                : 'bg-white border-gray-200 hover:border-blue-300'
+            }`}
+          >
+            🇪🇸 {t('spanish', language)}
+          </button>
+        </div>
       </div>
 
       {/* Settings */}
@@ -186,8 +232,8 @@ export function AccessibilityToolbar() {
           <div className="flex items-center gap-3">
             <Contrast className="w-5 h-5" />
             <div className="text-left">
-              <div className="font-medium">High Contrast</div>
-              <div className="text-xs text-gray-600">Better visibility</div>
+              <div className="font-medium">{t('highContrast', language)}</div>
+              <div className="text-xs text-gray-600">{t('betterVisibility', language)}</div>
             </div>
           </div>
           {settings.highContrast && (
@@ -210,8 +256,8 @@ export function AccessibilityToolbar() {
           <div className="flex items-center gap-3">
             <Type className="w-5 h-5" />
             <div className="text-left">
-              <div className="font-medium">Large Text</div>
-              <div className="text-xs text-gray-600">Easier to read</div>
+              <div className="font-medium">{t('largeText', language)}</div>
+              <div className="text-xs text-gray-600">{t('easierToRead', language)}</div>
             </div>
           </div>
           {settings.largeText && (
@@ -234,8 +280,8 @@ export function AccessibilityToolbar() {
           <div className="flex items-center gap-3">
             <Square className="w-5 h-5" />
             <div className="text-left">
-              <div className="font-medium">Reduced Motion</div>
-              <div className="text-xs text-gray-600">Less animation</div>
+              <div className="font-medium">{t('reducedMotion', language)}</div>
+              <div className="text-xs text-gray-600">{t('lessAnimation', language)}</div>
             </div>
           </div>
           {settings.reducedMotion && (
@@ -258,8 +304,8 @@ export function AccessibilityToolbar() {
           <div className="flex items-center gap-3">
             <Maximize2 className="w-5 h-5" />
             <div className="text-left">
-              <div className="font-medium">Focus Highlight</div>
-              <div className="text-xs text-gray-600">Show keyboard focus</div>
+              <div className="font-medium">{t('focusHighlight', language)}</div>
+              <div className="text-xs text-gray-600">{t('showKeyboardFocus', language)}</div>
             </div>
           </div>
           {settings.focusHighlight && (
@@ -272,7 +318,7 @@ export function AccessibilityToolbar() {
 
       {/* Text-to-Speech Controls */}
       <div className="mt-4 pt-4 border-t">
-        <div className="text-sm font-medium mb-2">Text-to-Speech</div>
+        <div className="text-sm font-medium mb-2">{t('textToSpeech', language)}</div>
         <div className="flex gap-2">
           <Button
             onClick={readPageContent}
@@ -280,7 +326,7 @@ export function AccessibilityToolbar() {
             className="flex-1 bg-blue-600 hover:bg-blue-700"
           >
             <Volume2 className="w-4 h-4 mr-2" />
-            Read Page
+            {t('readPage', language)}
           </Button>
           <Button
             onClick={stopSpeech}
@@ -288,13 +334,13 @@ export function AccessibilityToolbar() {
             variant="outline"
             className="flex-1"
           >
-            Stop
+            {t('stop', language)}
           </Button>
         </div>
       </div>
 
       <div className="mt-4 text-xs text-center text-gray-500">
-        Settings saved automatically
+        {t('settingsSavedAuto', language)}
       </div>
     </div>
   );
