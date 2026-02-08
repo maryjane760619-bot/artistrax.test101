@@ -123,3 +123,129 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Accessibility Enhancements */
+
+/* High Contrast Mode */
+.high-contrast {
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card: #000000;
+  --card-foreground: #FFFFFF;
+  --border: #FFFFFF;
+  --primary: #FFFF00;
+  --muted-foreground: #FFFFFF;
+}
+
+.high-contrast * {
+  border-color: #FFFFFF !important;
+}
+
+.high-contrast a {
+  color: #FFFF00 !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast button {
+  border: 2px solid #FFFFFF !important;
+  background: #000000 !important;
+  color: #FFFF00 !important;
+}
+
+/* Large Text Mode */
+.large-text {
+  font-size: 125% !important;
+}
+
+.large-text h1 {
+  font-size: 3.5rem !important;
+}
+
+.large-text h2 {
+  font-size: 2.5rem !important;
+}
+
+.large-text h3 {
+  font-size: 2rem !important;
+}
+
+.large-text p,
+.large-text button,
+.large-text a,
+.large-text span {
+  font-size: 1.25rem !important;
+  line-height: 1.8 !important;
+}
+
+.large-text button {
+  padding: 1rem 1.5rem !important;
+}
+
+/* Reduced Motion */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Focus Highlight */
+.focus-highlight *:focus {
+  outline: 4px solid #0066FF !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.3) !important;
+}
+
+.focus-highlight button:focus,
+.focus-highlight a:focus,
+.focus-highlight input:focus,
+.focus-highlight textarea:focus,
+.focus-highlight select:focus {
+  outline: 4px solid #0066FF !important;
+  outline-offset: 4px !important;
+}
+
+/* Skip to main content link */
+.skip-to-main {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 1rem;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+}
+
+.skip-to-main:focus {
+  left: 50%;
+  transform: translateX(-50%);
+  top: 1rem;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Ensure sufficient color contrast */
+.high-contrast input,
+.high-contrast textarea {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF !important;
+}
+
+.high-contrast input::placeholder,
+.high-contrast textarea::placeholder {
+  color: #CCCCCC !important;
+}

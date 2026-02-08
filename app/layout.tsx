@@ -4,6 +4,7 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
 import { AIChatWrapper } from '@/components/ai-chat-wrapper'
+import { AccessibilityToolbar } from '@/components/accessibility-toolbar'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -40,7 +41,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+        <a href="#main-content" className="skip-to-main">
+          Skip to main content
+        </a>
         <AuthProvider>
+          <AccessibilityToolbar />
           {children}
           <AIChatWrapper />
         </AuthProvider>
