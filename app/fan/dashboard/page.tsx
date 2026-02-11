@@ -171,16 +171,21 @@ function DashboardContent() {
             </Link>
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border border-green-200 dark:border-green-800 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Heart className="w-5 h-5" />
+              <Music className="w-5 h-5 text-green-700 dark:text-green-400" />
               Your Library
             </h2>
-            <p className="text-muted-foreground mb-4">
-              All your favorite tracks and purchases in one place
+            <p className="text-muted-foreground mb-2">
+              Stream unlimited • Download lossless
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              All your purchased tracks in one place. Own it forever.
             </p>
             <Link href="/fan/library">
-              <Button variant="outline">View Library</Button>
+              <Button className="bg-green-700 hover:bg-green-800 w-full">
+                Open Library
+              </Button>
             </Link>
           </div>
 

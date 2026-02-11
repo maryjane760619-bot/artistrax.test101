@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Download, Home } from 'lucide-react'
+import { CheckCircle, Download, Home, Play, Music } from 'lucide-react'
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams()
@@ -33,18 +33,39 @@ function CheckoutSuccessContent() {
           </div>
 
           <h1 className="text-3xl font-serif font-semibold mb-4">
-            Purchase Complete!
+            You Now Own This Track!
           </h1>
 
-          <p className="text-muted-foreground mb-8">
-            Your track has been added to your library. You can now download it anytime from your fan dashboard.
+          <p className="text-lg text-foreground font-medium mb-4">
+            🎵 Stream unlimited • Download lossless • Forever
           </p>
 
+          <div className="bg-muted/50 rounded-lg p-4 mb-6 text-left">
+            <div className="flex items-start gap-3 mb-3">
+              <Play className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium mb-1">Stream Anywhere</p>
+                <p className="text-sm text-muted-foreground">
+                  Listen unlimited on any device. Your purchase never expires.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Download className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium mb-1">Download Lossless</p>
+                <p className="text-sm text-muted-foreground">
+                  Get the highest quality WAV or FLAC file. DJs and audiophiles approved.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-3">
-            <Link href="/fan/dashboard">
-              <Button className="w-full" size="lg">
-                <Download className="w-4 h-4 mr-2" />
-                Go to Library
+            <Link href="/fan/library">
+              <Button className="w-full bg-green-700 hover:bg-green-800" size="lg">
+                <Music className="w-4 h-4 mr-2" />
+                Open Your Library
               </Button>
             </Link>
             <Link href="/">
