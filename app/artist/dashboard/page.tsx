@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, Music, TrendingUp, DollarSign, Download, User, ListMusic, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
+import StripeConnectOnboarding from '@/components/stripe-connect-onboarding'
 
 export default function ArtistDashboard() {
   const router = useRouter()
@@ -143,6 +144,11 @@ export default function ArtistDashboard() {
             trialEndsAt={artistData.trial_ends_at}
             subscriptionExpiresAt={artistData.subscription_expires_at}
           />
+        </div>
+
+        {/* Stripe Connect Onboarding */}
+        <div className="mb-8">
+          <StripeConnectOnboarding />
         </div>
 
         {/* Quick Actions */}

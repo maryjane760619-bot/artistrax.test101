@@ -1,0 +1,234 @@
+artistrax Financial Model - 5 Year Projections (Conservative Scenario)
+
+YEAR 1 - 2026,Q1,Q2,Q3,Q4,Year Total
+USER GROWTH
+New Artists,50,75,100,125,350
+New Labels,5,10,15,20,50
+Total Artists,50,125,225,350,350
+Total Labels,5,15,30,50,50
+Active Fans,100,300,600,1000,1000
+
+CATALOG
+Tracks Uploaded,250,500,750,1000,2500
+Total Catalog,250,750,1500,2500,2500
+Avg Tracks per Artist,5,6,7,7,7
+
+SALES & DOWNLOADS
+Total Downloads,2500,7500,12500,17500,40000
+Avg Price per Track,$1.50,$1.50,$1.50,$1.50,$1.50
+Gross GMV,$3750,$11250,$18750,$26250,$60000
+
+REVENUE
+Platform Fee (avg 6%),$225,$675,$1125,$1575,$3600
+Artist Subscription,$1650,$4200,$7650,$12600,$26100
+Label Subscription,$0,$0,$0,$0,$0
+Total Revenue,$1875,$4875,$8775,$14175,$29700
+
+COSTS
+Hosting (Vercel),$500,$750,$1000,$1500,$3750
+Supabase,$300,$500,$750,$1000,$2550
+Stripe Fees (2.9% + $0.30),$150,$450,$750,$1050,$2400
+Marketing,$2000,$1500,$1000,$500,$5000
+Development,$5000,$2000,$1000,$1000,$9000
+Support/Admin,$500,$750,$1000,$1500,$3750
+Total Costs,$8450,$5950,$5500,$6550,$26450
+
+PROFIT
+Net Profit,-$6575,-$1075,$3275,$7625,$3250
+Profit Margin,-351%,-22%,37%,54%,11%
+
+CUMULATIVE
+Cumulative Revenue,$1875,$6750,$15525,$29700,$29700
+Cumulative Costs,$8450,$14400,$19900,$26450,$26450
+Cumulative Profit,-$6575,-$7650,-$4375,$3250,$3250
+
+UNIT ECONOMICS
+CAC per Artist,$40.00,$20.00,$10.00,$4.00,$14.29
+Monthly Subscription Run Rate,$1650,$4200,$7650,$12600,$12600
+Artists Paying Monthly,50,125,225,350,350
+Labels Paying Monthly,5,15,30,50,50
+
+---
+
+YEAR 2 - 2027,Q1,Q2,Q3,Q4,Year Total
+USER GROWTH
+New Artists,150,200,250,300,900
+New Labels,25,35,45,55,160
+Total Artists,500,700,950,1250,1250
+Total Labels,75,110,155,210,210
+Active Fans,2000,4000,6500,10000,10000
+
+CATALOG
+Total Tracks,5000,7500,10000,12500,12500
+
+SALES & DOWNLOADS
+Total Downloads,50000,75000,100000,125000,250000
+Avg Price per Track,$1.50,$1.50,$1.50,$1.50,$1.50
+Gross GMV,$75000,$112500,$150000,$187500,$375000
+
+REVENUE
+Platform Fee (avg 6%),$4500,$6750,$9000,$11250,$22500
+Artist Subscription,$90000,$126000,$171000,$225000,$375000
+Label Subscription,$0,$0,$0,$0,$0
+Total Revenue,$94500,$132750,$180000,$236250,$397500
+
+COSTS
+Infrastructure,$5000,$7500,$10000,$12500,$25000
+Stripe Fees,$3000,$4500,$6000,$7500,$15000
+Marketing,$10000,$12500,$15000,$12500,$50000
+Development,$7500,$7500,$7500,$7500,$30000
+Support/Admin,$5000,$7500,$7500,$10000,$25000
+Total Costs,$30500,$39500,$46000,$50000,$145000
+
+PROFIT
+Net Profit,$64000,$93250,$134000,$186250,$252500
+Profit Margin,68%,70%,74%,79%,63%
+
+---
+
+YEAR 3 - 2028,,,,,Year Total
+Total Artists,,,,,3000
+Total Labels,,,,,500
+Active Fans,,,,,30000
+Total Catalog,,,,,25000
+Total Downloads,,,,,750000
+Avg Price per Track,,,,,$ 1.60
+Gross GMV,,,,,$ 1200000
+Platform Fee (avg 6%),,,,,$ 72000
+Subscription Revenue,,,,,$ 900000
+Total Revenue,,,,,$ 972000
+Infrastructure,,,,,$ 75000
+Stripe Fees,,,,,$ 48000
+Marketing,,,,,$ 100000
+Development,,,,,$ 60000
+Support/Admin (2 FTE),,,,,$ 120000
+Total Costs,,,,,$ 403000
+Net Profit,,,,,$ 569000
+Profit Margin,,,,,59%
+
+---
+
+YEAR 4 - 2029,,,,,Year Total
+Total Artists,,,,,7500
+Total Labels,,,,,1200
+Active Fans,,,,,75000
+Total Catalog,,,,,75000
+Total Downloads,,,,,2000000
+Avg Price per Track,,,,,$ 1.70
+Gross GMV,,,,,$ 3400000
+Platform Fee (avg 6%),,,,,$ 204000
+Subscription Revenue,,,,,$ 2340000
+Total Revenue,,,,,$ 2544000
+Infrastructure,,,,,$ 180000
+Stripe Fees,,,,,$ 136000
+Marketing,,,,,$ 200000
+Development,,,,,$ 150000
+Support/Admin (5 FTE),,,,,$ 300000
+Total Costs,,,,,$ 966000
+Net Profit,,,,,$ 1578000
+Profit Margin,,,,,62%
+
+---
+
+YEAR 5 - 2030,,,,,Year Total
+Total Artists,,,,,15000
+Total Labels,,,,,2500
+Active Fans,,,,,150000
+Total Catalog,,,,,150000
+Total Downloads,,,,,5000000
+Avg Price per Track,,,,,$ 1.80
+Gross GMV,,,,,$ 9000000
+Platform Fee (avg 6%),,,,,$ 540000
+Subscription Revenue,,,,,$ 5100000
+Total Revenue,,,,,$ 5640000
+Infrastructure,,,,,$ 400000
+Stripe Fees,,,,,$ 360000
+Marketing,,,,,$ 400000
+Development,,,,,$ 300000
+Support/Admin (10 FTE),,,,,$ 600000
+Total Costs,,,,,$ 2060000
+Net Profit,,,,,$ 3580000
+Profit Margin,,,,,63%
+
+---
+
+5-YEAR SUMMARY,,2026,2027,2028,2029,2030
+Total Artists,,350,1250,3000,7500,15000
+Total Labels,,50,210,500,1200,2500
+Active Fans,,1000,10000,30000,75000,150000
+Total Catalog,,2500,12500,25000,75000,150000
+GMV,,$60000,$375000,$1200000,$3400000,$9000000
+Total Revenue,,$29700,$397500,$972000,$2544000,$5640000
+Total Costs,,$26450,$145000,$403000,$966000,$2060000
+Net Profit,,$3250,$252500,$569000,$1578000,$3580000
+Profit Margin,,11%,63%,59%,62%,63%
+Cumulative Revenue,,$29700,$427200,$1399200,$3943200,$9583200
+Cumulative Profit,,$3250,$255750,$824750,$2402750,$5982750
+
+---
+
+UNIT ECONOMICS (5 Year)
+Artist LTV (5 years),,,,,$688
+Label LTV (5 years),,,,,$1620
+CAC (Year 1 avg),,,,,$14.29
+LTV/CAC Ratio (Artists),,,,,"48:1"
+LTV/CAC Ratio (Labels),,,,,"16:1"
+Gross Margin Year 1,,,,,11%
+Gross Margin Year 2-5,,,,,60-63%
+
+---
+
+SUBSCRIPTION BREAKDOWN (Year 1 End)
+Artists Paying Monthly,,,,,350
+Artist Monthly Revenue ($20 x 350),,,,,$ 7000
+Labels Paying Monthly,,,,,50
+Label Monthly Revenue ($25 x 50),,,,,$ 1250
+Total MRR (Monthly Recurring Revenue),,,,,$ 8250
+Annual Run Rate (MRR x 12),,,,,$ 99000
+
+---
+
+SUBSCRIPTION BREAKDOWN (Year 5 End)
+Artists Paying Monthly,,,,,15000
+Artist Monthly Revenue ($20 x 15000),,,,,$ 300000
+Labels Paying Monthly,,,,,2500
+Label Monthly Revenue ($25 x 2500),,,,,$ 62500
+Total MRR,,,,,$ 362500
+Annual Run Rate,,,,,$ 4350000
+% of Total Revenue,,,,,77%
+
+---
+
+MARKET SHARE ANALYSIS
+Total Addressable Market (TAM),,,,,$200000000
+Year 1 GMV,,,,,$ 60000
+Year 1 Market Share,,,,,0.03%
+Year 3 GMV,,,,,$ 1200000
+Year 3 Market Share,,,,,0.60%
+Year 5 GMV,,,,,$ 9000000
+Year 5 Market Share,,,,,4.50%
+
+---
+
+VALUATION (7-10x Revenue Multiple)
+Year 1 Revenue,,,,,$ 29700
+Year 1 Valuation (Low),,,,,$ 207900
+Year 1 Valuation (High),,,,,$ 297000
+Year 3 Revenue,,,,,$ 972000
+Year 3 Valuation (Low),,,,,$ 6804000
+Year 3 Valuation (High),,,,,$ 9720000
+Year 5 Revenue,,,,,$ 5640000
+Year 5 Valuation (Low),,,,,$ 39480000
+Year 5 Valuation (High),,,,,$ 56400000
+
+---
+
+STREAMING COST ANALYSIS
+Cost per Stream,,,,,$ 0.0007
+Break-even Streams per Purchase,,,,,96
+Average Streams per User per Year,,,,,20
+Total Streams Year 1 (40K purchases x 20),,,,,800000
+Streaming Cost Year 1,,,,,$ 560
+Storage Cost Year 1 (2500 tracks),,,,,$ 300
+Total Streaming Infrastructure Year 1,,,,,$ 860
+% of Revenue,,,,,2.90%

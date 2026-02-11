@@ -1,43 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
+
+// Generate signed streaming URL for purchased tracks
+// Token expires in 4 hours, tied to user ID
+
+const STREAMING_SECRET = process.env.STREAMING_SECRET || 'your-secret-key-change-in-production'
+const TOKEN_EXPIRY_HOURS = 4
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { trackId: string } }
 ) {
   try {
-    const supabase = createClient()
     const { trackId } = params
+    const supabase = createClient()
 
-    // Get the current user (fan)
+    // Get authenticated user (fan)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Please log in' },
+        { error: 'Unauthorized - please log in' },
         { status: 401 }
       )
     }
 
-    // Check if user has purchased this track
+    // Check if user purchased this track
     const { data: purchase, error: purchaseError } = await supabase
       .from('purchases')
-      .select('id')
-      .eq('fan_id', user.id)
+      .select('id, track_id')
       .eq('track_id', trackId)
+      .eq('buyer_id', user.id)
       .single()
 
     if (purchaseError || !purchase) {
       return NextResponse.json(
-        { error: 'Track not purchased - Please buy to stream' },
+        { error: 'Track not purchased - buy to stream' },
         { status: 403 }
       )
     }
 
-    // Get track details
+    // Get track info
     const { data: track, error: trackError } = await supabase
       .from('tracks')
-      .select('audio_url, streaming_url, title, artist_name')
+      .select('id, title, streaming_url, audio_url')
       .eq('id', trackId)
       .single()
 
@@ -48,42 +55,61 @@ export async function GET(
       )
     }
 
-    // Generate signed URL for streaming (expires in 4 hours)
-    const streamingPath = track.streaming_url || track.audio_url
-    const { data: signedUrl, error: signError } = await supabase
-      .storage
-      .from('audio')
-      .createSignedUrl(streamingPath, 14400) // 4 hours = 14400 seconds
+    // Use streaming_url if available, fallback to audio_url
+    const streamUrl = track.streaming_url || track.audio_url
 
-    if (signError || !signedUrl) {
+    if (!streamUrl) {
       return NextResponse.json(
-        { error: 'Failed to generate stream URL' },
+        { error: 'No audio file available' },
+        { status: 404 }
+      )
+    }
+
+    // Generate signed token
+    const expiresAt = Date.now() + (TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
+    const payload = JSON.stringify({
+      trackId,
+      userId: user.id,
+      expiresAt
+    })
+
+    const signature = crypto
+      .createHmac('sha256', STREAMING_SECRET)
+      .update(payload)
+      .digest('hex')
+
+    const token = Buffer.from(JSON.stringify({
+      payload,
+      signature
+    })).toString('base64url')
+
+    // Get signed URL from Supabase Storage
+    const bucketName = streamUrl.includes('/audio/') ? 'audio' : 'covers'
+    const filePath = streamUrl.split(`/${bucketName}/`)[1]
+
+    const { data: signedUrlData, error: urlError } = await supabase
+      .storage
+      .from(bucketName)
+      .createSignedUrl(filePath, TOKEN_EXPIRY_HOURS * 3600)
+
+    if (urlError || !signedUrlData) {
+      console.error('Error creating signed URL:', urlError)
+      return NextResponse.json(
+        { error: 'Failed to generate streaming URL' },
         { status: 500 }
       )
     }
 
-    // Log the stream play for analytics
-    await supabase
-      .from('stream_plays')
-      .insert({
-        track_id: trackId,
-        user_id: user.id,
-        played_at: new Date().toISOString()
-      })
-
-    // Return streaming URL
     return NextResponse.json({
-      streamUrl: signedUrl.signedUrl,
-      expiresIn: 14400,
-      track: {
-        id: trackId,
-        title: track.title,
-        artist: track.artist_name
-      }
+      streamUrl: signedUrlData.signedUrl,
+      token,
+      expiresAt,
+      trackId: track.id,
+      title: track.title
     })
 
   } catch (error) {
-    console.error('Stream API error:', error)
+    console.error('Stream URL generation error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

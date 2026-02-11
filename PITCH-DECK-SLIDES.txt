@@ -1,0 +1,568 @@
+# artistrax Pitch Deck - PowerPoint Slide Notes
+## Copy each slide into PowerPoint
+
+---
+
+SLIDE 1: TITLE
+Background: Dark green gradient (#1F4E3D to #0F2E1D)
+Text color: White
+
+artistrax
+Fair pay for artists. True ownership for fans.
+
+Powered by Siesta Records 🌿
+
+Contact: Bert Porcayo, CEO
+support@artistrax.com | artistrax.com
+
+---
+
+SLIDE 2: THE PROBLEM
+Title: The Problem
+Background: White
+3 columns with icons:
+
+Column 1:
+[Icon: Dollar sign with down arrow]
+Artists Get Pennies
+• Spotify: $0.003/stream
+• 333 streams = $1
+• 50K streams = $150
+
+Column 2:
+[Icon: Percentage symbol]
+Stores Take Too Much
+• Beatport: 30% fee (keep 70%)
+• Bandcamp: 18% fee (keep 82%)
+
+Column 3:
+[Icon: Cloud crossed out]
+Fans Own Nothing
+• Streaming = renting
+• Cancel = lose everything
+• No offline, no ownership
+
+Bottom banner: "The industry is broken. Artists and fans both lose."
+
+---
+
+SLIDE 3: THE SOLUTION
+Title: artistrax: Own It AND Stream It
+Background: Gradient green to orange
+3 sections:
+
+For Artists:
+✅ Keep 95% (vs 70-82%)
+✅ Instant payouts
+✅ $20/mo or $96/year
+✅ Link-in-Bio included
+
+For Fans:
+✅ Buy once, stream unlimited
+✅ Download lossless (WAV/FLAC)
+✅ PWA app (10 seconds install)
+✅ 2% cashback rewards
+
+For Labels:
+✅ Keep 90%
+✅ Batch upload
+✅ $25/mo or $120/year
+✅ Release management
+
+Bottom: "Best of both worlds: Ownership + streaming convenience"
+
+---
+
+SLIDE 4: MARKET OPPORTUNITY
+Title: $200-300M Addressable Market
+Background: White
+
+Chart 1: Market Size (Pie chart)
+• Beatport: $50-100M
+• Bandcamp: $20-40M
+• Others: $100M+
+
+Chart 2: Artist Growth (Line graph going up)
+• 500K-1M electronic producers worldwide
+• 200K-300K English-speaking (target)
+• 15-20% annual growth
+
+Market Trends (4 boxes with checkmarks):
+✅ Creator economy boom ($250B by 2025)
+✅ Streaming fatigue (artists want fair pay)
+✅ Ownership matters (NFT proof)
+✅ PWAs gaining traction
+
+Bottom: "Timing is perfect. The market is ready."
+
+---
+
+SLIDE 5: BUSINESS MODEL
+Title: Dual Revenue Stream
+Background: White
+2 large boxes:
+
+Box 1: Subscription Revenue (90% of revenue)
+• Artists: $20/mo or $96/year
+• Labels: $25/mo or $120/year
+• 30-day free trial
+
+Box 2: Platform Fees (10% of revenue)
+• Artists: 5% of sales
+• Labels: 10% of sales
+• Fans: 100% free
+
+Unit Economics (table):
+Artist LTV: $688 (5 years)
+Label LTV: $1,620 (5 years)
+CAC: $12.50 (artist), $100 (label)
+LTV/CAC: 55:1 (artists), 16:1 (labels) ✅
+
+Bottom: "Gross Margin: 60%+ (Year 1), 99%+ (Year 2+)"
+
+---
+
+SLIDE 6: COMPETITIVE ADVANTAGE
+Title: Why artistrax Wins
+Background: White
+
+Table (7 columns):
+Feature | artistrax | Beatport | Bandcamp | Spotify
+Artist % | 95% ✅ | 70% | 82% | 0.3%
+Fan Model | Own+Stream ✅ | Buy only | Buy only | Rent
+App | PWA (10s) ✅ | Native | Web | Native
+Trial | 30 days ✅ | ❌ | ❌ | 30 days
+Cost | $20/mo ✅ | High fees | Free* | $11/mo
+Link-in-Bio | ✓ ✅ | ❌ | ❌ | ❌
+Rewards | 2% ✅ | ❌ | ❌ | ❌
+
+*Bandcamp free but takes 18%
+
+4 Defensive Moats (boxes):
+1. Highest revenue share (95%)
+2. Unique feature (Stream Your Purchases)
+3. Lower friction (PWA vs app store)
+4. Network effects (more artists = more fans)
+
+---
+
+SLIDE 7: TRACTION & LAUNCH
+Title: Historic Launch: Siesta Records Back Catalog
+Background: Dark with album cover images
+
+Day 1 Catalog (big numbers):
+• 60-70 releases
+• 180-210 tracks
+• 15+ years of history
+• Never digital before
+
+Why This Matters:
+✅ Instant credibility
+✅ Built-in audience
+✅ Press angle
+✅ Network effects
+
+Launch Partners:
+• Siesta Records (anchor)
+• 10-20 indie labels
+• 50-100 beta artists
+
+Go-to-Market:
+→ Electronic music producers
+→ Music blogs (Hypebot, DJ Mag)
+→ Producer communities
+
+---
+
+SLIDE 8: FINANCIAL PROJECTIONS
+Title: 5-Year Revenue & Profit (Conservative)
+Background: White
+
+Table:
+Year | Artists | Labels | GMV | Revenue | Profit | Margin
+2026 | 350 | 50 | $60K | $30K | $3K | 11%
+2027 | 1,250 | 210 | $375K | $398K | $253K | 63%
+2028 | 3,000 | 500 | $1.2M | $972K | $569K | 59%
+2029 | 7,500 | 1,200 | $3.4M | $2.5M | $1.6M | 62%
+2030 | 15,000 | 2,500 | $9M | $5.6M | $3.6M | 63%
+
+Chart: Revenue & Profit (dual axis line graph)
+
+5-Year Totals:
+• Revenue: $9.5M
+• Profit: $6M
+• ROI: 300x on $20K
+
+Bottom: "Break-even: End of Year 1 (Q4)"
+
+---
+
+SLIDE 9: YEAR 1 MILESTONES
+Title: 2026 Goals (Achievable)
+Background: White
+
+4 quarters shown as timeline:
+
+Q1 (Launch):
+50 artists, 5 labels
+250 tracks
+2,500 downloads
+$1,875 revenue
+
+Q2:
+125 artists, 15 labels
+750 tracks total
+7,500 downloads
+$4,875 revenue
+
+Q3:
+225 artists, 30 labels
+1,500 tracks total
+12,500 downloads
+$8,775 revenue
+
+Q4:
+350 artists, 50 labels
+2,500 tracks total
+17,500 downloads
+$14,175 revenue
+
+Year 1 Total (big box):
+Revenue: $29,700
+Profit: $3,250 (11% margin)
+✅ Break-even and profitable!
+
+---
+
+SLIDE 10: MARKET SHARE
+Title: Path to 5% Market Share
+Background: White
+
+Chart: Growing pie slices
+
+Total Market: $200-300M/year
+
+artistrax Targets:
+• Year 1: 0.06% ($60K GMV)
+• Year 3: 1.2% ($1.2M GMV)
+• Year 5: 5% ($9M GMV)
+
+Benchmark Comparison:
+Bandcamp: 5-10% of indie market
+Beatport: 15-20% of DJ/club market
+artistrax: Target 5% of electronic downloads
+
+Bottom: "Capturing 5% = $5.6M revenue by Year 5 ✅"
+
+---
+
+SLIDE 11: TEAM
+Title: Team
+Background: White with headshot placeholders
+
+Bert Porcayo - Founder & CEO
+• CEO of Siesta Life Encinitas LLC (cannabis retail, 3 locations)
+• Founder of Siesta Records (15+ years, electronic music)
+• Vision: Fair pay for artists
+
+Mary Jane - AI Co-Founder
+• Built artistrax platform (full-stack)
+• Implemented PWA, streaming, Stripe Connect
+• Ongoing: Product development
+
+Advisors (Future):
+• Music industry veteran
+• SaaS/marketplace expert
+• CPA/tax specialist
+
+Hiring Roadmap:
+Year 1: Bootstrap | Year 2: Support (1 FTE) | Year 3: Dev + Marketing (2 FTE) | Year 5: Full team (10 FTE)
+
+---
+
+SLIDE 12: USE OF FUNDS
+Title: Use of Funds
+Background: White
+2 columns:
+
+Bootstrap Path (Recommended):
+Year 1: $20K
+
+Pie chart:
+Development: $9,000 (45%)
+Marketing: $5,000 (25%)
+Infrastructure: $3,750 (19%)
+Legal/Admin: $2,250 (11%)
+
+Result: Break-even Q4, no dilution ✅
+
+---
+
+Seed Round (Optional):
+Raise: $250-500K at $2-3M valuation
+
+Bar chart:
+Marketing: $200K
+Development: $100K
+Operations: $100K
+
+Goal: 5,000 artists by Year 2
+Exit: $40-60M in Year 3-5
+
+---
+
+SLIDE 13: EXIT STRATEGY
+Title: Multiple Exit Paths
+Background: White
+
+3 scenarios:
+
+Scenario 1: Bootstrap & Hold
+• Year 5: $5.6M revenue, $3.6M profit
+• Pay dividends, no exit
+• 100% ownership
+
+Scenario 2: Acquisition (Most Likely) ✅
+• Acquirers: Beatport, Bandcamp, SoundCloud
+• Year 3: $7-10M valuation
+• Year 5: $40-60M valuation
+• Exit multiple: 7-10x revenue
+
+Scenario 3: IPO (Long Shot)
+• Year 10: $50M+ revenue
+• $350M+ valuation
+• Public markets
+
+Comparables:
+Bandcamp → Epic Games: $200-300M
+Beatport → ByteDance: $300-500M
+
+Bottom: "Most realistic: $40-60M acquisition in Year 3-5"
+
+---
+
+SLIDE 14: RISKS & MITIGATION
+Title: Key Risks & Mitigation
+Background: White
+
+5 rows (Risk → Mitigation):
+
+1. Low Artist Adoption
+→ Siesta catalog, 30-day trial, 95% share
+
+2. High Churn
+→ Focus on success, annual plans, community
+
+3. Price Competition
+→ Differentiate with features, brand loyalty
+
+4. Tech Issues
+→ Proven stack (Vercel, Supabase, Stripe)
+
+5. Legal/Regulatory
+→ Stripe handles 1099-Ks, CPA on retainer
+
+---
+
+SLIDE 15: WHY NOW?
+Title: Perfect Timing
+Background: White
+
+4 quadrants:
+
+Market Trends:
+✅ Streaming fatigue
+✅ Creator economy ($250B)
+✅ Ownership matters
+✅ PWAs ready
+
+Technology Ready:
+✅ Stripe Connect
+✅ Supabase
+✅ Vercel
+✅ PWAs (Apple/Google support)
+
+Competitive Landscape:
+✅ Beatport stagnant
+✅ Bandcamp sold (uncertain)
+✅ Spotify hated by artists
+✅ No "Stream Your Purchases"
+
+Bottom: "Blue Ocean Opportunity"
+
+Center: "The window is open. First mover advantage matters."
+
+---
+
+SLIDE 16: KEY METRICS
+Title: Traction Metrics (To Track)
+Background: White
+
+4 boxes:
+
+Growth Metrics:
+• Monthly artist signups
+• Catalog size
+• Active fans
+
+Engagement Metrics:
+• Artist retention (>85%)
+• Avg tracks/artist (7-10)
+• Fan purchase frequency
+
+Revenue Metrics:
+• MRR (recurring revenue)
+• GMV (total sales)
+• Platform fee revenue
+
+Efficiency Metrics:
+• CAC (<$15)
+• LTV ($688)
+• LTV/CAC (>50:1)
+• Gross margin (>60%)
+
+---
+
+SLIDE 17: WHAT WE'VE BUILT
+Title: Platform Features (Live)
+Background: Green gradient
+
+3 columns of checkmarks:
+
+Core Features:
+✅ Artist/Label/Fan auth
+✅ Track upload (single + batch)
+✅ Audio player (waveform)
+✅ Download tracking
+✅ Public pages
+
+Monetization:
+✅ Stripe checkout
+✅ Stripe Connect
+✅ Subscription system
+✅ Points rewards
+✅ Email notifications
+
+Unique Features:
+✅ Link-in-Bio (13 platforms)
+✅ PWA app (offline)
+✅ Streaming infrastructure
+✅ 30-day free trial
+
+Next 30 days:
+→ Complete streaming
+→ Polish audio player
+→ Launch marketing
+
+---
+
+SLIDE 18: ROADMAP
+Title: Product Roadmap
+Background: White
+
+Timeline with 4 milestones:
+
+Q1 2026 (Launch):
+• Complete streaming
+• Launch with Siesta
+• 100 artists
+
+Q2 2026:
+• Mobile UX polish
+• Discovery features
+• Analytics dashboard
+
+Q3-Q4 2026:
+• Release workflow
+• Vault/archive
+• Social features
+
+2027:
+• International expansion
+• High-res streaming
+• Chromecast/AirPlay
+
+---
+
+SLIDE 19: THE ASK
+Title: The Ask
+Background: White
+2 columns:
+
+Bootstrap Path (Recommended):
+Self-fund: $20K
+
+Timeline:
+• Launch: Q1 2026
+• Break-even: Q4 2026
+• Profitable: Year 2+
+• No dilution, full ownership
+
+Bottom: "This is the recommended path." ✅
+
+---
+
+Seed Round (Optional):
+Raise: $250-500K at $2-3M valuation
+
+Use:
+• Marketing: $200K
+• Development: $100K
+• Operations: $100K
+
+Goals:
+• 5,000 artists by Year 2
+• $1.2M revenue by Year 2
+• Exit: $40-60M in Year 3-5
+
+Returns:
+• 13-20x on seed investment
+
+---
+
+SLIDE 20: CLOSING
+Title: Why artistrax Will Win
+Background: Dark green (#1F4E3D)
+Text: White
+
+5 reasons (numbered):
+
+1. Better Economics
+95% to artists vs 70-82%
+$688 LTV, $12.50 CAC = 55:1
+
+2. Unique Value
+Stream Your Purchases (no one else)
+PWA app (faster than native)
+
+3. Perfect Timing
+Streaming fatigue at peak
+Creator economy booming
+
+4. Proven Team
+15+ years music industry
+Real catalog (60-70 releases)
+
+5. Clear Path to Profit
+Break-even Year 1
+$3.6M profit by Year 5
+$40-60M exit potential
+
+Bottom CTA (large):
+Let's Build Fair Music Together 🌿
+
+Contact: Bert Porcayo
+support@artistrax.com | artistrax.com
+
+---
+
+END OF SLIDES
+
+Notes for PowerPoint Creation:
+1. Use Playfair Display or similar serif font for titles
+2. Use Inter or similar sans-serif for body text
+3. Brand colors: Forest green (#1F4E3D), Sunset orange (#F59E0B)
+4. Include artistrax logo on every slide (top right corner)
+5. Add charts/graphs where indicated (use placeholder data from REVENUE-PROJECTIONS.md)
+6. Keep slides clean and visual (limit text, use icons)
+7. Export as PDF for sharing, PPTX for editing

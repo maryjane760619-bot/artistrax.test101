@@ -1,310 +1,267 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
-import { EnhancedAudioPlayer } from '@/components/enhanced-audio-player'
+import { useRouter } from 'next/navigation'
+import { useFanAuth } from '@/lib/fan-auth-context'
 import { Button } from '@/components/ui/button'
-import { Play, Download, Music } from 'lucide-react'
-import Link from 'next/link'
+import { StreamingAudioPlayer } from '@/components/streaming-audio-player'
+import { Play, Download, Clock } from 'lucide-react'
 
 interface Track {
   id: string
   title: string
-  artist_name: string
-  artist_id: string
-  genre: string
+  slug: string
+  coverUrl: string
+  duration: number
   price: number
-  cover_art_url?: string
-  audio_url: string
-  created_at: string
+  streamingUrl: string
+  downloadUrl: string
+  artist: {
+    id: string
+    username: string
+    displayName: string
+    avatarUrl: string | null
+  }
+  stats: {
+    playCount: number
+    lastPlayed: string | null
+  }
 }
 
 interface LibraryItem {
   purchaseId: string
   purchasedAt: string
+  pricePaid: number
   track: Track
-  streamCount: number
 }
 
-export default function FanLibraryPage() {
+export default function LibraryPage() {
+  const { fan } = useFanAuth()
+  const router = useRouter()
   const [library, setLibrary] = useState<LibraryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
-  const [filterGenre, setFilterGenre] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'recent' | 'artist' | 'title'>('recent')
 
   useEffect(() => {
+    if (!fan) {
+      router.push('/fan/login')
+      return
+    }
+
     fetchLibrary()
-  }, [])
+  }, [fan, router])
 
   const fetchLibrary = async () => {
     try {
-      const response = await fetch('/api/library/purchased')
+      setLoading(true)
+      const response = await fetch('/api/library')
       
       if (!response.ok) {
-        throw new Error('Failed to load library')
+        throw new Error('Failed to fetch library')
       }
 
       const data = await response.json()
-      setLibrary(data.library)
-      setLoading(false)
-    } catch (err) {
-      console.error('Library error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load library')
+      setLibrary(data.library || [])
+    } catch (err: any) {
+      console.error('Error fetching library:', err)
+      setError(err.message || 'Failed to load library')
+    } finally {
       setLoading(false)
     }
+  }
+
+  const handlePlay = (track: Track) => {
+    setCurrentTrack(track)
   }
 
   const handleDownload = async (track: Track) => {
     try {
       const response = await fetch(`/api/download/${track.id}`)
+      
+      if (!response.ok) {
+        throw new Error('Download failed')
+      }
+
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${track.artist_name} - ${track.title}.wav`
+      a.download = `${track.artist.displayName} - ${track.title}.wav`
+      document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
-    } catch (err) {
-      console.error('Download error:', err)
+      document.body.removeChild(a)
+
+    } catch (err: any) {
+      console.error('Error downloading:', err)
       alert('Failed to download track')
     }
   }
 
-  const genres = ['all', ...new Set(library.map(item => item.track.genre).filter(Boolean))]
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
-  const filteredLibrary = library
-    .filter(item => filterGenre === 'all' || item.track.genre === filterGenre)
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'artist':
-          return a.track.artist_name.localeCompare(b.track.artist_name)
-        case 'title':
-          return a.track.title.localeCompare(b.track.title)
-        case 'recent':
-        default:
-          return new Date(b.purchasedAt).getTime() - new Date(a.purchasedAt).getTime()
-      }
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
     })
+  }
 
   if (loading) {
     return (
-      <>
-        <Header />
-        <main className="min-h-screen pt-24 pb-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-12">
-              <div className="text-muted-foreground">Loading your library...</div>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-800 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading your library...</p>
           </div>
-        </main>
-        <Footer />
-      </>
-    )
-  }
-
-  if (error) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-screen pt-24 pb-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-12">
-              <div className="text-destructive">{error}</div>
-              <Button onClick={fetchLibrary} className="mt-4">
-                Try Again
-              </Button>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </>
+        </div>
+      </div>
     )
   }
 
   return (
-    <>
-      <Header />
-      
-      <main className="min-h-screen pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-serif font-semibold mb-2">My Library</h1>
-            <p className="text-muted-foreground">
-              {library.length} {library.length === 1 ? 'track' : 'tracks'} owned • Stream unlimited or download lossless
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-green-800 mb-2">
+            Your Library
+          </h1>
+          <p className="text-gray-600">
+            {library.length} {library.length === 1 ? 'track' : 'tracks'} owned • Stream unlimited • Download anytime
+          </p>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
+            {error}
           </div>
+        )}
 
-          {/* Filters */}
-          {library.length > 0 && (
-            <div className="flex flex-wrap gap-4 mb-8 pb-8 border-b border-border">
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-muted-foreground">Genre:</span>
-                {genres.map(genre => (
-                  <button
-                    key={genre}
-                    onClick={() => setFilterGenre(genre)}
-                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                      filterGenre === genre
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border border-border hover:bg-accent'
-                    }`}
-                  >
-                    {genre === 'all' ? 'All' : genre}
-                  </button>
-                ))}
-              </div>
+        {/* Streaming Audio Player */}
+        {currentTrack && (
+          <div className="mb-8">
+            <StreamingAudioPlayer
+              track={{
+                id: currentTrack.id,
+                title: currentTrack.title,
+                artist: currentTrack.artist.displayName,
+                audioUrl: currentTrack.streamingUrl,
+                coverUrl: currentTrack.coverUrl,
+                duration: currentTrack.duration
+              }}
+              mode="stream"
+              onClose={() => setCurrentTrack(null)}
+              queue={library.map(item => ({
+                id: item.track.id,
+                title: item.track.title,
+                artist: item.track.artist.displayName,
+                audioUrl: item.track.streamingUrl,
+                coverUrl: item.track.coverUrl,
+                duration: item.track.duration
+              }))}
+              onTrackChange={(nextTrack) => {
+                const libraryTrack = library.find(item => item.track.id === nextTrack.id)
+                if (libraryTrack) {
+                  setCurrentTrack(libraryTrack.track)
+                }
+              }}
+            />
+          </div>
+        )}
 
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-muted-foreground">Sort:</span>
-                {[
-                  { value: 'recent', label: 'Recent' },
-                  { value: 'artist', label: 'Artist' },
-                  { value: 'title', label: 'Title' }
-                ].map(option => (
-                  <button
-                    key={option.value}
-                    onClick={() => setSortBy(option.value as any)}
-                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                      sortBy === option.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border border-border hover:bg-accent'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+        {library.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Your library is empty
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Purchase tracks to build your collection. Stream unlimited + download lossless.
+            </p>
+            <Button
+              onClick={() => router.push('/')}
+              className="bg-green-700 hover:bg-green-800"
+            >
+              Browse Music
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {library.map((item) => (
+              <div
+                key={item.purchaseId}
+                className="bg-white rounded-lg shadow-md p-6 flex items-center gap-6 hover:shadow-lg transition-shadow"
+              >
+                {/* Cover Art */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={item.track.coverUrl || '/placeholder-cover.png'}
+                    alt={item.track.title}
+                    className="w-24 h-24 rounded-lg object-cover"
+                  />
+                </div>
 
-          {/* Empty State */}
-          {library.length === 0 && (
-            <div className="text-center py-16">
-              <Music className="w-20 h-20 mx-auto mb-6 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-4">Your library is empty</h2>
-              <p className="text-muted-foreground mb-8">
-                Start building your collection by purchasing tracks
-              </p>
-              <Link href="/labels/siestarecords">
-                <Button size="lg">Browse Music</Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Track List */}
-          {filteredLibrary.length > 0 && (
-            <div className="space-y-4">
-              {filteredLibrary.map((item) => (
-                <div
-                  key={item.purchaseId}
-                  className="bg-card border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Cover Art */}
-                    {item.track.cover_art_url && (
-                      <img
-                        src={item.track.cover_art_url}
-                        alt={item.track.title}
-                        className="w-16 h-16 rounded object-cover flex-shrink-0"
-                      />
+                {/* Track Info */}
+                <div className="flex-grow min-w-0">
+                  <h3 className="text-xl font-bold text-gray-800 truncate">
+                    {item.track.title}
+                  </h3>
+                  <p className="text-gray-600 mb-2">
+                    by{' '}
+                    <a
+                      href={`/${item.track.artist.username}`}
+                      className="text-green-700 hover:underline"
+                    >
+                      {item.track.artist.displayName}
+                    </a>
+                  </p>
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {formatDuration(item.track.duration)}
+                    </span>
+                    <span>•</span>
+                    <span>Purchased {formatDate(item.purchasedAt)}</span>
+                    {item.track.stats.playCount > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>Played {item.track.stats.playCount}×</span>
+                      </>
                     )}
-
-                    {/* Track Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">{item.track.title}</h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {item.track.artist_name}
-                      </p>
-                      {item.track.genre && (
-                        <span className="text-xs text-muted-foreground">
-                          {item.track.genre}
-                        </span>
-                      )}
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {item.streamCount > 0 && (
-                          <span>Streamed {item.streamCount}× • </span>
-                        )}
-                        Purchased {new Date(item.purchasedAt).toLocaleDateString()}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 flex-shrink-0">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => setCurrentTrack(item.track)}
-                        className="gap-2"
-                      >
-                        <Play className="w-4 h-4" />
-                        Stream
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownload(item.track)}
-                        className="gap-2"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </Button>
-                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
 
-          {/* Current Player */}
-          {currentTrack && (
-            <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg z-50">
-              <div className="max-w-7xl mx-auto">
-                <EnhancedAudioPlayer
-                  track={{
-                    id: currentTrack.id,
-                    title: currentTrack.title,
-                    artist: currentTrack.artist_name,
-                    coverArt: currentTrack.cover_art_url
-                  }}
-                  mode="stream"
-                  autoPlay={true}
-                  onEnded={() => {
-                    // Auto-play next track
-                    const currentIndex = filteredLibrary.findIndex(
-                      item => item.track.id === currentTrack.id
-                    )
-                    if (currentIndex < filteredLibrary.length - 1) {
-                      setCurrentTrack(filteredLibrary[currentIndex + 1].track)
-                    }
-                  }}
-                  onNext={() => {
-                    const currentIndex = filteredLibrary.findIndex(
-                      item => item.track.id === currentTrack.id
-                    )
-                    if (currentIndex < filteredLibrary.length - 1) {
-                      setCurrentTrack(filteredLibrary[currentIndex + 1].track)
-                    }
-                  }}
-                  onPrevious={() => {
-                    const currentIndex = filteredLibrary.findIndex(
-                      item => item.track.id === currentTrack.id
-                    )
-                    if (currentIndex > 0) {
-                      setCurrentTrack(filteredLibrary[currentIndex - 1].track)
-                    }
-                  }}
-                />
+                {/* Actions */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <Button
+                    onClick={() => handlePlay(item.track)}
+                    className="bg-green-700 hover:bg-green-800 flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    Stream
+                  </Button>
+                  <Button
+                    onClick={() => handleDownload(item.track)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </main>
-      
-      <Footer />
-    </>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

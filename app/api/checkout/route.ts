@@ -13,10 +13,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Track ID required' }, { status: 400 })
     }
 
-    // Fetch track details
+    // Fetch track details with artist's Stripe account
     const { data: track, error: trackError } = await supabase
       .from('tracks')
-      .select('*, artists(display_name), labels(name)')
+      .select('*, artists(display_name, stripe_account_id), labels(name, stripe_account_id)')
       .eq('id', trackId)
       .single()
 
@@ -29,7 +29,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'This track is free' }, { status: 400 })
     }
 
-    // Create Stripe Checkout Session
+    // Determine who gets paid (artist or label)
+    const recipientAccount = track.label_id 
+      ? track.labels?.stripe_account_id 
+      : track.artists?.stripe_account_id
+
+    if (!recipientAccount) {
+      return NextResponse.json({ 
+        error: 'Artist/Label must complete Stripe onboarding before selling tracks' 
+      }, { status: 400 })
+    }
+
+    // Calculate platform fee (5% for artists, 10% for labels)
+    const platformFeePercent = track.label_id ? 0.10 : 0.05
+    const totalAmount = Math.round(track.price * 100) // Convert to cents
+    const platformFee = Math.round(totalAmount * platformFeePercent)
+
+    // Create Stripe Checkout Session with Connect
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -42,16 +58,23 @@ export async function POST(request: NextRequest) {
               description: track.artists?.display_name || track.labels?.name || 'Unknown Artist',
               images: track.cover_url ? [track.cover_url] : undefined,
             },
-            unit_amount: Math.round(track.price * 100), // Convert to cents
+            unit_amount: totalAmount,
           },
           quantity: 1,
         },
       ],
       customer_email: fanEmail || undefined,
+      payment_intent_data: {
+        application_fee_amount: platformFee,
+        transfer_data: {
+          destination: recipientAccount,
+        },
+      },
       metadata: {
         trackId: track.id,
         artistId: track.artist_id,
         labelId: track.label_id || '',
+        platformFee: platformFee.toString(),
       },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}`,

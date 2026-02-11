@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, Music, TrendingUp, DollarSign, Download, Users, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
+import StripeConnectOnboarding from '@/components/stripe-connect-onboarding'
 
 function DashboardContent() {
   const router = useRouter()
@@ -131,6 +132,11 @@ function DashboardContent() {
             trialEndsAt={labelData.trial_ends_at}
             subscriptionExpiresAt={labelData.subscription_expires_at}
           />
+        </div>
+
+        {/* Stripe Connect Onboarding */}
+        <div className="mb-8">
+          <StripeConnectOnboarding accountType="label" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
