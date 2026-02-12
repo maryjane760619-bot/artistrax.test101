@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Check Stripe Connect account status and onboarding completion
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient(request)
     
     // Get authenticated user (artist)
     const { data: { user }, error: authError } = await supabase.auth.getUser()

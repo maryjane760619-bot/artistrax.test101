@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Create Stripe Express Connect account for label
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient(request)
     
     // Get authenticated user (label)
     const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Used when onboarding link expires or artist needs to update info
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient(request)
     
     // Get authenticated user (artist)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
