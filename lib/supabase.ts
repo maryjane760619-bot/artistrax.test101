@@ -5,7 +5,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
 
-// Export a function to create a new client instance (for API routes)
+// Basic client for API routes (non-SSR)
+// Note: For auth-protected API routes, import from supabase-server.ts instead
 export function createClient() {
   return createSupabaseClient(supabaseUrl, supabaseAnonKey)
 }
