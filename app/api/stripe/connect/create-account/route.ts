@@ -46,51 +46,49 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if artist already has a Stripe account
-    if (artist.stripe_account_id) {
-      return NextResponse.json(
-        { error: 'Stripe account already exists', accountId: artist.stripe_account_id },
-        { status: 400 }
-      )
-    }
+    let accountId = artist.stripe_account_id
+    
+    if (!accountId) {
+      // Create new Stripe Express account
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'US',
+        email: artist.email,
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        business_type: 'individual',
+        metadata: {
+          artist_id: artist.id,
+          artist_name: artist.display_name,
+          platform: 'artistrax'
+        }
+      })
 
-    // Create Stripe Express account
-    const account = await stripe.accounts.create({
-      type: 'express',
-      country: 'US', // Default to US, can be changed during onboarding
-      email: artist.email,
-      capabilities: {
-        card_payments: { requested: true },
-        transfers: { requested: true },
-      },
-      business_type: 'individual', // Most artists are individuals
-      metadata: {
-        artist_id: artist.id,
-        artist_name: artist.display_name,
-        platform: 'artistrax'
+      accountId = account.id
+
+      // Save Stripe account ID to database
+      const { error: updateError } = await supabase
+        .from('artists')
+        .update({ stripe_account_id: accountId })
+        .eq('id', artist.id)
+
+      if (updateError) {
+        console.error('Error saving Stripe account ID:', updateError)
       }
-    })
-
-    // Save Stripe account ID to database
-    const { error: updateError } = await supabase
-      .from('artists')
-      .update({ stripe_account_id: account.id })
-      .eq('id', artist.id)
-
-    if (updateError) {
-      console.error('Error saving Stripe account ID:', updateError)
-      // Don't fail the request, account is created
     }
 
-    // Create account link for onboarding
+    // Create account link for onboarding (works for new or existing accounts)
     const accountLink = await stripe.accountLinks.create({
-      account: account.id,
+      account: accountId,
       refresh_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=refresh`,
       return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=success`,
       type: 'account_onboarding',
     })
 
     return NextResponse.json({
-      accountId: account.id,
+      accountId: accountId,
       onboardingUrl: accountLink.url
     })
 
