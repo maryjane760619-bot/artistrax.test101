@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, Music, TrendingUp, DollarSign, Download, User, ListMusic, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
-import StripeConnectOnboarding from '@/components/stripe-connect-onboarding'
+import StripeConnectOnboarding from '@/components/stripe-connect-onboarding-v2'
 
 export default function ArtistDashboard() {
   const router = useRouter()
