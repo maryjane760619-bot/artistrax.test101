@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, XCircle, AlertCircle, ExternalLink } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 interface StripeAccountStatus {
   hasAccount: boolean
@@ -37,7 +38,18 @@ export default function StripeConnectOnboarding({ accountType = 'artist' }: Stri
   const checkStatus = async () => {
     try {
       setLoading(true)
-      const response = await fetch(getApiPath('account-status'))
+      
+      // Get auth session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('Not authenticated')
+      }
+
+      const response = await fetch(getApiPath('account-status'), {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
       
       if (!response.ok) {
         throw new Error('Failed to check account status')
@@ -58,8 +70,17 @@ export default function StripeConnectOnboarding({ accountType = 'artist' }: Stri
       setCreating(true)
       setError('')
 
+      // Get auth session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('Not authenticated')
+      }
+
       const response = await fetch(getApiPath('create-account'), {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
       })
 
       if (!response.ok) {

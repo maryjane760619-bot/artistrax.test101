@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from "@/lib/supabase-server"
+import { createClient } from "@/lib/supabase"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
@@ -9,10 +9,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Check Stripe Connect account status and onboarding completion
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient(request)
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const token = authHeader.replace('Bearer ', '')
+    const supabase = createClient()
     
     // Get authenticated user (artist)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
       return NextResponse.json(
