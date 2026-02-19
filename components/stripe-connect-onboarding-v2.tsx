@@ -105,8 +105,14 @@ export default function StripeConnectOnboarding({ accountType = 'artist' }: Stri
       setCreating(true)
       setError('')
 
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+
       const response = await fetch(getApiPath('create-link'), {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
       })
 
       if (!response.ok) {

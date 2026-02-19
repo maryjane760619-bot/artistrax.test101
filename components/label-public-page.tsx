@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Download, Globe, Instagram, Twitter, Music2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { SocialLinksDisplay } from '@/components/social-links-display'
+import { ProductCard } from '@/components/product-card'
+import { VideoPlayer } from '@/components/video-player'
+import { useCart } from '@/lib/cart-context'
 
 type Label = {
   id: string
@@ -37,12 +40,38 @@ type Track = {
   } | null
 }
 
+type Product = {
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  category: string
+  base_price: number
+  images: string[]
+  is_active: boolean
+}
+
+type Video = {
+  id: string
+  title: string
+  description: string | null
+  video_url: string
+  thumbnail_url: string | null
+  view_count: number
+  category: string
+  created_at: string
+}
+
 type Props = {
   label: Label
   tracks: Track[]
+  products?: Product[]
+  videos?: Video[]
 }
 
-export function LabelPublicPage({ label, tracks }: Props) {
+export function LabelPublicPage({ label, tracks, products = [], videos = [] }: Props) {
+  const { addItem } = useCart()
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { 
@@ -50,6 +79,51 @@ export function LabelPublicPage({ label, tracks }: Props) {
       month: 'long', 
       day: 'numeric' 
     })
+  }
+
+  const handleAddToCart = (productId: string, variantId?: string) => {
+    const product = products.find(p => p.id === productId)
+    if (!product) {
+      console.error('[Label Page] Product not found:', productId)
+      return
+    }
+
+    const item = {
+      productId: productId,
+      variantId,
+      productTitle: product.title,
+      price: product.base_price,
+      imageUrl: product.images[0] || '/placeholder-product.png',
+      artistId: label.id,
+      artistName: label.name,
+      sellerType: 'label' // Track whether this is from an artist or label
+    }
+    
+    console.log('[Label Page] Adding to cart:', item)
+    
+    try {
+      addItem(item)
+      console.log('[Label Page] addItem() called successfully')
+      
+      // Force save to localStorage (backup)
+      const currentCart = localStorage.getItem('artistrax_cart')
+      const cart = currentCart ? JSON.parse(currentCart) : []
+      
+      const existingIndex = cart.findIndex((i: any) => 
+        i.productId === item.productId && i.variantId === item.variantId
+      )
+      
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity += 1
+      } else {
+        cart.push({ ...item, quantity: 1 })
+      }
+      
+      localStorage.setItem('artistrax_cart', JSON.stringify(cart))
+      console.log('[Label Page] Manually saved to localStorage:', cart)
+    } catch (error) {
+      console.error('[Label Page] Error adding to cart:', error)
+    }
   }
 
   const getSocialLink = (platform: string, value: string) => {
@@ -271,6 +345,32 @@ export function LabelPublicPage({ label, tracks }: Props) {
             </div>
           )}
         </div>
+
+        {/* Videos Section */}
+        {videos.length > 0 && (
+          <VideoPlayer videos={videos} />
+        )}
+
+        {/* Merchandise */}
+        {products.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-serif font-semibold">
+                Merchandise ({products.length})
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )

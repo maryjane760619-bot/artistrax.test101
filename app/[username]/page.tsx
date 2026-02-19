@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { CartProvider } from '@/lib/cart-context'
 import { ArtistPublicPage } from '@/components/artist-public-page'
 
 type Props = {
@@ -30,11 +29,27 @@ export default async function UsernamePage({ params }: Props) {
     .eq('artist_id', artist.id)
     .order('created_at', { ascending: false })
 
+  // Fetch artist's products
+  const { data: products } = await supabase
+    .from('products')
+    .select('*')
+    .eq('artist_id', artist.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false})
+
+  // Fetch artist's videos
+  const { data: videos } = await supabase
+    .from('videos')
+    .select('*')
+    .eq('artist_id', artist.id)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false})
+
   return (
-    <CartProvider>
+    <>
       <Header />
-      <ArtistPublicPage artist={artist} tracks={tracks || []} />
+      <ArtistPublicPage artist={artist} tracks={tracks || []} products={products || []} videos={videos || []} />
       <Footer />
-    </CartProvider>
+    </>
   )
 }

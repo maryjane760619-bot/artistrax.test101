@@ -1,139 +1,224 @@
 'use client'
 
-import Link from 'next/link'
-import { Trash2, ShoppingBag, ArrowRight, Play } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
+import { useCart } from '@/lib/cart-context'
 import { Button } from '@/components/ui/button'
-import { CartProvider, useCart } from '@/lib/cart-context'
+import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-function CartContent() {
-  const { items, removeItem, totalPrice, clearCart } = useCart()
-
-  if (items.length === 0) {
-    return (
-      <main className="pt-20 md:pt-24">
-        <section className="py-20 md:py-32">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground mb-6" />
-            <h1 className="font-serif text-3xl md:text-4xl mb-4">Your cart is empty</h1>
-            <p className="text-muted-foreground mb-8">
-              Discover our catalog of premium digital music downloads.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/releases">
-                Browse Releases
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
-      </main>
+export default function CartPage() {
+  const router = useRouter()
+  const cart = useCart()
+  const [items, setItems] = useState<any[]>([])
+  const [mounted, setMounted] = useState(false)
+  
+  // Load from localStorage on mount
+  useEffect(() => {
+    console.log('[Cart Page] Loading from localStorage...')
+    const saved = localStorage.getItem('artistrax_cart')
+    console.log('[Cart Page] localStorage value:', saved)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        console.log('[Cart Page] Parsed cart:', parsed)
+        setItems(parsed)
+      } catch (e) {
+        console.error('Cart parse error:', e)
+      }
+    }
+    setMounted(true)
+  }, [])
+  
+  const itemCount = items.reduce((sum: number, item: any) => sum + item.quantity, 0)
+  const totalAmount = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0)
+  const loading = !mounted
+  
+  function removeItem(productId: string, variantId?: string) {
+    const updated = items.filter(
+      item => !(item.productId === productId && item.variantId === variantId)
     )
+    setItems(updated)
+    localStorage.setItem('artistrax_cart', JSON.stringify(updated))
+    cart.removeItem(productId, variantId)
+  }
+  
+  function updateQuantity(productId: string, quantity: number, variantId?: string) {
+    if (quantity <= 0) {
+      removeItem(productId, variantId)
+      return
+    }
+    
+    const updated = items.map(item =>
+      item.productId === productId && item.variantId === variantId
+        ? { ...item, quantity }
+        : item
+    )
+    setItems(updated)
+    localStorage.setItem('artistrax_cart', JSON.stringify(updated))
+    cart.updateQuantity(productId, quantity, variantId)
+  }
+
+  const platformFee = totalAmount * 0.05 // Artist pays this
+  const shipping = 0 // Will be calculated at checkout
+  const total = totalAmount + shipping // Customer only pays subtotal + shipping
+
+  function handleCheckout() {
+    if (items.length === 0) return
+    router.push('/checkout')
   }
 
   return (
-    <main className="pt-20 md:pt-24">
-      <section className="py-12 md:py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="font-serif text-3xl md:text-4xl">Your Cart</h1>
-            <button 
-              onClick={clearCart}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Clear all
-            </button>
-          </div>
+    <>
+      <Header />
+      
+      <main className="min-h-screen pt-24 pb-16 bg-background">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-serif font-semibold mb-8">Shopping Cart</h1>
 
-          <div className="space-y-4 mb-8">
-            {items.map(item => (
-              <div 
-                key={item.releaseId}
-                className="flex items-center gap-4 p-4 rounded-lg border border-border bg-card"
-              >
-                <div className="w-20 h-20 rounded bg-muted overflow-hidden flex-shrink-0">
-                  <div className="w-full h-full bg-gradient-to-br from-muted-foreground/20 to-muted flex items-center justify-center">
-                    <Play className="w-6 h-6 text-muted-foreground/50" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <Link 
-                    href={`/releases/${item.release.slug}`}
-                    className="font-medium hover:text-muted-foreground transition-colors"
-                  >
-                    {item.release.title}
-                  </Link>
-                  <p className="text-sm text-muted-foreground">{item.release.artistName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {item.format.toUpperCase()} • {item.release.tracks.length} track{item.release.tracks.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">${item.price.toFixed(2)}</p>
-                </div>
-                <button
-                  onClick={() => removeItem(item.releaseId)}
-                  className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Order Summary */}
-          <div className="border border-border rounded-lg p-6 bg-card">
-            <h2 className="font-medium text-lg mb-4">Order Summary</h2>
-            <div className="space-y-2 mb-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal ({items.length} item{items.length !== 1 ? 's' : ''})</span>
-                <span>${totalPrice.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Processing fee</span>
-                <span>$0.00</span>
-              </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p>Loading cart...</p>
             </div>
-            <div className="border-t border-border pt-4 mb-6">
-              <div className="flex justify-between text-lg font-medium">
-                <span>Total</span>
-                <span>${totalPrice.toFixed(2)}</span>
-              </div>
-            </div>
-            <Button asChild size="lg" className="w-full">
-              <Link href="/checkout">
-                Proceed to Checkout
-                <ArrowRight className="ml-2 w-4 h-4" />
+          ) : items.length === 0 ? (
+            <div className="bg-card border rounded-lg p-12 text-center">
+              <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
+              <p className="text-muted-foreground mb-6">
+                Browse artists and add some merch to get started!
+              </p>
+              <Link href="/artists">
+                <Button size="lg">Browse Artists</Button>
               </Link>
-            </Button>
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Secure payment powered by Stripe
-            </p>
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Cart Items */}
+              <div className="lg:col-span-2 space-y-4">
+                {items.map((item) => (
+                  <div
+                    key={`${item.productId}-${item.variantId || 'default'}`}
+                    className="bg-card border rounded-lg p-4 flex gap-4"
+                  >
+                    {/* Product Image */}
+                    <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.productTitle}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ShoppingCart className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
 
-          <div className="mt-8 text-center">
-            <Link 
-              href="/releases"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Continue Shopping
-            </Link>
-          </div>
+                    {/* Product Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg mb-1">{item.productTitle}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        by {item.artistName}
+                      </p>
+                      {item.variantName && (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {item.variantName}
+                        </p>
+                      )}
+                      <p className="font-bold">${item.price.toFixed(2)}</p>
+                    </div>
+
+                    {/* Quantity Controls */}
+                    <div className="flex flex-col items-end gap-2">
+                      <button
+                        onClick={() => removeItem(item.productId, item.variantId)}
+                        className="text-muted-foreground hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      
+                      <div className="flex items-center gap-2 border rounded-md">
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.productId, item.quantity - 1, item.variantId)
+                          }
+                          className="p-2 hover:bg-muted transition-colors"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.productId, item.quantity + 1, item.variantId)
+                          }
+                          className="p-2 hover:bg-muted transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      
+                      <p className="text-sm font-medium">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Order Summary */}
+              <div className="lg:col-span-1">
+                <div className="bg-card border rounded-lg p-6 sticky top-24">
+                  <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+                      </span>
+                      <span>${totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Shipping</span>
+                      <span className="text-muted-foreground">
+                        Calculated at checkout
+                      </span>
+                    </div>
+                    <div className="border-t pt-3">
+                      <div className="flex justify-between font-semibold text-lg">
+                        <span>Estimated Total</span>
+                        <span>${totalAmount.toFixed(2)}+</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        + shipping (calculated at checkout)
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="lg"
+                    className="w-full mb-3"
+                    onClick={handleCheckout}
+                  >
+                    Proceed to Checkout
+                  </Button>
+
+                  <Link href="/artists">
+                    <Button variant="outline" size="lg" className="w-full">
+                      Continue Shopping
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </section>
-    </main>
-  )
-}
+      </main>
 
-export default function CartPage() {
-  return (
-    <CartProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        <CartContent />
-        <Footer />
-      </div>
-    </CartProvider>
+      <Footer />
+    </>
   )
 }

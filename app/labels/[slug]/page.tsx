@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { CartProvider } from '@/lib/cart-context'
 import { LabelPublicPage } from '@/components/label-public-page'
 
 type Props = {
@@ -30,11 +29,27 @@ export default async function LabelPage({ params }: Props) {
     .eq('label_id', label.id)
     .order('created_at', { ascending: false })
 
+  // Fetch label's products
+  const { data: products } = await supabase
+    .from('products')
+    .select('*')
+    .eq('label_id', label.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  // Fetch label's videos
+  const { data: videos } = await supabase
+    .from('videos')
+    .select('*')
+    .eq('label_id', label.id)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+
   return (
-    <CartProvider>
+    <>
       <Header />
-      <LabelPublicPage label={label} tracks={tracks || []} />
+      <LabelPublicPage label={label} tracks={tracks || []} products={products || []} videos={videos || []} />
       <Footer />
-    </CartProvider>
+    </>
   )
 }

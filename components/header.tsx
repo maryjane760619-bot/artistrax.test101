@@ -2,9 +2,12 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, LayoutDashboard, LogIn, Heart, Music, Building2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Menu, LayoutDashboard, LogIn, Heart, Music, Building2, Search, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { CartButton } from '@/components/cart-button'
 import {
   Sheet,
   SheetContent,
@@ -20,7 +23,19 @@ const navLinks = [
 
 export function Header() {
   const { user } = useAuth()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchOpen(false)
+      setSearchQuery('')
+    }
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -48,6 +63,29 @@ export function Header() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Search */}
+            {searchOpen ? (
+              <form onSubmit={handleSearch} className="flex items-center gap-2">
+                <Input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-40 sm:w-56 h-8 text-sm"
+                />
+                <Button type="button" variant="ghost" size="icon" onClick={() => { setSearchOpen(false); setSearchQuery('') }}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </form>
+            ) : (
+              <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)}>
+                <Search className="w-4 h-4" />
+              </Button>
+            )}
+
+            {/* Cart Button */}
+            <CartButton />
+            
             {/* Login Button - Opens to Fan Login (most common) */}
             <Link href="/fan/login">
               <Button variant="ghost" size="sm" className="gap-2">

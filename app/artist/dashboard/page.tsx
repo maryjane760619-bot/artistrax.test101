@@ -152,7 +152,7 @@ export default function ArtistDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <Link href="/artist/upload">
             <Button className="w-full h-auto py-6 flex-col gap-2">
               <Upload className="w-8 h-8" />
@@ -163,6 +163,30 @@ export default function ArtistDashboard() {
             <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
               <Upload className="w-8 h-8" />
               <span className="text-lg">Batch Upload</span>
+            </Button>
+          </Link>
+          <Link href="/artist/merch">
+            <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="text-lg">Merch</span>
+            </Button>
+          </Link>
+          <Link href="/artist/orders">
+            <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+              <span className="text-lg">Orders</span>
+            </Button>
+          </Link>
+          <Link href="/artist/videos">
+            <Button variant="outline" className="w-full h-auto py-6 flex-col gap-2">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span className="text-lg">Videos</span>
             </Button>
           </Link>
           <Link href="/artist/links">

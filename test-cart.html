@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Cart Test</title></head>
+<body>
+<h1>LocalStorage Cart Check</h1>
+<pre id="output"></pre>
+<script>
+const cart = localStorage.getItem('artistrax_cart');
+document.getElementById('output').textContent = cart || 'Cart is empty';
+</script>
+</body>
+</html>

@@ -1,344 +1,404 @@
-# Stripe Connect Setup - Complete! ✅
-## Instant Payouts + Automatic Tax Reporting
+# Stripe Connect Integration - Setup & Testing Guide
+
+## Overview
+
+This integration enables automatic 95/5 payment splits between artists/labels (95%) and the platform (5%) using Stripe Connect.
+
+**Payment Flow:**
+1. Customer purchases product → Stripe charges full amount
+2. 95% automatically transferred to artist/label's Stripe account
+3. 5% stays with platform as application fee
+4. Artist/label can withdraw to their bank account anytime
 
 ---
 
-## 🎉 What's Built (Last 30 Minutes)
+## Database Setup
 
-### 1. API Routes for Artists ✅
-**`/api/stripe/connect/create-account`**
-- Creates Stripe Express Connect account
-- Saves account ID to artists table
-- Returns onboarding URL
+### 1. Run the SQL Migration
 
-**`/api/stripe/connect/account-status`**
-- Checks if artist has Stripe account
-- Returns onboarding completion status
-- Shows charges/payouts enabled status
+Execute this in Supabase SQL Editor:
 
-**`/api/stripe/connect/create-link`**
-- Generates new onboarding link (for refresh)
-- Used when link expires or artist needs to update info
-
----
-
-### 2. API Routes for Labels ✅
-**`/api/stripe/connect/label/create-account`**
-**`/api/stripe/connect/label/account-status`**
-**`/api/stripe/connect/label/create-link`**
-
-Same functionality as artist routes, but for labels table.
-
----
-
-### 3. UI Component ✅
-**`/components/stripe-connect-onboarding.tsx`**
-
-Beautiful onboarding component with 3 states:
-
-**State 1: No Account**
-- Shows "Connect Your Stripe Account" card
-- Lists what they'll need (bank info, tax ID, etc.)
-- "You keep 95%" messaging
-- Green "Connect Stripe Account" button
-
-**State 2: Onboarding Incomplete**
-- Yellow warning card
-- Shows what's still needed
-- "Continue Onboarding" button
-
-**State 3: Fully Connected** 
-- Green success card
-- Shows charges/payouts enabled status
-- Displays account email and ID
-
----
-
-### 4. Dashboard Integration ✅
-**Artist Dashboard**: `/app/artist/dashboard/page.tsx`
-- Stripe Connect component added after subscription banner
-- Automatically detects artist account
-
-**Label Dashboard**: `/app/label/dashboard/page.tsx`
-- Same component with `accountType="label"` prop
-- Works with labels table
-
----
-
-### 5. Payment Splitting ✅
-**Updated `/app/api/checkout/route.ts`**
-
-Now handles Stripe Connect payment splitting:
-- Gets artist/label Stripe account ID
-- Creates checkout with `payment_intent_data`
-- Sets `application_fee_amount` (5% artists, 10% labels)
-- Uses `transfer_data` to send money to connected account
-
-**Money flow:**
+```bash
+supabase db push stripe-connect-schema.sql
 ```
-Fan pays $1.99
-  ↓
-Stripe processes ($0.36 Stripe fee)
-  ↓
-Net: $1.63
-  ↓
-Platform fee: $0.08 (5%)
-  ↓
-Artist receives: $1.55 (direct to their account)
+
+Or copy the contents of `stripe-connect-schema.sql` and run in:
+https://wpsmgfulrugrsabgcdmp.supabase.co/project/_/sql
+
+**What it adds:**
+- `stripe_account_id` fields to artists/labels tables
+- `stripe_onboarding_complete`, `stripe_charges_enabled` status fields
+- `payouts` table to track earnings and transfers
+- `stripe_payment_intent_id` to orders table
+
+---
+
+## Stripe Dashboard Setup
+
+### 2. Enable Stripe Connect
+
+1. Go to: https://dashboard.stripe.com/test/connect/accounts/overview
+2. Click "Get Started" if you haven't enabled Connect yet
+3. Choose "Express accounts" (easiest for sellers)
+4. Configure Connect settings:
+   - Platform profile: Fill out your company info
+   - Branding: Add logo and colors
+
+### 3. Configure Webhooks
+
+**For Connect Events:**
+
+1. Go to: https://dashboard.stripe.com/test/webhooks
+2. Click "Add endpoint"
+3. Endpoint URL: `https://yourdomain.com/api/webhooks/stripe-connect`
+4. Select these events:
+   - `account.updated`
+   - `payment_intent.succeeded`
+   - `transfer.created`
+   - `transfer.paid`
+5. Copy the webhook signing secret
+6. Add to `.env.local`:
+   ```
+   STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+   ```
+
+**For Local Testing (ngrok):**
+
+```bash
+# Terminal 1: Start dev server
+npm run dev
+
+# Terminal 2: Start ngrok
+ngrok http 3000
+
+# Terminal 3: Forward webhooks
+stripe listen --forward-to localhost:3000/api/webhooks/stripe-connect
 ```
 
 ---
 
-## How It Works (User Flow)
+## Testing the Integration
 
-### Artist Signs Up
-1. Sign up on artistrax
-2. Go to dashboard
-3. See "Connect Your Stripe Account" banner
-4. Click "Connect Stripe Account"
-5. Redirected to Stripe onboarding
-6. Enter bank info, tax ID, etc. (2-3 minutes)
-7. Return to artistrax dashboard
-8. ✅ **Ready to receive payments!**
+### Step 1: Artist/Label Onboarding
 
-### Fan Buys Track
-1. Fan clicks "Buy" on track
-2. Checkout opens (Stripe Checkout)
-3. Fan pays $1.99
-4. **Money instantly goes to artist's Stripe account** (minus fees)
-5. Artist can withdraw to bank anytime
+**Option A: Use the Component**
 
-### Tax Time (January)
-1. **Stripe issues 1099-K** to artist (if >$600 earned)
-2. **Stripe files with IRS** (automatically)
-3. **You do nothing!** (no admin burden)
+Add to artist/label dashboard:
 
----
+```tsx
+import { StripeConnectButton } from '@/components/stripe-connect-button'
 
-## What You Need to Do (Before Launch)
-
-### 1. Enable Stripe Connect in Dashboard
-1. Go to https://dashboard.stripe.com
-2. Click "Connect" in left sidebar
-3. Enable "Express" accounts
-4. Set platform name: "artistrax"
-5. Add support email: support@artistrax.com
-
-### 2. Add Environment Variable (Vercel)
-Already done! But for reference:
-```
-STRIPE_SECRET_KEY=sk_test_... (already set)
+// In your dashboard component:
+<StripeConnectButton 
+  userId={artistId}
+  userType="artist"  // or "label"
+  userEmail={artistEmail}
+/>
 ```
 
-### 3. Test the Flow
-**As Artist:**
-1. Create test artist account
-2. Go to dashboard
-3. Click "Connect Stripe Account"
-4. Use Stripe test data:
-   - SSN: 000-00-0000
-   - Bank account: 000123456789
-   - Routing: 110000000
-5. Complete onboarding
-6. Verify "Payment Setup Complete" shows
+**Option B: Test the API Directly**
 
-**As Fan:**
-1. Create test fan account
-2. Try to buy a track from test artist
+```bash
+# 1. Create Stripe Connect account
+curl -X POST http://localhost:3000/api/stripe/connect/create-account \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "your-artist-id",
+    "userType": "artist",
+    "email": "artist@example.com"
+  }'
+
+# Response: { "accountId": "acct_xxxxx" }
+
+# 2. Get onboarding link
+curl -X POST http://localhost:3000/api/stripe/connect/onboarding-link \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accountId": "acct_xxxxx",
+    "userType": "artist"
+  }'
+
+# Response: { "url": "https://connect.stripe.com/setup/..." }
+
+# 3. Visit the URL and complete onboarding
+```
+
+**Test Onboarding:**
+- Use Stripe's test mode
+- You can fill in fake info (name, DOB, SSN, bank details)
+- Stripe provides test values: https://stripe.com/docs/connect/testing
+
+### Step 2: Make a Test Purchase
+
+**Update Checkout to Include Seller Info:**
+
+Modify your checkout page to pass seller information:
+
+```tsx
+// In checkout page
+const response = await fetch('/api/create-payment-intent', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    amount: total,
+    orderId: order.id,
+    sellerId: firstItem.artistId,  // or labelId
+    sellerType: firstItem.sellerType, // 'artist' or 'label'
+    metadata: {
+      customerEmail: buyerEmail
+    }
+  })
+})
+```
+
+**Test Purchase Flow:**
+
+1. Add product to cart from a connected artist/label
+2. Proceed to checkout
 3. Use Stripe test card: `4242 4242 4242 4242`
 4. Complete purchase
-5. Check artist's Stripe dashboard (should show payment)
 
----
+**What Happens:**
+- Full payment charged to customer
+- 95% instantly transferred to artist/label's Connect account
+- 5% stays with platform
+- Payout record created in database
+- Order marked as "processing"
 
-## Tax Reporting (Zero Burden!)
+### Step 3: Verify the Split
 
-### Your Obligations:
-✅ **Report your platform fees** (5-10% you collect)
-✅ **File your business taxes** (LLC or Corp)
+**Check in Stripe Dashboard:**
 
-### What You DON'T Do:
-❌ Issue 1099s to artists/labels
-❌ Collect W-9s manually  
-❌ File forms with IRS
-❌ Track individual artist earnings
+1. **Platform account:** https://dashboard.stripe.com/test/payments
+   - You'll see the payment
+   - Application fee (5%) shown separately
 
-### Stripe Handles:
-✅ Collects W-9/W-8BEN during onboarding
-✅ Issues 1099-Ks to artists (if >$600)
-✅ Files with IRS automatically
-✅ Stores tax documents
+2. **Connected account:** https://dashboard.stripe.com/test/connect/accounts/overview
+   - Click on the connected account
+   - View balance (should show 95% of sale)
 
----
+**Check in Database:**
 
-## Revenue Share Breakdown
-
-### Artist Track ($1.99 sale)
-```
-Fan pays: $1.99
-Stripe fee (2.9% + $0.30): -$0.36
-Net: $1.63
-Platform fee (5%): -$0.08
-Artist receives: $1.55 (95% of net)
-```
-
-### Label Track ($1.99 sale)
-```
-Fan pays: $1.99
-Stripe fee: -$0.36
-Net: $1.63
-Platform fee (10%): -$0.16
-Label receives: $1.47 (90% of net)
-```
-
-**Platform makes $0.08-$0.16 per sale** (covers hosting, streaming, development)
-
----
-
-## Database Schema
-
-### Artists Table
-Added column:
 ```sql
-ALTER TABLE artists ADD COLUMN stripe_account_id TEXT;
+-- Check order was created
+SELECT * FROM orders WHERE id = 'order-id';
+
+-- Check payout was recorded
+SELECT * FROM payouts WHERE order_id = 'order-id';
+
+-- Should show:
+-- amount: $50.00 (full sale)
+-- platform_fee: $2.50 (5%)
+-- net_amount: $47.50 (95% to artist)
+-- status: 'paid'
 ```
 
-### Labels Table
-Added column:
-```sql
-ALTER TABLE labels ADD COLUMN stripe_account_id TEXT;
+---
+
+## Dashboard Integration Examples
+
+### Artist Dashboard
+
+```tsx
+// app/artist/dashboard/page.tsx
+import { StripeConnectButton } from '@/components/stripe-connect-button'
+import { useAuth } from '@/lib/auth-context'
+
+export default function ArtistDashboard() {
+  const { artist } = useAuth()
+  
+  return (
+    <div className="space-y-6">
+      <h1>Dashboard</h1>
+      
+      {/* Stripe Connect Section */}
+      <div className="bg-card border rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Payment Setup</h2>
+        <StripeConnectButton 
+          userId={artist.id}
+          userType="artist"
+          userEmail={artist.email}
+        />
+      </div>
+      
+      {/* Rest of dashboard */}
+    </div>
+  )
+}
 ```
 
-You need to run these migrations in Supabase!
+### Earnings Display
+
+```tsx
+// Create a new component: components/earnings-dashboard.tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+export function EarningsDashboard({ userId, userType }) {
+  const [earnings, setEarnings] = useState({ total: 0, pending: 0, paid: 0 })
+  
+  useEffect(() => {
+    loadEarnings()
+  }, [])
+  
+  async function loadEarnings() {
+    const filter = userType === 'artist' 
+      ? { artist_id: userId }
+      : { label_id: userId }
+      
+    const { data } = await supabase
+      .from('payouts')
+      .select('net_amount, status')
+      .match(filter)
+    
+    if (data) {
+      const total = data.reduce((sum, p) => sum + parseFloat(p.net_amount), 0)
+      const paid = data.filter(p => p.status === 'paid')
+        .reduce((sum, p) => sum + parseFloat(p.net_amount), 0)
+      const pending = total - paid
+      
+      setEarnings({ total, paid, pending })
+    }
+  }
+  
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <div className="bg-card border rounded-lg p-4">
+        <p className="text-sm text-muted-foreground">Total Earnings</p>
+        <p className="text-2xl font-bold">${earnings.total.toFixed(2)}</p>
+      </div>
+      <div className="bg-card border rounded-lg p-4">
+        <p className="text-sm text-muted-foreground">Paid Out</p>
+        <p className="text-2xl font-bold text-green-600">${earnings.paid.toFixed(2)}</p>
+      </div>
+      <div className="bg-card border rounded-lg p-4">
+        <p className="text-sm text-muted-foreground">Pending</p>
+        <p className="text-2xl font-bold text-orange-600">${earnings.pending.toFixed(2)}</p>
+      </div>
+    </div>
+  )
+}
+```
 
 ---
 
-## Testing Checklist
+## Production Checklist
 
-### Before Launch:
-- [ ] Enable Stripe Connect in Stripe dashboard
-- [ ] Add database columns (artists.stripe_account_id, labels.stripe_account_id)
-- [ ] Test artist onboarding flow
-- [ ] Test label onboarding flow
-- [ ] Test purchase with connected artist
-- [ ] Test purchase with connected label
-- [ ] Verify money appears in connected account
-- [ ] Test instant payout (artist withdraws to bank)
+Before going live:
 
-### Production Setup:
-- [ ] Switch Stripe to live mode
-- [ ] Update environment variables with live keys
-- [ ] Test real purchase with real card (small amount)
-- [ ] Verify real money flow
-- [ ] Consult CPA about platform revenue reporting
+- [ ] Switch Stripe from test mode to live mode
+- [ ] Update API keys in production `.env`:
+  - `STRIPE_SECRET_KEY=sk_live_...`
+  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...`
+- [ ] Configure production webhook endpoint
+- [ ] Update `NEXT_PUBLIC_SITE_URL` to production domain
+- [ ] Test full flow in live mode (use small real amounts first)
+- [ ] Set up Stripe Connect payout schedule (instant, daily, weekly, monthly)
+- [ ] Add Stripe Express dashboard link for artists to manage their accounts
+- [ ] Configure email notifications for successful payouts
 
 ---
 
-## Common Issues & Solutions
+## Troubleshooting
 
-### Issue: "Stripe account already exists" error
-**Solution:** Artist/label already connected. Use "Continue Onboarding" or check status endpoint.
+### "Seller has not completed Stripe setup"
+- Artist/label needs to complete Stripe onboarding
+- Check account status: https://dashboard.stripe.com/test/connect/accounts/overview
+- Make sure `stripe_charges_enabled` is true
 
-### Issue: Onboarding link expired
-**Solution:** Click "Continue Onboarding" to generate new link. Links expire after 5 minutes.
+### Payment succeeds but no payout recorded
+- Check webhook events in Stripe dashboard
+- Verify webhook endpoint is receiving events
+- Check application logs for errors
 
-### Issue: Artist completed onboarding but chargesEnabled = false
-**Solution:** Stripe may need additional verification. Artist should check email from Stripe.
+### 95/5 split not working
+- Verify `application_fee_amount` is calculated correctly (5% of total)
+- Check `transfer_data.destination` has correct Connect account ID
+- Ensure payment intent includes seller metadata
 
-### Issue: Purchase fails with "destination account not found"
-**Solution:** Artist/label must complete Stripe onboarding before their tracks can be sold.
-
-### Issue: Money not appearing in connected account
-**Solution:** Check Stripe dashboard → Connect → Transfers. May take 2-3 days for first payout.
-
----
-
-## Stripe Connect Limits
-
-### Test Mode:
-- Unlimited test accounts
-- Unlimited test payments
-- No real money
-
-### Live Mode (Free Tier):
-- Unlimited connected accounts
-- Unlimited payments
-- Stripe takes 2.9% + $0.30 per transaction
-- Platform fee: You keep 5-10% (set by you)
-
-### No Platform Fees from Stripe:
-Stripe doesn't charge extra for Connect! You only pay standard processing fees (2.9% + $0.30).
+### Cannot create Connect account
+- Verify email is valid and not already used
+- Check Stripe API keys are correct
+- Ensure Connect is enabled in Stripe dashboard
 
 ---
 
-## What's Next?
+## API Reference
 
-### Phase 1 (This Week):
-1. **Add database columns** (stripe_account_id)
-2. **Enable Stripe Connect** in dashboard
-3. **Test the flow** (artist + label + purchase)
-4. **Deploy to production**
+### POST /api/stripe/connect/create-account
+Creates a Stripe Connect Express account.
 
-### Phase 2 (After Launch):
-1. **Instant Payouts** (artists pay $0.50 per instant payout, optional)
-2. **Payout Dashboard** (show artists their balance and payout history)
-3. **International Support** (W-8BEN for non-US artists)
-4. **Custom Payout Schedule** (daily, weekly, monthly)
+**Request:**
+```json
+{
+  "userId": "uuid",
+  "userType": "artist" | "label",
+  "email": "user@example.com"
+}
+```
 
----
+**Response:**
+```json
+{
+  "accountId": "acct_xxxxx",
+  "success": true
+}
+```
 
-## Files Created/Modified
+### POST /api/stripe/connect/onboarding-link
+Generates an onboarding link for Connect account setup.
 
-### New Files:
-- `/app/api/stripe/connect/create-account/route.ts`
-- `/app/api/stripe/connect/account-status/route.ts`
-- `/app/api/stripe/connect/create-link/route.ts`
-- `/app/api/stripe/connect/label/create-account/route.ts`
-- `/app/api/stripe/connect/label/account-status/route.ts`
-- `/app/api/stripe/connect/label/create-link/route.ts`
-- `/components/stripe-connect-onboarding.tsx`
+**Request:**
+```json
+{
+  "accountId": "acct_xxxxx",
+  "userType": "artist" | "label"
+}
+```
 
-### Modified Files:
-- `/app/artist/dashboard/page.tsx` (added Stripe Connect component)
-- `/app/label/dashboard/page.tsx` (added Stripe Connect component)
-- `/app/api/checkout/route.ts` (added payment splitting)
+**Response:**
+```json
+{
+  "url": "https://connect.stripe.com/setup/...",
+  "success": true
+}
+```
 
----
+### POST /api/stripe/connect/account-status
+Checks the status of a Connect account.
 
-## Documentation Links
+**Request:**
+```json
+{
+  "userId": "uuid",
+  "userType": "artist" | "label"
+}
+```
 
-- **Stripe Connect Docs**: https://stripe.com/docs/connect
-- **Express Accounts**: https://stripe.com/docs/connect/express-accounts
-- **Payment Splitting**: https://stripe.com/docs/connect/charges
-- **Tax Reporting (1099-K)**: https://stripe.com/docs/connect/taxes
-- **Instant Payouts**: https://stripe.com/docs/connect/instant-payouts
-
----
-
-## Summary
-
-✅ **Stripe Connect onboarding flow: Built**
-✅ **Payment splitting (95%/90%): Built**
-✅ **Tax reporting: Handled by Stripe**
-✅ **Dashboard integration: Complete**
-✅ **Artist & Label support: Both work**
-
-**What's left:**
-1. Add database columns (5 minutes)
-2. Enable Stripe Connect in dashboard (5 minutes)
-3. Test the flow (30 minutes)
-4. Deploy! 🚀
-
-**Tax burden: ZERO** (Stripe handles everything)
-**Artist experience: 2-3 minutes to onboard**
-**Payout speed: Instant (or 2-3 days standard)**
-
----
-
-**You're ready to launch with instant payouts and zero tax headaches!** 🎉
+**Response:**
+```json
+{
+  "connected": true,
+  "accountId": "acct_xxxxx",
+  "chargesEnabled": true,
+  "detailsSubmitted": true,
+  "payoutsEnabled": true,
+  "requiresAction": false
+}
+```
 
 ---
 
-**Powered by Siesta Records 🌿**
+## Support Resources
 
-_Fair pay for artists. True ownership for fans. Music ownership reimagined._
+- **Stripe Connect Docs:** https://stripe.com/docs/connect
+- **Test Cards:** https://stripe.com/docs/testing
+- **Connect Testing:** https://stripe.com/docs/connect/testing
+- **Webhook Testing:** https://stripe.com/docs/webhooks/test
+
+---
+
+**Questions? Issues?**
+Check Stripe dashboard logs and application console for detailed error messages.

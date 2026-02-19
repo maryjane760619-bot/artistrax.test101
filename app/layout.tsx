@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
+import { CartProvider } from '@/lib/cart-context'
 import { AIChatWrapper } from '@/components/ai-chat-wrapper'
 import { AccessibilityToolbar } from '@/components/accessibility-toolbar'
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
@@ -91,10 +92,12 @@ export default function RootLayout({
           Skip to main content
         </a>
         <AuthProvider>
-          <AccessibilityToolbar />
-          {children}
-          <AIChatWrapper />
-          <PWAInstallPrompt />
+          <CartProvider>
+            <AccessibilityToolbar />
+            {children}
+            <AIChatWrapper />
+            <PWAInstallPrompt />
+          </CartProvider>
         </AuthProvider>
         <Analytics />
         

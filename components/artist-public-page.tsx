@@ -2,8 +2,11 @@
 
 import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
-import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink } from 'lucide-react'
+import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink, ShoppingBag } from 'lucide-react'
 import { SocialLinksDisplay } from '@/components/social-links-display'
+import { ProductCard } from '@/components/product-card'
+import { VideoPlayer } from '@/components/video-player'
+import { useCart } from '@/lib/cart-context'
 
 type Artist = {
   id: string
@@ -32,12 +35,66 @@ type Track = {
   created_at: string
 }
 
+type Product = {
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  category: string
+  base_price: number
+  images: string[]
+  is_active: boolean
+}
+
+type Video = {
+  id: string
+  title: string
+  description: string | null
+  video_url: string
+  thumbnail_url: string | null
+  view_count: number
+  category: string
+  created_at: string
+}
+
 type Props = {
   artist: Artist
   tracks: Track[]
+  products?: Product[]
+  videos?: Video[]
 }
 
-export function ArtistPublicPage({ artist, tracks }: Props) {
+export function ArtistPublicPage({ artist, tracks, products = [], videos = [] }: Props) {
+  const cart = useCart()
+  
+  function handleAddToCart(productId: string) {
+    const product = products.find(p => p.id === productId)
+    if (!product) {
+      console.error('Product not found:', productId)
+      return
+    }
+    
+    console.log('Adding to cart:', {
+      productId: product.id,
+      productTitle: product.title,
+      price: product.base_price,
+      imageUrl: product.images[0],
+      artistId: artist.id,
+      artistName: artist.display_name
+    })
+    
+    cart.addItem({
+      productId: product.id,
+      productTitle: product.title,
+      price: product.base_price,
+      imageUrl: product.images[0],
+      artistId: artist.id,
+      artistName: artist.display_name
+    })
+    
+    console.log('Cart after adding:', cart.items)
+    alert('Added to cart!')
+  }
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { 
@@ -260,6 +317,32 @@ export function ArtistPublicPage({ artist, tracks }: Props) {
             </div>
           )}
         </div>
+
+        {/* Videos Section */}
+        {videos.length > 0 && (
+          <VideoPlayer videos={videos} />
+        )}
+
+        {/* Merch Section */}
+        {products.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-serif font-semibold">
+                Merchandise ({products.length})
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )
