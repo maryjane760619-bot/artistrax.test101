@@ -76,10 +76,18 @@ export async function POST(request: NextRequest) {
             break
           }
 
+          // Get fan by email to set buyer_id
+          const { data: fan } = await supabase
+            .from('fans')
+            .select('id')
+            .eq('email', customerEmail)
+            .single()
+
           const { data: purchaseData, error: purchaseError } = await supabase.from('purchases').insert({
             track_id: trackId,
             artist_id: artistId,
             label_id: labelId || null,
+            buyer_id: fan?.id || null,
             buyer_email: customerEmail,
             amount: amountPaid,
             stripe_session_id: session.id,
@@ -92,12 +100,6 @@ export async function POST(request: NextRequest) {
             console.log(`Purchase recorded: ${trackId} by ${customerEmail}`)
             
             // Award points to fan if they have an account
-            const { data: fan } = await supabase
-              .from('fans')
-              .select('id')
-              .eq('email', customerEmail)
-              .single()
-            
             if (fan && amountPaid > 0) {
               const pointsEarned = POINTS_CONFIG.calculatePointsEarned(amountPaid)
               

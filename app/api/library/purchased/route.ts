@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       .from('purchases')
       .select(`
         id,
-        purchased_at,
+        created_at,
         track:tracks (
           id,
           title,
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
           created_at
         )
       `)
-      .eq('fan_id', user.id)
-      .order('purchased_at', { ascending: false })
+      .eq('buyer_id', user.id)
+      .order('created_at', { ascending: false })
 
     if (purchasesError) {
       console.error('Library fetch error:', purchasesError)
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Format the response
     const library = purchases?.map(p => ({
       purchaseId: p.id,
-      purchasedAt: p.purchased_at,
+      purchasedAt: p.created_at,
       track: p.track
     })) || []
 
