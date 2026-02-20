@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
 import { VideoPlayer } from '@/components/video-player'
+import { SubscribeButton } from '@/components/subscribe-button'
 import { useCart } from '@/lib/cart-context'
 
 type Label = {
@@ -62,14 +63,26 @@ type Video = {
   created_at: string
 }
 
+type SubscriptionSettings = {
+  is_enabled: boolean
+  monthly_price: number
+  description: string
+  benefits_discount_percent: number
+  benefits_early_access_hours: number
+  benefits_exclusive_streams: boolean
+  benefits_subscriber_badge: boolean
+}
+
 type Props = {
   label: Label
   tracks: Track[]
   products?: Product[]
   videos?: Video[]
+  subscriberCount: number
+  subscriptionSettings: SubscriptionSettings | null
 }
 
-export function LabelPublicPage({ label, tracks, products = [], videos = [] }: Props) {
+export function LabelPublicPage({ label, tracks, products = [], videos = [], subscriberCount, subscriptionSettings }: Props) {
   const { addItem } = useCart()
 
   const formatDate = (dateString: string) => {
@@ -168,9 +181,14 @@ export function LabelPublicPage({ label, tracks, products = [], videos = [] }: P
           <h1 className="text-5xl font-serif font-semibold mb-3">
             {label.name}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <p className="text-xl text-muted-foreground mb-2">
             Record Label
           </p>
+          {subscriberCount > 0 && (
+            <p className="text-sm text-pink-500 font-medium mb-4">
+              {subscriberCount} {subscriberCount === 1 ? 'subscriber' : 'subscribers'}
+            </p>
+          )}
           {label.bio && (
             <p className="text-muted-foreground max-w-2xl mx-auto mb-6 whitespace-pre-wrap">
               {label.bio}
@@ -243,6 +261,18 @@ export function LabelPublicPage({ label, tracks, products = [], videos = [] }: P
         <div className="mb-12 max-w-md mx-auto">
           <SocialLinksDisplay labelId={label.id} />
         </div>
+
+        {/* Subscription Section */}
+        {subscriptionSettings?.is_enabled && (
+          <div className="mb-12 max-w-md mx-auto">
+            <SubscriptionCard
+              labelId={label.id}
+              price={subscriptionSettings.monthly_price}
+              description={subscriptionSettings.description}
+              subscriberCount={subscriberCount}
+            />
+          </div>
+        )}
 
         {/* Catalog */}
         <div className="mb-8">
