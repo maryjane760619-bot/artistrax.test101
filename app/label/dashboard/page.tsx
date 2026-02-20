@@ -101,7 +101,7 @@ function DashboardContent() {
 
     const totalRevenue = orderData?.reduce((sum, o) => sum + Number(o.total_amount), 0) || 0
 
-    // Calculate pending payout (95% of revenue minus paid out)
+    // Calculate pending payout (90% for labels)
     const { data: payoutData } = await supabase
       .from('payouts')
       .select('amount')
@@ -109,7 +109,7 @@ function DashboardContent() {
       .eq('status', 'paid')
 
     const totalPaidOut = payoutData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
-    const pendingPayout = (totalRevenue * 0.95) - totalPaidOut
+    const pendingPayout = (totalRevenue * 0.90) - totalPaidOut
 
     setStats({
       totalTracks: trackCount || 0,
@@ -495,7 +495,7 @@ function DashboardContent() {
                     <p className="text-sm text-muted-foreground mb-1">Available to withdraw</p>
                     <p className="text-3xl font-bold text-accent">${stats.pendingPayout.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      You keep 95% of every sale. Payouts process within 2-3 business days.
+                      You keep 90% of every sale. Payouts process within 2-3 business days.
                     </p>
                     {stats.pendingPayout > 0 && (
                       <Button className="w-full mt-4" size="sm">
