@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     supabase
       .from('labels')
       .select('id, name, slug, description, logo_url')
-      .or(`name.ilike.${search},description.ilike.${search}`)
+      .or(`name.ilike.${search},slug.ilike.${search},description.ilike.${search}`)
       .limit(6),
 
     supabase
