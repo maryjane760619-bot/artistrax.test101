@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
   }
 
   const search = `%${query}%`
+  const searchWithHyphens = `%${query.replace(/\s+/g, '-')}%`
+  const searchWithSpaces = `%${query.replace(/-/g, ' ')}%`
 
   const [artistsRes, labelsRes, tracksRes] = await Promise.all([
     supabase
@@ -21,7 +23,7 @@ export async function GET(request: NextRequest) {
     supabase
       .from('labels')
       .select('id, name, slug, description, logo_url')
-      .or(`name.ilike.${search},slug.ilike.${search},description.ilike.${search}`)
+      .or(`name.ilike.${search},slug.ilike.${search},slug.ilike.${searchWithHyphens},slug.ilike.${searchWithSpaces},description.ilike.${search}`)
       .limit(6),
 
     supabase
