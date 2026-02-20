@@ -14,13 +14,18 @@
 - **Free Trial:** 30 days
 - **Storage:** 10GB included, +$5/month for unlimited
 
+### Fans
+- **Free to join** — no subscription required
+- **Buy tracks individually** — pay per track, own forever
+- **Unlimited streaming** — of purchased tracks, any device, forever
+
 ---
 
 ## Homepage
 
 ### Variation 1: Direct
 **Headline:** Sell Your Music. Keep 90-95%.
-**Subheadline:** The independent platform for artists and labels. Artists keep 95%, labels keep 90%. No middlemen. No hidden fees.
+**Subheadline:** Free for fans. Artists keep 95%, labels keep 90%. No middlemen. No hidden fees.
 
 ### Variation 2: Empowerment
 **Headline:** Your Music. Your Terms. Your Money.
@@ -61,12 +66,12 @@ You keep 90% of every sale.
 ## Fan Landing Page
 
 **Hero:**
-Support the artists you love.
-Buy direct. Download lossless. Stream unlimited.
+Join free. Support artists directly.
+Buy music you own. Stream unlimited.
 
 **3 Key Benefits:**
-1. **Own Your Music** — Download WAV/FLAC. No DRM. Yours forever.
-2. **Unlimited Streaming** — Stream purchases anywhere, forever.
+1. **Free to Join** — No subscription. Just buy the tracks you want.
+2. **Own Your Music** — Download WAV/FLAC. No DRM. Yours forever.
 3. **Support Artists Directly** — 90-95% goes to creators. No corporate middlemen.
 
 ---

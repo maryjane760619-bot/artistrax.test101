@@ -24,6 +24,12 @@
 - **Included:** 10GB
 - **Unlimited:** +$5/month
 
+## Fans
+- **Free to join** — no subscription required
+- **Buy tracks individually** — artist/label sets price (typically $0.99-$2.99)
+- **Unlimited streaming** — of purchased tracks, forever
+- **Lossless downloads** — WAV, FLAC, or MP3
+
 ## Stripe Connect
 - Instant payouts to connected account
 - Platform fee automatically deducted
