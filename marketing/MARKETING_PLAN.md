@@ -21,7 +21,7 @@ Artistrax is an electronic music download platform offering the fairest revenue 
 ### Tertiary: Electronic Music Fans
 - **Demographics:** 25-40, audiophiles, vinyl collectors, club-goers
 - **Pain Points:** Streaming doesn't support artists, compressed audio
-- **Value Prop:** Own lossless files, 90-95% goes to artist, stream forever
+- **Value Prop:** Own lossless files, 2% rewards on purchases, 90-95% goes to artist
 
 ---
 

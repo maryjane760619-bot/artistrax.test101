@@ -29,6 +29,7 @@
 - **Buy tracks individually** — artist/label sets price (typically $0.99-$2.99)
 - **Unlimited streaming** — of purchased tracks, forever
 - **Lossless downloads** — WAV, FLAC, or MP3
+- **2% rewards** — earn 2% back on every purchase
 
 ## Payouts
 - **Schedule:** Monthly payouts to artist/label accounts

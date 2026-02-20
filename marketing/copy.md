@@ -18,6 +18,7 @@
 - **Free to join** — no subscription required
 - **Buy tracks individually** — pay per track, own forever
 - **Unlimited streaming** — of purchased tracks, any device, forever
+- **2% rewards** — earn 2% back on every purchase
 
 ---
 
@@ -72,7 +73,7 @@ Buy music you own. Stream unlimited.
 **3 Key Benefits:**
 1. **Free to Join** — No subscription. Just buy the tracks you want.
 2. **Own Your Music** — Download WAV/FLAC. No DRM. Yours forever.
-3. **Support Artists Directly** — 90-95% goes to creators. No corporate middlemen.
+3. **Earn 2% Rewards** — Get 2% back on every purchase. Support artists directly.
 
 ---
 
