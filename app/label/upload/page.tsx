@@ -146,11 +146,9 @@ function UploadForm() {
 
       setUploadProgress(80)
 
-      // Save to database (label_id instead of artist_id for now)
-      // In a full implementation, we'd create/find the artist profile
+      // Save to database - label upload (no artist_id)
       const { error: dbError } = await supabase.from('tracks').insert({
         label_id: user.id,
-        artist_id: user.id, // Temporary - label acts as artist for now
         title,
         slug: generateSlug(title),
         description: artistName ? `Artist: ${artistName}\n\n${description}` : description,
