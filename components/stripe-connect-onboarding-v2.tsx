@@ -30,9 +30,8 @@ export default function StripeConnectOnboarding({ accountType = 'artist' }: Stri
   }, [])
 
   const getApiPath = (endpoint: string) => {
-    return accountType === 'label' 
-      ? `/api/stripe/connect/label/${endpoint}`
-      : `/api/stripe/connect/${endpoint}`
+    // All Stripe Connect endpoints handle both artist and label via auth token
+    return `/api/stripe/connect/${endpoint}`
   }
 
   const checkStatus = async () => {
