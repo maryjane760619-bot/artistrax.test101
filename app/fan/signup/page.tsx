@@ -3,13 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { FanAuthProvider, useFanAuth } from '@/lib/fan-auth-context'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Loader2, Heart } from 'lucide-react'
 
-function SignupContent() {
+export default function FanSignupPage() {
   const router = useRouter()
-  const { signUp } = useFanAuth()
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,24 +21,42 @@ function SignupContent() {
     setError('')
     setLoading(true)
 
-    const { error: signUpError } = await signUp(email, password, displayName)
-    
-    if (signUpError) {
-      setError(signUpError.message)
-      setLoading(false)
-    } else {
-      // Send welcome email (non-blocking)
-      fetch('/api/email/welcome', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          accountType: 'fan',
-          name: displayName,
-          email: email,
-        }),
-      }).catch(err => console.error('Failed to send welcome email:', err));
+    try {
+      // Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      })
       
-      router.push('/fan/dashboard')
+      if (authError) throw authError
+
+      // Create fan profile
+      if (authData.user) {
+        const { error: profileError } = await supabase.from('fans').insert({
+          id: authData.user.id,
+          email,
+          display_name: displayName,
+        })
+
+        if (profileError) throw profileError
+
+        // Send welcome email (non-blocking)
+        fetch('/api/email/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accountType: 'fan',
+            name: displayName,
+            email: email,
+          }),
+        }).catch(err => console.error('Failed to send welcome email:', err))
+        
+        router.push('/fan/dashboard')
+      }
+    } catch (err: any) {
+      console.error('Signup error:', err)
+      setError(err.message || 'Failed to create account')
+      setLoading(false)
     }
   }
 
@@ -153,13 +170,5 @@ function SignupContent() {
         </div>
       </div>
     </div>
-  )
-}
-
-export default function FanSignupPage() {
-  return (
-    <FanAuthProvider>
-      <SignupContent />
-    </FanAuthProvider>
   )
 }
