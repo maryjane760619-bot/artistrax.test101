@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, LayoutDashboard, LogIn, Heart, Music, Building2, Search, X } from 'lucide-react'
+import { Menu, LayoutDashboard, LogIn, Heart, Music, Building2, Search, X, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CartButton } from '@/components/cart-button'
@@ -22,11 +23,22 @@ const navLinks = [
 ]
 
 export function Header() {
-  const { user } = useAuth()
+  const { user: artistUser } = useAuth()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [fanUser, setFanUser] = useState<any>(null)
+
+  // Check for fan auth
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setFanUser(user)
+    })
+  }, [])
+
+  const user = artistUser || fanUser
+  const isFan = !!fanUser && !artistUser
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,19 +98,19 @@ export function Header() {
             {/* Cart Button */}
             <CartButton />
             
-            {/* Login Button - Opens to Fan Login (most common) */}
-            <Link href="/fan/login">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <LogIn className="w-4 h-4" />
-                <span className="hidden sm:inline">Login</span>
-              </Button>
-            </Link>
-
-            {user && (
-              <Link href="/artist/dashboard">
+            {/* User Button */}
+            {user ? (
+              <Link href={isFan ? '/fan/dashboard' : '/artist/dashboard'}>
                 <Button variant="ghost" size="sm" className="gap-2">
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">{isFan ? 'Fan' : 'Artist'}</span>
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/fan/login">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Login</span>
                 </Button>
               </Link>
             )}
@@ -114,7 +126,7 @@ export function Header() {
                 <div className="flex flex-col gap-6 mt-8">
                   {user && (
                     <Link
-                      href="/artist/dashboard"
+                      href={isFan ? '/fan/dashboard' : '/artist/dashboard'}
                       onClick={() => setMobileMenuOpen(false)}
                       className="text-2xl font-serif flex items-center gap-3"
                     >
@@ -134,35 +146,37 @@ export function Header() {
                   ))}
                   
                   {/* Login Options in Mobile Menu */}
-                  <div className="pt-6 border-t border-border">
-                    <div className="text-sm text-muted-foreground mb-3">Login</div>
-                    <div className="flex flex-col gap-3">
-                      <Link
-                        href="/fan/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 text-lg"
-                      >
-                        <Heart className="w-5 h-5" />
-                        Fan Login
-                      </Link>
-                      <Link
-                        href="/artist/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 text-lg"
-                      >
-                        <Music className="w-5 h-5" />
-                        Artist Login
-                      </Link>
-                      <Link
-                        href="/label/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 text-lg"
-                      >
-                        <Building2 className="w-5 h-5" />
-                        Label Login
-                      </Link>
+                  {!user && (
+                    <div className="pt-6 border-t border-border">
+                      <div className="text-sm text-muted-foreground mb-3">Login</div>
+                      <div className="flex flex-col gap-3">
+                        <Link
+                          href="/fan/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 text-lg"
+                        >
+                          <Heart className="w-5 h-5" />
+                          Fan Login
+                        </Link>
+                        <Link
+                          href="/artist/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 text-lg"
+                        >
+                          <Music className="w-5 h-5" />
+                          Artist Login
+                        </Link>
+                        <Link
+                          href="/label/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 text-lg"
+                        >
+                          <Building2 className="w-5 h-5" />
+                          Label Login
+                        </Link>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
