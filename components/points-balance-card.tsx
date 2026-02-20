@@ -64,11 +64,11 @@ export function PointsBalanceCard({ pointsBalance, showDetails = true }: PointsB
           <div className="border-t border-white/20 pt-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="opacity-90">Earn rate</span>
-              <span className="font-semibold">{POINTS_CONFIG.POINTS_PER_DOLLAR} pts / $1</span>
+              <span className="font-semibold">{POINTS_CONFIG.REWARD_PERCENTAGE}% back on purchases</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="opacity-90">Redemption</span>
-              <span className="font-semibold">{POINTS_CONFIG.POINTS_PER_TRACK} pts / track</span>
+              <span className="font-semibold">{POINTS_CONFIG.POINTS_PER_TRACK} pts = 1 free track</span>
             </div>
           </div>
 

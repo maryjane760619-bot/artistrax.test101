@@ -1,11 +1,15 @@
 // Fan Rewards Points System Configuration
+// 2% rewards = 2 points per $1 spent
 
 export const POINTS_CONFIG = {
-  // How many points earned per $1 spent
-  POINTS_PER_DOLLAR: 10,
+  // How many points earned per $1 spent (2% = 2 points)
+  POINTS_PER_DOLLAR: 2,
   
   // How many points needed to redeem 1 free track
-  POINTS_PER_TRACK: 500,
+  POINTS_PER_TRACK: 100,
+  
+  // Reward percentage for display
+  REWARD_PERCENTAGE: 2,
   
   // Calculate points earned from purchase amount
   calculatePointsEarned: (amountInDollars: number): number => {
@@ -31,16 +35,6 @@ export const POINTS_CONFIG = {
   // Format points display
   formatPoints: (points: number): string => {
     return points.toLocaleString();
-  },
-  
-  // Calculate reward percentage (for display)
-  rewardPercentage: (): number => {
-    // If you spend enough to redeem a track, what % of that is the free track worth?
-    // Points needed / Points per dollar = dollars needed
-    const dollarsNeeded = POINTS_CONFIG.POINTS_PER_TRACK / POINTS_CONFIG.POINTS_PER_DOLLAR;
-    // Assuming average track price around $2, but this is a rough estimate
-    // Real calculation: (1 track value / dollars spent) * 100
-    return (1 / dollarsNeeded) * 100; // ~5%
   }
 } as const;
 
