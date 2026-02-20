@@ -495,7 +495,7 @@ function DashboardContent() {
                     <p className="text-sm text-muted-foreground mb-1">Available to withdraw</p>
                     <p className="text-3xl font-bold text-accent">${stats.pendingPayout.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      You keep 90% of every sale. Payouts process within 2-3 business days.
+                      You keep 90% of every sale. Payouts process monthly.
                     </p>
                     {stats.pendingPayout > 0 && (
                       <Button className="w-full mt-4" size="sm">

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Artistrax is an electronic music download platform offering the fairest revenue splits in the industry: **95% to artists, 90% to labels**. With instant Stripe payouts, lossless downloads, and unlimited streaming for fans, we're building the future of independent music distribution.
+Artistrax is an electronic music download platform offering the fairest revenue splits in the industry: **95% to artists, 90% to labels**. With monthly payouts, lossless downloads, and unlimited streaming for fans, we're building the future of independent music distribution.
 
 ---
 
@@ -11,7 +11,7 @@ Artistrax is an electronic music download platform offering the fairest revenue 
 ### Primary: Independent Electronic Music Artists
 - **Demographics:** 18-35, tech-savvy, SoundCloud/Bandcamp users
 - **Pain Points:** 30-50% platform fees, delayed payouts, lack of fan data
-- **Value Prop:** Keep 95%, get paid instantly, own your audience
+- **Value Prop:** Keep 95%, monthly payouts, own your audience
 
 ### Secondary: Small Independent Labels  
 - **Demographics:** 2-20 artists per label, genre-focused
@@ -217,7 +217,7 @@ Artistrax is an electronic music download platform offering the fairest revenue 
 ## Competitive Positioning
 
 ### vs Bandcamp
-- **Advantage:** Better split (95% vs 85%), instant payouts vs monthly
+- **Advantage:** Better split (95% vs 85%), monthly payouts vs monthly
 - **Differentiator:** Built for electronic music specifically
 
 ### vs DistroKid/Amuse
@@ -303,7 +303,7 @@ Artistrax is an electronic music download platform offering the fairest revenue 
 ## Appendix: Quick Reference
 
 ### Elevator Pitch
-"Artistrax is the fairest platform for selling electronic music. Artists keep 95%, labels keep 90%, and everyone gets instant payouts. No other platform comes close."
+"Artistrax is the fairest platform for selling electronic music. Artists keep 95%, labels keep 90%, and everyone gets monthly payouts. No other platform comes close."
 
 ### Key Messaging
 - **Fair:** 95% to artists, 90% to labels

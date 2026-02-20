@@ -168,7 +168,7 @@ export default function StripeConnectOnboarding({ accountType = 'artist' }: Stri
 
             <div className="bg-green-50 rounded-lg p-4 mb-4">
               <p className="text-sm text-green-800">
-                <strong>You keep {accountType === 'label' ? '90%' : '95%'} of every sale.</strong> Instant payouts. No hidden fees.
+                <strong>You keep {accountType === 'label' ? '90%' : '95%'} of every sale.</strong> Monthly payouts. No hidden fees.
               </p>
             </div>
 

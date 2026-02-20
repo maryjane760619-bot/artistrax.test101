@@ -46,7 +46,7 @@ Artistrax gives you 95% of every sale.
 **3 Key Benefits:**
 1. **Keep 95% of Every Sale** — Industry-leading split. Just 5% to the platform.
 2. **$20/month or $96/year** — 30-day free trial. 10GB storage included.
-3. **Instant Payouts** — Connect Stripe, get paid immediately. No waiting.
+3. **Monthly Payouts** — Funds held securely, paid out monthly.
 
 ---
 
@@ -59,7 +59,7 @@ You keep 90% of every sale.
 **3 Key Benefits:**
 1. **Keep 90% of Revenue** — Only 10% to the platform. More margin for your business.
 2. **$25/month or $120/year** — Manage unlimited artists. 30-day free trial.
-3. **Batch Upload & Analytics** — Upload catalogs, track sales, manage payouts.
+3. **Monthly Payouts** — Funds held securely, paid out monthly.
 
 ---
 
@@ -82,7 +82,7 @@ Buy music you own. Stream unlimited.
 2. "30-day free trial: start selling this week"
 3. "95% vs 30%: here's what you actually earn"
 4. "Your first upload: 5-minute setup guide"
-5. "Connect Stripe, get paid instantly"
+5. "Connect Stripe for monthly payouts"
 
 ---
 
@@ -116,7 +116,7 @@ Vs. streaming: $0.004 per play 😬"
 
 ## SEO Meta Descriptions
 
-- **Homepage:** Artistrax—electronic music platform with fair splits. Artists keep 95%, labels keep 90%. Direct downloads, instant payouts.
-- **Artist Signup:** Sell music direct. Keep 95%, $20/month, 30-day trial, instant Stripe payouts.
+- **Homepage:** Artistrax—electronic music platform with fair splits. Artists keep 95%, labels keep 90%. Direct downloads, monthly payouts.
+- **Artist Signup:** Sell music direct. Keep 95%, $20/month, 30-day trial, monthly Stripe payouts.
 - **Label Signup:** Run your label. Keep 90%, $25/month, batch upload, artist management.
 - **Fan Page:** Buy lossless electronic music. Support artists directly. Stream unlimited.

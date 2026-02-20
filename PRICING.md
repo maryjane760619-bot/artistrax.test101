@@ -30,7 +30,7 @@
 - **Unlimited streaming** — of purchased tracks, forever
 - **Lossless downloads** — WAV, FLAC, or MP3
 
-## Stripe Connect
-- Instant payouts to connected account
-- Platform fee automatically deducted
-- Remainder (90% or 95%) available for withdrawal
+## Payouts
+- **Schedule:** Monthly payouts to artist/label accounts
+- **Holding:** Funds held in Stripe Treasury (interest-bearing account)
+- **Automatic:** Platform fee deducted, remainder paid out monthly

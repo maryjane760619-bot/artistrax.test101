@@ -324,18 +324,18 @@ Let's get you paid what you deserve.
 
 ### Email 2: Feature Spotlight (Day 3)
 ```
-Subject: How instant payouts work (setup takes 2 min)
+Subject: How monthly payouts work (setup takes 2 min)
 
 [First name],
 
-One feature our beta artists love: Instant payouts.
+One feature our beta artists love: Monthly payouts.
 
 Here's how it works:
 1. Connect your Stripe account (2 min)
-2. Make a sale
-3. Money hits your account in 2-3 days
+2. Make sales throughout the month
+3. Get paid on the 1st of each month
 
-No waiting 30-60 days.
+Funds held securely in Treasury.
 No minimum thresholds.
 
 Set yours up:
