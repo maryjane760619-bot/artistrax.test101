@@ -12,7 +12,30 @@ Build complete live streaming system integrated with chat.
 
 ## Technical Architecture
 
-### Option 1: Mux (Recommended)
+### Cloudflare Stream (Selected)
+**Best for:** Cost at scale, no egress fees
+
+**Pricing:**
+- **Storage:** $5 per 1,000 minutes
+- **Delivery:** $1 per 1,000 minutes (75% cheaper than Mux!)
+- **Artistrax adds:** 10% platform fee
+- **NO egress fees**
+
+**Example: 4 hour stream, 100 viewers = $24 Cloudflare cost + $2.40 fee = $26.40 total**
+
+---
+
+## Alternative Options Considered
+
+### Mux
+- $0.004/minute (4x more expensive than Cloudflare)
+- Good developer experience
+- Not selected due to cost
+
+### WebRTC + SFU (Daily.co/100ms)
+- sub-second latency
+- Too expensive at scale
+- Not selected
 **Best for:** Developer experience, reliability, pricing
 
 **Pros:**
