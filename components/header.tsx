@@ -19,6 +19,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/artists', label: 'Artists' },
   { href: '/labels/siestarecords', label: 'Labels' },
+  { href: '/live', label: 'Live' },
   { href: '/about', label: 'About' },
 ]
 

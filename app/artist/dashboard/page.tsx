@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Music, TrendingUp, DollarSign, Download, User, Link as LinkIcon, CreditCard, ShoppingBag, Activity, ArrowUpRight, Wallet, Banknote, Video } from 'lucide-react'
+import { Upload, Music, TrendingUp, DollarSign, Download, User, Link as LinkIcon, CreditCard, ShoppingBag, Activity, ArrowUpRight, Wallet, Banknote, Video, Radio } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
 import StripeConnectOnboarding from '@/components/stripe-connect-onboarding-v2'
@@ -295,6 +295,12 @@ export default function ArtistDashboard() {
             <Button className="w-full h-auto py-4 flex-col gap-1 text-sm">
               <Upload className="w-5 h-5" />
               <span>Upload</span>
+            </Button>
+          </Link>
+          <Link href="/artist/go-live">
+            <Button variant="outline" className="w-full h-auto py-4 flex-col gap-1 text-sm border-red-500 text-red-500 hover:bg-red-50">
+              <Radio className="w-5 h-5" />
+              <span>Go Live</span>
             </Button>
           </Link>
           <Link href="/artist/batch-upload">
