@@ -6,7 +6,7 @@ import { LabelAuthProvider, useLabelAuth } from '@/lib/label-auth-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Music, TrendingUp, DollarSign, Download, Users, Link as LinkIcon, CreditCard, ShoppingBag, Activity, Clock, ArrowUpRight, Wallet, Banknote } from 'lucide-react'
+import { Upload, Music, TrendingUp, DollarSign, Download, Users, Link as LinkIcon, CreditCard, ShoppingBag, Activity, Clock, ArrowUpRight, Wallet, Banknote, Video } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
 import StripeConnectOnboarding from '@/components/stripe-connect-onboarding-v2'
@@ -294,7 +294,7 @@ function DashboardContent() {
           </Link>
           <Link href="/label/videos">
             <Button variant="outline" className="w-full h-auto py-4 flex-col gap-1 text-sm">
-              <Activity className="w-5 h-5" />
+              <Video className="w-5 h-5" />
               <span>Videos</span>
             </Button>
           </Link>
