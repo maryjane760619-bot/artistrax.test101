@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
 import { VideoPlayer } from '@/components/video-player'
-import { SubscribeButton } from '@/components/subscribe-button'
+import { SubscribeButton, SubscriptionCard } from '@/components/subscribe-button'
 import { useCart } from '@/lib/cart-context'
 
 type Label = {
