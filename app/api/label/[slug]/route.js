@@ -52,6 +52,31 @@ export async function GET(request, { params }) {
       }
     }
 
+    // If not found by slug, try by name
+    if (!label) {
+      for (const trySlug of slugVariations) {
+        const { data } = await supabase
+          .from('labels')
+          .select(`
+            id, 
+            name, 
+            slug, 
+            description, 
+            avatar_url,
+            banner_url,
+            website_url,
+            social_links
+          `)
+          .ilike('name', trySlug.replace(/-/g, ' '))
+          .single();
+        
+        if (data) {
+          label = data;
+          break;
+        }
+      }
+    }
+
     if (!label) {
       return NextResponse.json({ 
         error: 'Label not found',
