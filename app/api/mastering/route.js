@@ -163,13 +163,13 @@ export async function GET(request) {
                 .from('mastering_jobs')
                 .update({
                   status: 'completed',
-                  mastered_audio_url: downloadData.url,
+                  mastered_audio_url: downloadData.downloadUrl,
                   completed_at: new Date().toISOString()
                 })
                 .eq('id', jobId);
               
               job.status = 'completed';
-              job.mastered_audio_url = downloadData.url;
+              job.mastered_audio_url = downloadData.downloadUrl;
             }
           } else if (landrData.status === 'failed') {
             await supabase
