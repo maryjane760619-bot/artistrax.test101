@@ -8,6 +8,8 @@
 **artistrax**
 *Fair pay for artists. True ownership for fans.*
 
+**Where an artist can be an artist**
+
 **Powered by Siesta Records**
 
 **Seeking:** Bootstrap / Optional Seed ($250-500K)
@@ -44,6 +46,8 @@
 ## Slide 3: The Solution
 
 ### artistrax: Own It AND Stream It
+
+*Where an artist can be an artist*
 
 **For Artists:**
 - ✅ Keep **95%** of every sale (vs 70-82%)

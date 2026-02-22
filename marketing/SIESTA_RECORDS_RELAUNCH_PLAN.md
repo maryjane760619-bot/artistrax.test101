@@ -4,7 +4,7 @@
 
 **Announce:** Siesta Records is returning Summer 2026
 **Focus:** Back catalog digital downloads + new releases + demo submissions
-**Platform:** Artistrax (primary), social media amplification
+**Platform:** Artistrax (primary) - *Where an artist can be an artist*
 **Timeline:** 3-month campaign (March - June 2026)
 
 ---
@@ -61,7 +61,7 @@ The relaunch includes:
 • Complete back catalog available for digital download in lossless formats
 • New releases scheduled for Summer 2026 and beyond
 • Open demo submission process for emerging artists
-• Direct-to-fan platform via Artistrax
+• Direct-to-fan platform via Artistrax — Where an artist can be an artist
 
 "We're excited to bring Siesta Records into the modern era," says [Name], founder. 
 "Our mission remains the same: discover and nurture electronic music talent. But now 
@@ -109,6 +109,8 @@ What's coming:
 
 Back catalog is LIVE now 👇
 [Link to Artistrax profile]
+
+Powered by @artistrax — Where an artist can be an artist 🎵
 
 Demo submissions open 👇
 [Link to demo submission form]

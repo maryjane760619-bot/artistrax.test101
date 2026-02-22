@@ -22,6 +22,8 @@ New music platform reimagines ownership with "Stream Your Purchases" feature, PW
 
 "The streaming model is broken," said **Bert Porcayo, CEO of Siesta Records and founder of artistrax**. "Artists make pennies. Fans don't own anything. Labels take massive cuts. We built artistrax to change that. Fair pay for artists. True ownership for fans. Simple."
 
+**artistrax: Where an artist can be an artist**
+
 #### **Key Features**
 
 **For Artists:**
@@ -78,6 +80,8 @@ Siesta Records is an independent electronic music label based in Encinitas, Cali
 
 artistrax is a fair-pay music distribution platform where artists keep 95% of revenue and fans own music forever while also streaming it unlimited times. Built by Siesta Records, artistrax combines the ownership model of Bandcamp with the convenience of streaming, powered by a PWA app and 2% cashback rewards.
 
+**Where an artist can be an artist**
+
 For more information, visit **[artistrax.com](https://artistrax.com)** or contact **support@artistrax.com**.
 
 ---
@@ -87,6 +91,8 @@ For more information, visit **[artistrax.com](https://artistrax.com)** or contac
 ### Twitter/X Launch Thread
 
 🎵 **INTRODUCING ARTISTRAX** 🎵
+
+*Where an artist can be an artist*
 
 The music platform where:
 ✅ Artists keep 95%

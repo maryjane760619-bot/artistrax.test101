@@ -19,6 +19,8 @@ You need a platform built for labels.
 
 ## The Solution: artistrax
 
+*Where an artist can be an artist*
+
 ### 🏷️ **90% Revenue Share**
 Your label keeps **90%** of every sale. Not 70%. **Ninety percent.**
 

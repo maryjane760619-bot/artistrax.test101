@@ -1,9 +1,13 @@
 # artistrax Marketing Plan
 ## Budget: $500 | Timeline: 4 weeks
 
+**Tagline:** *Where an artist can be an artist*
+
 ---
 
 ## Core Value Propositions
+
+*Artistrax: Where an artist can be an artist*
 
 ### For Artists
 - **95% revenue share** (vs Spotify $0.003/stream, Beatport 70%, Bandcamp 82%)
@@ -284,3 +288,7 @@
 - Highlight the "historic launch" angle (catalog never digital before)
 - Emphasize fair pay, ownership, and artist-first approach
 - Position as alternative to streaming's broken economics
+
+---
+
+**Artistrax: Where an artist can be an artist** 🎵

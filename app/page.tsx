@@ -16,8 +16,11 @@ export default function HomePage() {
           <h1 className="text-5xl md:text-7xl font-serif font-semibold tracking-tight mb-8">
             artistrax
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
             Premium digital downloads from independent artists & labels
+          </p>
+          <p className="text-base text-primary/80 italic max-w-2xl mx-auto mb-12">
+            Where an artist can be an artist
           </p>
         </div>
 

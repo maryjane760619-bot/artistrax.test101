@@ -19,6 +19,8 @@ You deserve better.
 
 ## The Solution: artistrax
 
+*Where an artist can be an artist*
+
 ### 🎵 **95% Revenue Share**
 You keep **95%** of every sale. Not 70%. Not 82%. **Ninety-five percent.**
 

@@ -16,8 +16,11 @@ export default function AboutPage() {
           <h1 className="text-5xl md:text-6xl font-serif font-semibold mb-6">
             About artistrax
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-4">
             A platform built for independent artists, labels, and music lovers who believe in direct connection and fair compensation.
+          </p>
+          <p className="text-lg text-primary italic max-w-3xl mx-auto">
+            Where an artist can be an artist
           </p>
         </section>
 
