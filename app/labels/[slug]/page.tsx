@@ -28,7 +28,7 @@ export default function LabelPage({ params }: { params: Promise<{ slug: string }
   useEffect(() => {
     if (!slug) return;
     
-    fetch(`/api/label/${slug}/tracks`)
+    fetch(`/api/label/${slug}`)
       .then(res => res.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
