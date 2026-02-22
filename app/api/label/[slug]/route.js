@@ -1,5 +1,5 @@
 // Universal Label API - works for any label
-// GET /api/label/[slug]/tracks
+// GET /api/label/[slug]
 // Next.js App Router format
 
 import { createClient } from '@supabase/supabase-js';
@@ -30,6 +30,7 @@ export async function GET(request, { params }) {
     
     let label = null;
     
+    // Search by slug
     for (const trySlug of slugVariations) {
       const { data } = await supabase
         .from('labels')
@@ -37,11 +38,11 @@ export async function GET(request, { params }) {
           id, 
           name, 
           slug, 
-          description, 
-          avatar_url,
-          banner_url,
-          website_url,
-          social_links
+          bio,
+          logo_url,
+          website,
+          instagram,
+          twitter
         `)
         .eq('slug', trySlug)
         .single();
@@ -52,7 +53,7 @@ export async function GET(request, { params }) {
       }
     }
 
-    // If not found by slug, try by name
+    // Search by name if not found
     if (!label) {
       for (const trySlug of slugVariations) {
         const { data } = await supabase
@@ -61,11 +62,11 @@ export async function GET(request, { params }) {
             id, 
             name, 
             slug, 
-            description, 
-            avatar_url,
-            banner_url,
-            website_url,
-            social_links
+            bio,
+            logo_url,
+            website,
+            instagram,
+            twitter
           `)
           .ilike('name', trySlug.replace(/-/g, ' '))
           .single();
@@ -84,62 +85,75 @@ export async function GET(request, { params }) {
       }, { status: 404 });
     }
 
-    // Get all published tracks for this label
-    const { data: tracks, error: tracksError } = await supabase
-      .from('products')
-      .select(`
-        id,
-        title,
-        description,
-        price,
-        cover_art_url,
-        audio_preview_url,
-        created_at,
-        artists:artist_id (name, slug, avatar_url)
-      `)
-      .eq('label_id', label.id)
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
+    // Get artists for this label
+    const { data: artists } = await supabase
+      .from('artists')
+      .select('id, display_name, username')
+      .eq('label_id', label.id);
 
-    if (tracksError) throw tracksError;
+    const artistIds = artists?.map(a => a.id) || [];
 
-    // Get label stats
-    const { count: totalTracks } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true })
-      .eq('label_id', label.id)
-      .eq('status', 'published');
+    // Get tracks by these artists
+    let tracks = [];
+    if (artistIds.length > 0) {
+      const { data: tracksData } = await supabase
+        .from('tracks')
+        .select(`
+          id,
+          title,
+          slug,
+          description,
+          audio_url,
+          cover_url,
+          duration,
+          price,
+          is_free,
+          play_count,
+          download_count,
+          created_at,
+          artists:artist_id (display_name, username)
+        `)
+        .in('artist_id', artistIds)
+        .order('created_at', { ascending: false });
+
+      tracks = tracksData || [];
+    }
 
     // Format response
-    const formattedTracks = tracks?.map(track => ({
+    const formattedTracks = tracks.map(track => ({
       id: track.id,
       title: track.title,
-      artist: track.artists?.name || 'Unknown Artist',
-      artistSlug: track.artists?.slug,
-      artistAvatar: track.artists?.avatar_url,
-      price: track.price,
-      coverArt: track.cover_art_url,
-      previewUrl: track.audio_preview_url,
+      artist: track.artists?.display_name || 'Unknown Artist',
+      artistUsername: track.artists?.username,
+      price: track.is_free ? 0 : track.price,
+      coverArt: track.cover_url,
+      audioUrl: track.audio_url,
+      duration: track.duration,
+      plays: track.play_count,
+      downloads: track.download_count,
       buyUrl: `https://artistrax.com/track/${track.id}`,
       createdAt: track.created_at
-    })) || [];
+    }));
 
     return NextResponse.json({
       label: {
         id: label.id,
         name: label.name,
         slug: label.slug,
-        description: label.description,
-        avatar: label.avatar_url,
-        banner: label.banner_url,
-        website: label.website_url,
-        socialLinks: label.social_links || {},
-        totalTracks: totalTracks || 0
+        description: label.bio,
+        avatar: label.logo_url,
+        website: label.website,
+        instagram: label.instagram,
+        twitter: label.twitter,
+        totalTracks: formattedTracks.length
       },
       tracks: formattedTracks
     });
   } catch (error) {
     console.error('Label API Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch label data' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to fetch label data',
+      details: error.message 
+    }, { status: 500 });
   }
 }
