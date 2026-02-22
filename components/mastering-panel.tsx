@@ -17,9 +17,9 @@ interface MasteringPanelProps {
 
 export function MasteringPanel({ trackId, trackTitle, audioUrl, onMasteringComplete }: MasteringPanelProps) {
   const [style, setStyle] = useState('balanced');
-  const [intensity, setIntensity] = useState(50);
+  const [loudness, setLoudness] = useState(50);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [jobStatus, setJobStatus] = useState<'idle' | 'pending' | 'processing' | 'completed'>('idle');
+  const [jobStatus, setJobStatus] = useState<'idle' | 'pending_payment' | 'processing' | 'completed'>('idle');
   const { toast } = useToast();
 
   const handleMaster = async () => {
@@ -33,7 +33,7 @@ export function MasteringPanel({ trackId, trackTitle, audioUrl, onMasteringCompl
         body: JSON.stringify({
           trackId,
           style,
-          intensity: intensity < 33 ? 'low' : intensity > 66 ? 'high' : 'medium'
+          loudness: loudness < 33 ? 'low' : loudness > 66 ? 'high' : 'medium'
         })
       });
 
@@ -43,7 +43,7 @@ export function MasteringPanel({ trackId, trackTitle, audioUrl, onMasteringCompl
         throw new Error(data.error || 'Failed to create mastering job');
       }
 
-      setJobStatus('pending');
+      setJobStatus('pending_payment');
       
       toast({
         title: 'Mastering Job Created',
@@ -144,20 +144,20 @@ export function MasteringPanel({ trackId, trackTitle, audioUrl, onMasteringCompl
           </Select>
         </div>
 
-        {/* Intensity Slider */}
+        {/* Loudness Slider */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Intensity: {intensity}%</label>
+          <label className="text-sm font-medium">Loudness: {loudness}%</label>
           <Slider
-            value={[intensity]}
-            onValueChange={(value) => setIntensity(value[0])}
+            value={[loudness]}
+            onValueChange={(value) => setLoudness(value[0])}
             min={0}
             max={100}
             step={1}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Subtle</span>
-            <span>Moderate</span>
-            <span>Intense</span>
+            <span>Low (Dynamic)</span>
+            <span>Medium</span>
+            <span>High (Loud)</span>
           </div>
         </div>
 

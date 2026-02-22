@@ -1,5 +1,5 @@
-// LANDR Mastering Integration for Artistrax
-// Allows artists to master tracks directly on the platform
+// LANDR Mastering API Integration
+// Production-ready implementation using LANDR API v1
 
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
@@ -10,13 +10,21 @@ const supabase = createClient(
 );
 
 // LANDR API configuration
-const LANDR_API_KEY = process.env.LANDR_API_KEY;
-const LANDR_API_URL = 'https://api.landr.com/v1';
+const LANDR_API_KEY = process.env.LANDR_MASTERING_API_KEY;
+const LANDR_API_URL = 'https://api.landr.com/mastering/v1';
 
 export async function POST(request) {
   try {
+    // Check if LANDR API is configured
+    if (!LANDR_API_KEY) {
+      return NextResponse.json(
+        { error: 'Mastering service not configured. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
-    const { trackId, artistId, style = 'balanced', intensity = 'medium' } = body;
+    const { trackId, artistId, style = 'balanced', loudness = 'medium', format = 'wav' } = body;
 
     if (!trackId || !artistId) {
       return NextResponse.json(
@@ -47,36 +55,46 @@ export async function POST(request) {
       );
     }
 
+    // Validate LANDR parameters
+    const validStyles = ['warm', 'balanced', 'open'];
+    const validLoudness = ['low', 'medium', 'high'];
+    const validFormats = ['cd', 'mp3', 'wav'];
+
+    const finalStyle = validStyles.includes(style) ? style : 'balanced';
+    const finalLoudness = validLoudness.includes(loudness) ? loudness : 'medium';
+    const finalFormat = validFormats.includes(format) ? format : 'wav';
+
     // Create mastering job in database
     const { data: masteringJob, error: jobError } = await supabase
       .from('mastering_jobs')
       .insert({
         track_id: trackId,
         artist_id: artistId,
-        status: 'pending',
-        style,
-        intensity,
+        status: 'pending_payment',
+        style: finalStyle,
+        loudness: finalLoudness,
+        format: finalFormat,
         original_audio_url: track.audio_url,
-        cost: 9.99 // LANDR per-track cost
+        cost: 9.99,
+        landr_master_id: null // Will be set after payment
       })
       .select()
       .single();
 
     if (jobError) throw jobError;
 
-    // In production, this would call LANDR API
-    // For now, return the job details
     return NextResponse.json({
       success: true,
       job: masteringJob,
       message: 'Mastering job created. Payment required to proceed.',
-      paymentUrl: `/api/mastering/pay/${masteringJob.id}`
+      paymentUrl: `/api/mastering/pay/${masteringJob.id}`,
+      estimatedTime: '30-60 seconds'
     });
 
   } catch (error) {
     console.error('Mastering API Error:', error);
     return NextResponse.json(
-      { error: 'Failed to create mastering job' },
+      { error: 'Failed to create mastering job', details: error.message },
       { status: 500 }
     );
   }
@@ -109,6 +127,66 @@ export async function GET(request) {
         { error: 'Job not found' },
         { status: 404 }
       );
+    }
+
+    // If job has a LANDR master ID and is processing, check LANDR status
+    if (job.landr_master_id && job.status === 'processing') {
+      try {
+        const landrResponse = await fetch(
+          `${LANDR_API_URL}/master/single/${job.landr_master_id}/status`,
+          {
+            headers: {
+              'x-landr-mastering-api-key': LANDR_API_KEY
+            }
+          }
+        );
+
+        if (landrResponse.ok) {
+          const landrData = await landrResponse.json();
+          
+          // Update status based on LANDR response
+          if (landrData.status === 'completed') {
+            // Get download URL
+            const downloadResponse = await fetch(
+              `${LANDR_API_URL}/master/single/${job.landr_master_id}/download`,
+              {
+                headers: {
+                  'x-landr-mastering-api-key': LANDR_API_KEY
+                }
+              }
+            );
+            
+            if (downloadResponse.ok) {
+              const downloadData = await downloadResponse.json();
+              
+              await supabase
+                .from('mastering_jobs')
+                .update({
+                  status: 'completed',
+                  mastered_audio_url: downloadData.url,
+                  completed_at: new Date().toISOString()
+                })
+                .eq('id', jobId);
+              
+              job.status = 'completed';
+              job.mastered_audio_url = downloadData.url;
+            }
+          } else if (landrData.status === 'failed') {
+            await supabase
+              .from('mastering_jobs')
+              .update({
+                status: 'failed',
+                error_message: landrData.error?.details || 'Mastering failed'
+              })
+              .eq('id', jobId);
+            
+            job.status = 'failed';
+            job.error_message = landrData.error?.details;
+          }
+        }
+      } catch (landrError) {
+        console.error('LANDR API Error:', landrError);
+      }
     }
 
     return NextResponse.json({ job });
