@@ -20,24 +20,45 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get label info
-    const { data: label, error: labelError } = await supabase
-      .from('labels')
-      .select(`
-        id, 
-        name, 
-        slug, 
-        description, 
-        avatar_url,
-        banner_url,
-        website_url,
-        social_links
-      `)
-      .eq('slug', slug)
-      .single();
+    // Try different slug formats
+    const slugVariations = [
+      slug,
+      slug.toLowerCase(),
+      slug.replace(/-/g, ''),
+      slug.replace(/-/g, '_'),
+      slug.replace(/ /g, '-'),
+      slug.replace(/ /g, '_')
+    ];
+    
+    let label = null;
+    
+    for (const trySlug of slugVariations) {
+      const { data } = await supabase
+        .from('labels')
+        .select(`
+          id, 
+          name, 
+          slug, 
+          description, 
+          avatar_url,
+          banner_url,
+          website_url,
+          social_links
+        `)
+        .eq('slug', trySlug)
+        .single();
+      
+      if (data) {
+        label = data;
+        break;
+      }
+    }
 
-    if (labelError || !label) {
-      return res.status(404).json({ error: 'Label not found' });
+    if (!label) {
+      return res.status(404).json({ 
+        error: 'Label not found',
+        tried: slugVariations
+      });
     }
 
     // Get all published tracks for this label
