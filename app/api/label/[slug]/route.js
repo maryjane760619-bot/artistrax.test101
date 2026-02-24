@@ -18,21 +18,41 @@ export async function GET(request, { params }) {
   }
 
   try {
-    // Try different slug formats
-    const slugVariations = [
-      slug,
-      slug.toLowerCase(),
-      slug.replace(/-/g, ''),
-      slug.replace(/-/g, '_'),
-      slug.replace(/ /g, '-'),
-      slug.replace(/ /g, '_')
-    ];
+    console.log('Looking for label with slug:', slug);
     
-    let label = null;
+    // First, try to list all labels (for debugging)
+    const { data: allLabels, error: listError } = await supabase
+      .from('labels')
+      .select('id, name, slug')
+      .limit(10);
     
-    // Search by slug
-    for (const trySlug of slugVariations) {
-      const { data } = await supabase
+    console.log('Available labels:', allLabels);
+    console.log('List error:', listError);
+
+    // Try exact match first
+    const { data: exactMatch, error: exactError } = await supabase
+      .from('labels')
+      .select(`
+        id, 
+        name, 
+        slug, 
+        bio,
+        logo_url,
+        website,
+        instagram,
+        twitter
+      `)
+      .eq('slug', slug)
+      .maybeSingle();
+    
+    console.log('Exact match:', exactMatch);
+    console.log('Exact error:', exactError);
+
+    let label = exactMatch;
+
+    // If not found, try case-insensitive
+    if (!label) {
+      const { data: caseMatch } = await supabase
         .from('labels')
         .select(`
           id, 
@@ -44,59 +64,59 @@ export async function GET(request, { params }) {
           instagram,
           twitter
         `)
-        .eq('slug', trySlug)
-        .single();
+        .ilike('slug', slug)
+        .maybeSingle();
       
-      if (data) {
-        label = data;
-        break;
-      }
+      label = caseMatch;
+      console.log('Case match:', caseMatch);
     }
 
-    // Search by name if not found
+    // Try name match
     if (!label) {
-      for (const trySlug of slugVariations) {
-        const { data } = await supabase
-          .from('labels')
-          .select(`
-            id, 
-            name, 
-            slug, 
-            bio,
-            logo_url,
-            website,
-            instagram,
-            twitter
-          `)
-          .ilike('name', trySlug.replace(/-/g, ' '))
-          .single();
-        
-        if (data) {
-          label = data;
-          break;
-        }
-      }
+      const { data: nameMatch } = await supabase
+        .from('labels')
+        .select(`
+          id, 
+          name, 
+          slug, 
+          bio,
+          logo_url,
+          website,
+          instagram,
+          twitter
+        `)
+        .ilike('name', slug.replace(/-/g, ' '))
+        .maybeSingle();
+      
+      label = nameMatch;
+      console.log('Name match:', nameMatch);
     }
 
     if (!label) {
       return NextResponse.json({ 
         error: 'Label not found',
-        tried: slugVariations 
+        searched: slug,
+        availableLabels: allLabels?.map(l => ({ name: l.name, slug: l.slug })) || []
       }, { status: 404 });
     }
 
+    console.log('Found label:', label);
+
     // Get artists for this label
-    const { data: artists } = await supabase
+    const { data: artists, error: artistsError } = await supabase
       .from('artists')
       .select('id, display_name, username')
       .eq('label_id', label.id);
+
+    console.log('Artists:', artists);
+    console.log('Artists error:', artistsError);
 
     const artistIds = artists?.map(a => a.id) || [];
 
     // Get tracks by these artists
     let tracks = [];
     if (artistIds.length > 0) {
-      const { data: tracksData } = await supabase
+      const { data: tracksData, error: tracksError } = await supabase
         .from('tracks')
         .select(`
           id,
@@ -115,6 +135,9 @@ export async function GET(request, { params }) {
         `)
         .in('artist_id', artistIds)
         .order('created_at', { ascending: false });
+
+      console.log('Tracks:', tracksData);
+      console.log('Tracks error:', tracksError);
 
       tracks = tracksData || [];
     }
@@ -153,7 +176,8 @@ export async function GET(request, { params }) {
     console.error('Label API Error:', error);
     return NextResponse.json({ 
       error: 'Failed to fetch label data',
-      details: error.message 
+      details: error.message,
+      stack: error.stack
     }, { status: 500 });
   }
 }
