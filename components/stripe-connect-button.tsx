@@ -120,10 +120,10 @@ export function StripeConnectButton({ userId, userType, userEmail }: StripeConne
         <h3 className="font-semibold mb-2">Connect Stripe to Get Paid</h3>
         <p className="text-sm text-muted-foreground mb-3">
           Connect your Stripe account to receive payments when customers buy your products.
-          You'll keep 95% of every sale!
+          You'll keep {userType === 'label' ? '90%' : '95%'} of every sale!
         </p>
         <ul className="text-sm space-y-1 mb-3 text-muted-foreground">
-          <li>✓ Instant payouts to your bank account</li>
+          <li>✓ {userType === 'label' ? 'Monthly' : 'Instant'} payouts to your bank account</li>
           <li>✓ Secure payment processing</li>
           <li>✓ Only takes 2 minutes to set up</li>
         </ul>
