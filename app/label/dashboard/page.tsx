@@ -264,7 +264,7 @@ function DashboardContent() {
 
         {/* Stripe Connect Onboarding */}
         <div className="mb-8">
-          <StripeStatusCheck userId={labelData.id} />
+          <StripeConnectOnboarding accountType="label" />
         </div>
 
         {/* Quick Actions */}
