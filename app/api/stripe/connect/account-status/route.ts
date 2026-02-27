@@ -17,6 +17,38 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Try labels table first (for label dashboard)
+    const { data: label, error: labelError } = await supabaseClient
+      .from('labels')
+      .select('id, stripe_account_id')
+      .eq('id', user.id)
+      .single()
+
+    if (label) {
+      // User is a label
+      if (!label.stripe_account_id) {
+        return NextResponse.json({
+          hasAccount: false,
+          onboardingComplete: false,
+          chargesEnabled: false,
+          payoutsEnabled: false
+        })
+      }
+
+      const account = await stripe.accounts.retrieve(label.stripe_account_id)
+
+      return NextResponse.json({
+        hasAccount: true,
+        accountId: account.id,
+        onboardingComplete: account.details_submitted,
+        chargesEnabled: account.charges_enabled,
+        payoutsEnabled: account.payouts_enabled,
+        requirements: account.requirements,
+        email: account.email
+      })
+    }
+
+    // Try artists table (for artist dashboard)
     const { data: artist, error: artistError } = await supabaseClient
       .from('artists')
       .select('id, stripe_account_id')
@@ -24,7 +56,7 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (artistError || !artist) {
-      return NextResponse.json({ error: 'Artist not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Artist or Label not found' }, { status: 404 })
     }
 
     if (!artist.stripe_account_id) {
@@ -98,14 +130,13 @@ export async function POST(request: NextRequest) {
       accountId: account.id,
       chargesEnabled: account.charges_enabled,
       detailsSubmitted: account.details_submitted,
-      payoutsEnabled: account.payouts_enabled,
-      requiresAction: !account.details_submitted || !account.charges_enabled
+      email: account.email
     })
 
   } catch (error: any) {
-    console.error('Stripe account status error:', error)
+    console.error('Stripe connect status error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to get account status' },
+      { error: error.message },
       { status: 500 }
     )
   }
