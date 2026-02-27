@@ -10,6 +10,7 @@ import { Upload, Music, TrendingUp, DollarSign, Download, Users, Link as LinkIco
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
 import StripeConnectOnboarding from '@/components/stripe-connect-onboarding-v2'
+import StripeStatusCheck from '@/components/stripe-status-check'
 
 interface Payout {
   id: string
@@ -263,7 +264,7 @@ function DashboardContent() {
 
         {/* Stripe Connect Onboarding */}
         <div className="mb-8">
-          <StripeConnectOnboarding accountType="label" />
+          <StripeStatusCheck userId={labelData.id} />
         </div>
 
         {/* Quick Actions */}
