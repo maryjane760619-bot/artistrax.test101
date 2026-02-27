@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export async function POST() {
+export async function GET() {
   try {
     // Update Siesta Records Stripe status
     const { data, error } = await supabase
