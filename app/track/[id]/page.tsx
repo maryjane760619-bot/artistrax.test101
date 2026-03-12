@@ -23,10 +23,7 @@ export default function TrackPage() {
     const fetchTrack = async () => {
       const { data } = await supabase
         .from('tracks')
-        .select(`
-          *,
-          artists:artist_id (display_name)
-        `)
+        .select(`*, artists:artist_id (display_name)`)
         .eq('id', id)
         .single()
       
@@ -94,10 +91,10 @@ export default function TrackPage() {
       <Header />
       <main className="min-h-screen pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4">
-          <Link href="/">
+          <Link href="/labels/siesta-records">
             <Button variant="ghost" className="mb-6">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              Back to Siesta Records
             </Button>
           </Link>
 
