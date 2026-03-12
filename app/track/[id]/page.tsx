@@ -15,6 +15,7 @@ export default function TrackPage() {
   const id = params?.id as string
   const [track, setTrack] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [buying, setBuying] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -35,6 +36,29 @@ export default function TrackPage() {
     
     fetchTrack()
   }, [id])
+
+  const handleBuy = async () => {
+    setBuying(true)
+    try {
+      const response = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trackId: id })
+      })
+      
+      const data = await response.json()
+      
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Error: ' + (data.error || 'Could not create checkout'))
+      }
+    } catch (err) {
+      alert('Error creating checkout session')
+    } finally {
+      setBuying(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -103,9 +127,17 @@ export default function TrackPage() {
               <Button 
                 size="lg" 
                 className="w-full"
-                onClick={() => alert('Stripe checkout coming soon!')}
+                onClick={handleBuy}
+                disabled={buying}
               >
-                Buy Now
+                {buying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Buy Now'
+                )}
               </Button>
 
               <p className="text-sm text-muted-foreground mt-4 text-center">
