@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Music, ArrowLeft, Loader2 } from 'lucide-react'
+import { Music, ArrowLeft, Loader2, ExternalLink } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
@@ -15,7 +15,6 @@ export default function TrackPage() {
   const id = params?.id as string
   const [track, setTrack] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [buying, setBuying] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -33,29 +32,6 @@ export default function TrackPage() {
     
     fetchTrack()
   }, [id])
-
-  const handleBuy = async () => {
-    setBuying(true)
-    try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trackId: id })
-      })
-      
-      const data = await response.json()
-      
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        alert('Error: ' + (data.error || 'Could not create checkout'))
-      }
-    } catch (err) {
-      alert('Error creating checkout session')
-    } finally {
-      setBuying(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -85,6 +61,9 @@ export default function TrackPage() {
       </>
     )
   }
+
+  // Stripe payment link (direct)
+  const stripePaymentUrl = `https://buy.stripe.com/test_eVa3fWePd28j4z6bII?prefilled_email=&client_reference_id=${track.id}&metadata_track_id=${track.id}&metadata_track_title=${encodeURIComponent(track.title)}`
 
   return (
     <>
@@ -121,21 +100,18 @@ export default function TrackPage() {
                 ${track.price}
               </p>
 
-              <Button 
-                size="lg" 
-                className="w-full"
-                onClick={handleBuy}
-                disabled={buying}
+              <a 
+                href={stripePaymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                {buying ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  'Buy Now'
-                )}
-              </Button>
+                <Button 
+                  size="lg" 
+                  className="w-full"
+                >
+                  Buy Now <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </a>
 
               <p className="text-sm text-muted-foreground mt-4 text-center">
                 Secure payment via Stripe
