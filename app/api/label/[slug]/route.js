@@ -1,26 +1,60 @@
-// Ultra simple label API
+// Label API - queries database
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 export async function GET(request, { params }) {
-  const { slug } = await params;
-  
-  // Static response for Siesta Records
-  if (slug === 'siesta-records') {
+  try {
+    const { slug } = await params;
+    
+    if (!slug) {
+      return NextResponse.json({ error: 'Slug required' }, { status: 400 });
+    }
+
+    // Get label
+    const { data: label } = await supabase
+      .from('labels')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (!label) {
+      return NextResponse.json({ error: 'Label not found' }, { status: 404 });
+    }
+
+    // Get tracks
+    const { data: tracks } = await supabase
+      .from('tracks')
+      .select(`
+        id, title, price, cover_url,
+        artists:artist_id (display_name)
+      `)
+      .eq('label_id', label.id)
+      .order('created_at', { ascending: false });
+
     return NextResponse.json({
       label: {
-        id: '60660d4f-5eaa-45c1-8705-d133bab4c124',
-        name: 'Siesta Records',
-        slug: 'siesta-records',
-        description: 'Surf · Sound · Soul. Independent electronic music label from Encinitas, CA.',
-        totalTracks: 18
+        id: label.id,
+        name: label.name,
+        slug: label.slug,
+        description: label.bio,
+        totalTracks: tracks?.length || 0
       },
-      tracks: [
-        { id: '1', title: 'Test buy track 1a', artist: 'DJ Mary', price: 0.99, buyUrl: 'https://artistrax.com/track/1' },
-        { id: '2', title: 'sell. human gazpacho - A Visit to Kali the Artificer Test 1', artist: 'DJ Mary', price: 1.99, buyUrl: 'https://artistrax.com/track/2' },
-        { id: '3', title: 'Bertin - Test 1', artist: 'Bertin', price: 0.99, buyUrl: 'https://artistrax.com/track/3' }
-      ]
+      tracks: tracks?.map(t => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artists?.display_name || 'Unknown',
+        price: t.price,
+        coverArt: t.cover_url,
+        buyUrl: `https://music-download-store-2.vercel.app/track/${t.id}`
+      })) || []
     });
+
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  
-  return NextResponse.json({ error: 'Label not found' }, { status: 404 });
 }
