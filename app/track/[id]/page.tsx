@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Music, ArrowLeft, Loader2, ExternalLink } from 'lucide-react'
+import { Music, ArrowLeft, Loader2, Mail } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
@@ -62,9 +62,6 @@ export default function TrackPage() {
     )
   }
 
-  // Stripe payment link (direct)
-  const stripePaymentUrl = `https://buy.stripe.com/test_eVa3fWePd28j4z6bII?prefilled_email=&client_reference_id=${track.id}&metadata_track_id=${track.id}&metadata_track_title=${encodeURIComponent(track.title)}`
-
   return (
     <>
       <Header />
@@ -100,21 +97,26 @@ export default function TrackPage() {
                 ${track.price}
               </p>
 
-              <a 
-                href={stripePaymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p className="text-yellow-800 font-medium mb-2">🚧 Checkout Coming Soon</p>
+                <p className="text-yellow-700 text-sm">
+                  Stripe integration is being configured. 
+                  Please check back in a few days to purchase this track.
+                </p>
+              </div>
+
+              <Button 
+                variant="outline"
+                size="lg" 
+                className="w-full"
+                onClick={() => window.location.href = 'mailto:bert@siestarecords.net?subject=Track Inquiry: ' + encodeURIComponent(track.title)}
               >
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                >
-                  Buy Now <ExternalLink className="w-4 h-4 ml-2" />
-                </Button>
-              </a>
+                <Mail className="w-4 h-4 mr-2" />
+                Contact to Purchase
+              </Button>
 
               <p className="text-sm text-muted-foreground mt-4 text-center">
-                Secure payment via Stripe
+                Secure payments via Stripe - Coming soon!
               </p>
             </CardContent>
           </Card>
