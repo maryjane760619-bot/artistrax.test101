@@ -1,141 +1,114 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Music, 
-  Users, 
-  DollarSign, 
-  TrendingUp,
-  Upload,
-  ExternalLink,
-  CheckCircle,
-  AlertCircle,
-  Loader2
-} from 'lucide-react'
-import Link from 'next/link'
+import { Music, ExternalLink, DollarSign, TrendingUp } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
-// Stripe Status Component - Direct from DB
-function StripeStatusCard({ userId }: { userId: string }) {
-  const [status, setStatus] = useState<any>(null)
+export default function LabelDashboard() {
+  const { user } = useAuth()
+  const [labelData, setLabelData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        // Direct database query instead of API
-        const { data: label } = await supabase
-          .from('labels')
-          .select('stripe_account_id, stripe_charges_enabled, stripe_onboarding_complete')
-          .eq('id', userId)
-          .single()
-
-        setStatus({
-          hasAccount: !!label?.stripe_account_id,
-          chargesEnabled: label?.stripe_charges_enabled,
-          onboardingComplete: label?.stripe_onboarding_complete,
-          accountId: label?.stripe_account_id
-        })
-      } catch (err) {
-        console.error('Stripe check error:', err)
-      } finally {
-        setLoading(false)
-      }
+    if (!user) return
+    
+    const fetchData = async () => {
+      const { data } = await supabase
+        .from('labels')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      setLabelData(data)
+      setLoading(false)
     }
-    checkStatus()
-  }, [userId])
+    
+    fetchData()
+  }, [user])
 
-  if (loading) return <div className="p-4 text-center">Loading Stripe status...</div>
-
-  if (!status?.hasAccount) {
-    return (
-      <div className="bg-gradient-to-br from-orange-500/10 to-pink-500/10 rounded-lg p-6 border-2 border-orange-200">
-        <h3 className="text-xl font-bold mb-2">Connect Your Stripe Account</h3>
-        <p className="text-muted-foreground mb-4">
-          To receive payments and get paid instantly, you need to connect a Stripe account.
-          This takes 2-3 minutes.
-        </p>
-        <div className="bg-background/50 rounded p-3 mb-4 text-sm">
-          <strong className="text-orange-600">You keep 90% of every sale.</strong> Monthly payouts. No hidden fees.
-        </div>
-        <ul className="text-sm space-y-1 mb-4 text-muted-foreground">
-          <li>• Bank account information</li>
-          <li>• Tax ID (SSN or EIN)</li>
-          <li>• Date of birth</li>
-          <li>• Contact information</li>
-        </ul>
-        <Button 
-          onClick={() => window.location.href = '/api/stripe/connect/create-account-link?userType=label'}
-          className="w-full"
-        >
-          Connect Stripe Account
-        </Button>
-      </div>
-    )
-  }
-
-  if (!status.onboardingComplete) {
-    return (
-      <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertCircle className="w-5 h-5 text-yellow-600" />
-          <h3 className="text-lg font-bold">Complete Stripe Onboarding</h3>
-        </div>
-        <p className="text-muted-foreground mb-4">
-          Your Stripe account is created but needs more information to start receiving payments.
-        </p>
-        <Button 
-          onClick={() => window.location.href = '/api/stripe/connect/create-account-link?userType=label'}
-        >
-          Continue Setup
-        </Button>
-      </div>
-    )
-  }
+  if (!user) return <div>Please log in</div>
+  if (loading) return <div>Loading...</div>
 
   return (
-    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <CheckCircle className="w-8 h-8 text-green-600" />
-        <div>
-          <h3 className="text-xl font-bold text-green-800">Stripe Connected!</h3>
-          <p className="text-green-700">You're ready to receive payments.</p>
+    <>
+      <Header />
+      <main className="min-h-screen pt-24 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold">{labelData?.name || 'Label Dashboard'}</h1>
+            <p className="text-muted-foreground">Manage your catalog and artists</p>
+          </div>
+
+          {/* Stripe Status - Simple */}
+          <Card className="mb-8 bg-green-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <DollarSign className="w-8 h-8 text-green-600" />
+                <div>
+                  <h3 className="text-xl font-bold text-green-800">Stripe Connected!</h3>
+                  <p className="text-green-700">You're ready to receive payments.</p>
+                </div>
+              </div>
+              <ul className="text-sm space-y-2 text-green-800 mb-4">
+                <li>✓ Charges enabled</li>
+                <li>✓ You keep 90% of every sale</li>
+                <li>✓ Monthly payouts</li>
+              </ul>
+              <Button 
+                variant="outline" 
+                onClick={() => window.open('https://dashboard.stripe.com', '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Open Stripe Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Stats */}
+          <div className="grid md:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <Music className="w-8 h-8 text-primary" />
+                  <div>
+                    <p className="text-2xl font-bold">18</p>
+                    <p className="text-sm text-muted-foreground">Tracks</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-8 h-8 text-green-600" />
+                  <div>
+                    <p className="text-2xl font-bold">$0</p>
+                    <p className="text-sm text-muted-foreground">Revenue</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Public Page Link */}
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/labels/siesta-records" target="_blank">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View Public Page
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
-      <ul className="text-sm space-y-2 text-green-800 mb-4">
-        <li className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          Account: ...{status.accountId?.slice(-10)}
-        </li>
-        <li className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          Charges enabled
-        </li>
-        <li className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          Onboarding complete
-        </li>
-        <li className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          You keep 90% of every sale
-        </li>
-      </ul>
-      <Button 
-        variant="outline" 
-        onClick={() => window.open('https://dashboard.stripe.com', '_blank')}
-        className="w-full"
-      >
-        <ExternalLink className="w-4 h-4 mr-2" />
-        Open Stripe Dashboard
-      </Button>
-    </div>
+      </main>
+      <Footer />
+    </>
   )
 }
-
-// ... rest of the dashboard component
