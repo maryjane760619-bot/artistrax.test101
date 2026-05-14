@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export async function GET(request, { params }) {
@@ -50,7 +50,7 @@ export async function GET(request, { params }) {
         artist: t.artists?.display_name || 'Unknown',
         price: t.price,
         coverArt: t.cover_url,
-        buyUrl: `https://music-download-store-2.vercel.app/track/${t.id}`
+        buyUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ''}/track/${t.id}`
       })) || []
     });
 
