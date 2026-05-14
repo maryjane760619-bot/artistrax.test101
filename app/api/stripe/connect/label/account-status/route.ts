@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const { data: label, error: labelError } = await supabase
       .from('labels')
-      .select('id, stripe_account_id')
+      .select('id, stripe_account_id, stripe_onboarding_complete, stripe_charges_enabled')
       .eq('id', user.id)
       .single()
 
@@ -44,17 +44,30 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const account = await stripe.accounts.retrieve(label.stripe_account_id)
-
-    return NextResponse.json({
+    // Use DB values as primary source of truth — Stripe API as optional enhancement
+    const dbResponse = {
       hasAccount: true,
-      accountId: account.id,
-      onboardingComplete: account.details_submitted,
-      chargesEnabled: account.charges_enabled,
-      payoutsEnabled: account.payouts_enabled,
-      requirements: account.requirements,
-      email: account.email
-    })
+      accountId: label.stripe_account_id,
+      onboardingComplete: label.stripe_onboarding_complete ?? false,
+      chargesEnabled: label.stripe_charges_enabled ?? false,
+      payoutsEnabled: label.stripe_charges_enabled ?? false,
+    }
+
+    // Try to enrich with live Stripe data, but don't fail if unavailable
+    try {
+      const account = await stripe.accounts.retrieve(label.stripe_account_id)
+      return NextResponse.json({
+        ...dbResponse,
+        onboardingComplete: account.details_submitted,
+        chargesEnabled: account.charges_enabled,
+        payoutsEnabled: account.payouts_enabled,
+        requirements: account.requirements,
+        email: account.email,
+      })
+    } catch {
+      // Stripe API unavailable or account mismatch — return DB state
+      return NextResponse.json(dbResponse)
+    }
 
   } catch (error: any) {
     console.error('Stripe account status error:', error)
