@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Upload, Music, Image as ImageIcon, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { SubscriptionGate } from '@/components/subscription-gate'
+import { GENRES, MUSICAL_KEYS } from '@/lib/genres'
 
 function UploadForm() {
   const router = useRouter()
@@ -26,6 +27,9 @@ function UploadForm() {
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('0')
   const [isFree, setIsFree] = useState(true)
+  const [genre, setGenre] = useState('')
+  const [bpm, setBpm] = useState('')
+  const [musicalKey, setMusicalKey] = useState('')
   
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -159,6 +163,9 @@ function UploadForm() {
         format: audioExt as 'mp3' | 'flac' | 'wav',
         price: isFree ? 0 : parseFloat(price),
         is_free: isFree,
+        genre: genre || null,
+        bpm: bpm ? parseInt(bpm) : null,
+        musical_key: musicalKey || null,
       })
 
       if (dbError) throw dbError
@@ -348,6 +355,47 @@ function UploadForm() {
               rows={4}
               className="mt-2"
             />
+          </div>
+
+          {/* Genre / BPM / Key */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="genre">Genre</Label>
+              <select
+                id="genre"
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+                className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select genre</option>
+                {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="bpm">BPM</Label>
+              <Input
+                id="bpm"
+                type="number"
+                min="40"
+                max="250"
+                value={bpm}
+                onChange={(e) => setBpm(e.target.value)}
+                placeholder="128"
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="musicalKey">Key</Label>
+              <select
+                id="musicalKey"
+                value={musicalKey}
+                onChange={(e) => setMusicalKey(e.target.value)}
+                className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select key</option>
+                {MUSICAL_KEYS.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
+            </div>
           </div>
 
           {/* Pricing */}
