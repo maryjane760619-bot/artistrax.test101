@@ -16,21 +16,25 @@ export default function LibraryPage() {
 
   const loadLibrary = async () => {
     setLoading(true)
-    
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
+
     // Fetch tracks
-    const tracksRes = await fetch('/api/library')
+    const tracksRes = await fetch('/api/library', { headers })
     if (tracksRes.ok) {
       const data = await tracksRes.json()
       setTracks(data.library || [])
     }
 
     // Fetch videos
-    const videosRes = await fetch('/api/library/videos')
+    const videosRes = await fetch('/api/library/videos', { headers })
     if (videosRes.ok) {
       const data = await videosRes.json()
       setVideos(data.videos || [])
     }
-    
+
     setLoading(false)
   }
 

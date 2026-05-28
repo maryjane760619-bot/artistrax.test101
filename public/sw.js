@@ -1,7 +1,19 @@
 // artistrax Service Worker - PWA Support
-const CACHE_NAME = 'artistrax-v1';
-const AUDIO_CACHE = 'artistrax-audio-v1';
-const STATIC_CACHE = 'artistrax-static-v1';
+const CACHE_NAME = 'artistrax-v3';
+const AUDIO_CACHE = 'artistrax-audio-v3';
+const STATIC_CACHE = 'artistrax-static-v3';
+
+// Never cache these paths - always fetch from network
+const NETWORK_ONLY_PATHS = [
+  '/fan/',
+  '/artist/',
+  '/label/',
+  '/admin/',
+  '/checkout',
+  '/track/',
+  '/releases',
+  '/labels/',
+];
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -60,6 +72,12 @@ self.addEventListener('fetch', (event) => {
   // Handle audio files specially
   if (request.url.includes('/audio/') || request.url.includes('.mp3') || request.url.includes('.flac') || request.url.includes('.wav')) {
     event.respondWith(handleAudioRequest(request));
+    return;
+  }
+
+  // Skip caching for authenticated/dynamic pages - always network
+  if (NETWORK_ONLY_PATHS.some(path => url.pathname.startsWith(path))) {
+    event.respondWith(fetch(request));
     return;
   }
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Get user's purchased tracks (their library)
@@ -6,10 +6,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      token ? { global: { headers: { Authorization: `Bearer ${token}` } } } : {}
+    )
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
       return NextResponse.json(

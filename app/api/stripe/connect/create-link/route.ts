@@ -1,15 +1,15 @@
+import { getSiteUrl } from "@/lib/site-url"
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from "@/lib/supabase"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-})
 
 // Create new account link for existing Stripe Connect account
 // Used when onboarding link expires or artist needs to update info
 export async function POST(request: NextRequest) {
   try {
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2024-12-18.acacia',
+    })
     const authHeader = request.headers.get('authorization')
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const token = authHeader.replace('Bearer ', '')
@@ -46,11 +46,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create new account link
     const accountLink = await stripe.accountLinks.create({
       account: artist.stripe_account_id,
-      refresh_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=refresh`,
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=success`,
+      refresh_url: `${getSiteUrl()}/artist/dashboard?stripe=refresh`,
+      return_url: `${getSiteUrl()}/artist/dashboard?stripe=success`,
       type: 'account_onboarding',
     })
 

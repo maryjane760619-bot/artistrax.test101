@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,15 +9,18 @@ import { Music, ArrowLeft, Loader2, ShoppingCart, CheckCircle, Download } from '
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
+import { useCart } from '@/lib/cart-context'
 
 export default function TrackPage() {
   const params = useParams()
+  const router = useRouter()
   const id = params?.id as string
+  const { addItem, items } = useCart()
   const [track, setTrack] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [purchasing, setPurchasing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [alreadyOwned, setAlreadyOwned] = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -49,34 +52,19 @@ export default function TrackPage() {
     fetchTrack()
   }, [id])
 
-  const handleBuy = async () => {
-    setPurchasing(true)
-    setError(null)
+  const inCart = items.some(i => i.productId === id)
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const fanEmail = session?.user?.email
-
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trackId: id, fanEmail }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong. Please try again.')
-        setPurchasing(false)
-        return
-      }
-
-      // Redirect to Stripe Checkout
-      window.location.href = data.url
-    } catch {
-      setError('Network error. Please check your connection and try again.')
-      setPurchasing(false)
-    }
+  const handleAddToCart = () => {
+    if (!track || inCart) return
+    addItem({
+      productId: track.id,
+      productTitle: track.title,
+      price: Number(track.price),
+      artistId: track.artist_id || track.label_id || '',
+      artistName: track.labels?.name || track.artists?.display_name || '',
+      imageUrl: track.cover_url || undefined,
+    })
+    setAddedToCart(true)
   }
 
   if (loading) {
@@ -169,33 +157,34 @@ export default function TrackPage() {
                     Own it forever · Stream unlimited · Download lossless
                   </p>
 
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                      <p className="text-red-700 text-sm">{error}</p>
+                  {inCart || addedToCart ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-green-600 font-semibold">
+                        <CheckCircle className="w-5 h-5" />
+                        Added to cart
+                      </div>
+                      <Button
+                        size="lg"
+                        className="w-full"
+                        onClick={() => router.push('/cart')}
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        View Cart &amp; Checkout
+                      </Button>
                     </div>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="w-full bg-green-700 hover:bg-green-800"
+                      onClick={handleAddToCart}
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Add to Cart — ${track.price}
+                    </Button>
                   )}
 
-                  <Button
-                    size="lg"
-                    className="w-full bg-green-700 hover:bg-green-800"
-                    onClick={handleBuy}
-                    disabled={purchasing}
-                  >
-                    {purchasing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Redirecting to checkout...
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Buy Now — ${track.price}
-                      </>
-                    )}
-                  </Button>
-
                   <p className="text-xs text-muted-foreground mt-3 text-center">
-                    Secure payment via Stripe · 95% goes directly to the artist
+                    Secure payment via Stripe · 90% goes directly to the artist
                   </p>
                 </div>
               )}

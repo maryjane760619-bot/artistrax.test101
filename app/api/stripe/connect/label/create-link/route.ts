@@ -1,17 +1,21 @@
+import { getSiteUrl } from "@/lib/site-url"
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from "@/lib/supabase"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-})
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2024-12-18.acacia',
+    })
     const authHeader = request.headers.get('authorization')
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    )
     
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
@@ -44,8 +48,8 @@ export async function POST(request: NextRequest) {
 
     const accountLink = await stripe.accountLinks.create({
       account: label.stripe_account_id,
-      refresh_url: `${process.env.NEXT_PUBLIC_SITE_URL}/label/dashboard?stripe=refresh`,
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/label/dashboard?stripe=success`,
+      refresh_url: `${getSiteUrl()}/label/dashboard?stripe=refresh`,
+      return_url: `${getSiteUrl()}/label/dashboard?stripe=success`,
       type: 'account_onboarding',
     })
 

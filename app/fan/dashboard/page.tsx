@@ -105,7 +105,7 @@ function DashboardContent() {
               <span className="text-lg">{fanData.display_name}</span>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/">
+              <Link href="/releases">
                 <Button variant="outline" size="sm">
                   Browse Music
                 </Button>
@@ -197,7 +197,7 @@ function DashboardContent() {
             <p className="text-muted-foreground mb-4">
               Explore the latest releases and trending tracks
             </p>
-            <Link href="/">
+            <Link href="/releases">
               <Button variant="outline">Browse Catalog</Button>
             </Link>
           </div>
@@ -215,7 +215,7 @@ function DashboardContent() {
                 <p className="text-sm text-muted-foreground mb-2">
                   Browse our catalog, explore new releases, and find your next favorite track
                 </p>
-                <Link href="/">
+                <Link href="/releases">
                   <Button size="sm">Start Exploring</Button>
                 </Link>
               </div>

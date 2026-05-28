@@ -18,7 +18,7 @@ import {
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/artists', label: 'Artists' },
-  { href: '/labels/siestarecords', label: 'Labels' },
+  { href: '/labels/siesta-records', label: 'Labels' },
   { href: '/live', label: 'Live' },
   { href: '/about', label: 'About' },
 ]
@@ -30,16 +30,25 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [fanUser, setFanUser] = useState<any>(null)
+  const [isLabel, setIsLabel] = useState(false)
 
-  // Check for fan auth
+  // Check for fan auth and label membership
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const user = session?.user ?? null
       setFanUser(user)
+      if (user) {
+        supabase.from('labels').select('id').eq('id', user.id).maybeSingle()
+          .then(({ data, error }) => {
+            if (data) setIsLabel(true)
+          })
+      }
     })
-  }, [])
+  }, [artistUser])
 
   const user = artistUser || fanUser
   const isFan = !!fanUser && !artistUser
+  const dashboardHref = isFan ? '/fan/dashboard' : isLabel ? '/label/dashboard' : '/artist/dashboard'
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,10 +113,10 @@ export function Header() {
             
             {/* User Button */}
             {user ? (
-              <Link href={isFan ? '/fan/dashboard' : '/artist/dashboard'}>
+              <Link href={dashboardHref}>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{isFan ? 'Fan' : 'Artist'}</span>
+                  <span className="hidden sm:inline">{isFan ? 'Fan' : isLabel ? 'Label' : 'Artist'}</span>
                 </Button>
               </Link>
             ) : (
@@ -130,7 +139,7 @@ export function Header() {
                 <div className="flex flex-col gap-6 mt-8">
                   {user && (
                     <Link
-                      href={isFan ? '/fan/dashboard' : '/artist/dashboard'}
+                      href={dashboardHref}
                       onClick={() => setMobileMenuOpen(false)}
                       className="text-2xl font-serif flex items-center gap-3"
                     >

@@ -1,4 +1,4 @@
-# Live Streaming Chat Specification
+go for it# Live Streaming Chat Specification
 
 ## Overview
 Real-time chat system for artists during live streams. Fans watch the stream and can chat with the artist and other fans in real-time.

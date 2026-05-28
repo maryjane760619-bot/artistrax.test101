@@ -1,13 +1,16 @@
+import { getSiteUrl } from "@/lib/site-url"
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabase, createClient } from '@/lib/supabase'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia'
-})
-
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 })
+    }
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2024-12-18.acacia'
+    })
     // Check if auth-token based (from dashboard component - no body)
     const authHeader = request.headers.get('authorization')
     const contentLength = request.headers.get('content-length')
@@ -35,8 +38,8 @@ export async function POST(request: NextRequest) {
       if (artist.stripe_account_id) {
         const accountLink = await stripe.accountLinks.create({
           account: artist.stripe_account_id,
-          refresh_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=refresh`,
-          return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=success`,
+          refresh_url: `${getSiteUrl()}/artist/dashboard?stripe=refresh`,
+          return_url: `${getSiteUrl()}/artist/dashboard?stripe=success`,
           type: 'account_onboarding',
         })
         return NextResponse.json({ accountId: artist.stripe_account_id, onboardingUrl: accountLink.url })
@@ -98,8 +101,8 @@ export async function POST(request: NextRequest) {
     // Create onboarding link
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=refresh`,
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/artist/dashboard?stripe=success`,
+      refresh_url: `${getSiteUrl()}/artist/dashboard?stripe=refresh`,
+      return_url: `${getSiteUrl()}/artist/dashboard?stripe=success`,
       type: 'account_onboarding',
     })
 

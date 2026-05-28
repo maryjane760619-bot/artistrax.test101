@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+  apiVersion: '2024-11-20.acacia',
+})
 import { POINTS_CONFIG } from '@/lib/points-config'
 import { sendSubscriptionNotification } from '@/lib/email-service'
 
@@ -22,7 +30,7 @@ export async function POST(request: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      (process.env.STRIPE_WEBHOOK_SECRET || '').trim()
     )
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message)
@@ -64,14 +72,14 @@ export async function POST(request: NextRequest) {
             console.log(`Subscription activated for ${accountType} ${accountId}`)
           }
         } else {
-          // Handle track purchase
+          // Handle track purchase (single or cart)
           const trackId = session.metadata?.trackId
+          const trackIds = session.metadata?.trackIds // cart checkout: comma-separated
           const artistId = session.metadata?.artistId
-          const labelId = session.metadata?.labelId
           const customerEmail = session.customer_details?.email
           const amountPaid = session.amount_total ? session.amount_total / 100 : 0
 
-          if (!trackId || !customerEmail) {
+          if ((!trackId && !trackIds) || !customerEmail) {
             console.error('Missing track purchase metadata:', session.metadata)
             break
           }
@@ -83,39 +91,40 @@ export async function POST(request: NextRequest) {
             .eq('email', customerEmail)
             .single()
 
-          const { data: purchaseData, error: purchaseError } = await supabase.from('purchases').insert({
-            track_id: trackId,
-            artist_id: artistId,
-            label_id: labelId || null,
-            buyer_id: fan?.id || null,
-            buyer_email: customerEmail,
-            amount: amountPaid,
-            stripe_session_id: session.id,
-            stripe_payment_intent: session.payment_intent as string,
-          }).select().single()
+          // Build list of track IDs to record
+          const ids = trackIds ? trackIds.split(',') : [trackId]
 
-          if (purchaseError) {
-            console.error('Failed to record purchase:', purchaseError)
-          } else {
-            console.log(`Purchase recorded: ${trackId} by ${customerEmail}`)
-            
-            // Award points to fan if they have an account
-            if (fan && amountPaid > 0) {
-              const pointsEarned = POINTS_CONFIG.calculatePointsEarned(amountPaid)
-              
-              // Call the award_points function
-              const { error: pointsError } = await supabase.rpc('award_points', {
-                p_fan_id: fan.id,
-                p_amount: pointsEarned,
-                p_source_type: 'purchase',
-                p_source_id: purchaseData.id,
-                p_description: `Earned ${pointsEarned} points from $${amountPaid.toFixed(2)} purchase`
+          for (const tid of ids) {
+            const perTrackAmount = amountPaid / ids.length
+
+            const { data: purchaseData, error: purchaseError } = await supabase
+              .from('purchases')
+              .insert({
+                track_id: tid,
+                artist_id: artistId || null,
+                buyer_id: fan?.id || null,
+                buyer_email: customerEmail,
+                amount: perTrackAmount,
+                stripe_payment_id: session.payment_intent ? session.payment_intent as string : null,
               })
-              
-              if (pointsError) {
-                console.error('Failed to award points:', pointsError)
-              } else {
-                console.log(`Awarded ${pointsEarned} points to fan ${fan.id}`)
+              .select()
+              .single()
+
+            if (purchaseError) {
+              console.error('Failed to record purchase:', purchaseError)
+            } else {
+              console.log(`Purchase recorded: ${tid} by ${customerEmail}`)
+
+              if (fan && perTrackAmount > 0) {
+                const pointsEarned = POINTS_CONFIG.calculatePointsEarned(perTrackAmount)
+                const { error: pointsError } = await supabase.rpc('award_points', {
+                  p_fan_id: fan.id,
+                  p_amount: pointsEarned,
+                  p_source_type: 'purchase',
+                  p_source_id: purchaseData.id,
+                  p_description: `Earned ${pointsEarned} points from $${perTrackAmount.toFixed(2)} purchase`
+                })
+                if (pointsError) console.error('Failed to award points:', pointsError)
               }
             }
           }

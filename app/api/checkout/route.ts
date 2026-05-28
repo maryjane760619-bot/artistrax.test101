@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import Stripe from 'stripe'
 import { supabase } from '@/lib/supabase'
+import { getSiteUrl } from '@/lib/site-url'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -45,6 +46,10 @@ export async function POST(request: NextRequest) {
     const totalAmount = Math.round(track.price * 100) // Convert to cents
     const platformFee = Math.round(totalAmount * platformFeePercent)
 
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2024-11-20.acacia',
+    })
+
     // Create Stripe Checkout Session with Connect
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -76,8 +81,8 @@ export async function POST(request: NextRequest) {
         labelId: track.label_id || '',
         platformFee: platformFee.toString(),
       },
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}`,
+      success_url: `${getSiteUrl()}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${getSiteUrl()}/track/${trackId}`,
     })
 
     return NextResponse.json({ sessionId: session.id, url: session.url })

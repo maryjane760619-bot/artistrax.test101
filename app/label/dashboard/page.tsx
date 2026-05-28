@@ -16,6 +16,9 @@ export default function LabelDashboard() {
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState(false)
   const [connectError, setConnectError] = useState('')
+  const [continuingOnboarding, setContinuingOnboarding] = useState(false)
+  const [earnings, setEarnings] = useState<any>(null)
+  const [tracks, setTracks] = useState<any[]>([])
 
   useEffect(() => {
     if (!user) return
@@ -29,7 +32,44 @@ export default function LabelDashboard() {
         setLabelData(data)
         setLoading(false)
       })
+
+    supabase
+      .from('tracks')
+      .select('id, title, price, is_free, cover_url, created_at')
+      .eq('label_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setTracks(data || []))
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      fetch('/api/stripe/connect/label/earnings', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+        .then(r => r.json())
+        .then(data => setEarnings(data))
+        .catch(() => {})
+    })
   }, [user])
+
+  const handleContinueOnboarding = async () => {
+    setContinuingOnboarding(true)
+    setConnectError('')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Please log in again')
+
+      const res = await fetch('/api/stripe/connect/label/create-link', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to create onboarding link')
+      window.location.href = data.onboardingUrl
+    } catch (err: any) {
+      setConnectError(err.message)
+      setContinuingOnboarding(false)
+    }
+  }
 
   const handleConnectStripe = async () => {
     setConnecting(true)
@@ -44,7 +84,9 @@ export default function LabelDashboard() {
       })
       const data = await res.json()
 
-      if (!res.ok) throw new Error(data.error || 'Failed to start Stripe setup')
+      if (!res.ok) throw new Error(
+        `${data.error || 'Failed'}${data.type ? ` [${data.type}]` : ''}${data.code ? ` code:${data.code}` : ''}`
+      )
 
       window.location.href = data.onboardingUrl
     } catch (err: any) {
@@ -61,6 +103,7 @@ export default function LabelDashboard() {
   )
 
   const stripeConnected = !!(labelData?.stripe_account_id && labelData?.stripe_charges_enabled)
+  const stripeIncomplete = !!(labelData?.stripe_account_id && !labelData?.stripe_charges_enabled)
 
   return (
     <>
@@ -68,33 +111,52 @@ export default function LabelDashboard() {
       <main className="min-h-screen pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">{labelData?.name || 'Label Dashboard'}</h1>
-            <p className="text-muted-foreground">Manage your catalog and artists</p>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold">{labelData?.name || 'Label Dashboard'}</h1>
+              <p className="text-muted-foreground">Manage your catalog and artists</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}>
+              Sign Out
+            </Button>
           </div>
 
           {/* Stripe Status */}
           {stripeConnected ? (
-            <Card className="mb-8 bg-green-50 border-green-200">
+            <div className="flex items-center gap-2 mb-6 text-sm text-green-700">
+              <CheckCircle className="w-4 h-4" />
+              <span>Stripe connected</span>
+              <span className="text-muted-foreground">·</span>
+              <button
+                className="underline text-muted-foreground hover:text-foreground"
+                onClick={() => window.open(earnings?.stripeLoginUrl || 'https://dashboard.stripe.com', '_blank')}
+              >
+                Open Stripe Dashboard
+              </button>
+            </div>
+          ) : stripeIncomplete ? (
+            <Card className="mb-8 border-2 border-yellow-300 bg-yellow-50">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
+                  <AlertCircle className="w-8 h-8 text-yellow-600" />
                   <div>
-                    <h3 className="text-xl font-bold text-green-800">Stripe Connected!</h3>
-                    <p className="text-green-700">You're ready to receive payments.</p>
+                    <h3 className="text-xl font-bold text-yellow-800">Complete Stripe Onboarding</h3>
+                    <p className="text-yellow-700">Your account was created but onboarding isn't finished yet.</p>
                   </div>
                 </div>
-                <ul className="text-sm space-y-2 text-green-800 mb-4">
-                  <li>✓ Charges enabled</li>
-                  <li>✓ You keep 90% of every sale</li>
-                  <li>✓ Monthly payouts</li>
-                </ul>
+                {connectError && (
+                  <p className="text-red-600 text-sm mb-3">{connectError}</p>
+                )}
                 <Button
-                  variant="outline"
-                  onClick={() => window.open('https://dashboard.stripe.com', '_blank')}
+                  onClick={handleContinueOnboarding}
+                  disabled={continuingOnboarding}
+                  className="bg-yellow-600 hover:bg-yellow-700"
                 >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open Stripe Dashboard
+                  {continuingOnboarding ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
+                  ) : (
+                    'Continue Onboarding'
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -132,13 +194,13 @@ export default function LabelDashboard() {
           )}
 
           {/* Stats */}
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <div className="grid md:grid-cols-3 gap-4 mb-8">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
                   <Music className="w-8 h-8 text-primary" />
                   <div>
-                    <p className="text-2xl font-bold">{labelData?.track_count ?? '—'}</p>
+                    <p className="text-2xl font-bold">{tracks.length}</p>
                     <p className="text-sm text-muted-foreground">Tracks</p>
                   </div>
                 </div>
@@ -149,13 +211,59 @@ export default function LabelDashboard() {
                 <div className="flex items-center gap-3">
                   <DollarSign className="w-8 h-8 text-green-600" />
                   <div>
-                    <p className="text-2xl font-bold">$0</p>
-                    <p className="text-sm text-muted-foreground">Revenue</p>
+                    <p className="text-2xl font-bold">
+                      ${earnings?.stripeBalance ? earnings.stripeBalance.available.toFixed(2) : '—'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Available in Stripe</p>
+                    {earnings?.stripeBalance?.pending > 0 && (
+                      <p className="text-xs text-muted-foreground">${earnings.stripeBalance.pending.toFixed(2)} pending</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <p className="text-2xl font-bold">
+                      ${earnings ? earnings.labelShare.toFixed(2) : '—'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Tracked sales ({earnings?.salesCount ?? 0})
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Catalog */}
+          {tracks.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Your Catalog</h2>
+              <div className="space-y-2">
+                {tracks.map(track => (
+                  <div key={track.id} className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {track.cover_url ? (
+                        <img src={track.cover_url} alt={track.title} className="w-10 h-10 rounded object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                          <Music className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <span className="font-medium">{track.title}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {track.is_free ? 'Free' : `$${Number(track.price).toFixed(2)}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex flex-wrap gap-4 justify-center">

@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
   apiVersion: '2024-12-18.acacia'
 });
 
