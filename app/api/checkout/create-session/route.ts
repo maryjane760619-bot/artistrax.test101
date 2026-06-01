@@ -1,23 +1,26 @@
-import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
-  apiVersion: '2024-12-18.acacia'
-});
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { trackId } = body;
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2026-01-28.clover'
+    })
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const body = await request.json()
+    const { trackId } = body
 
     if (!trackId) {
-      return NextResponse.json({ error: 'Track ID required' }, { status: 400 });
+      return NextResponse.json({ error: 'Track ID required' }, { status: 400 })
     }
 
     // Get track details
@@ -28,10 +31,10 @@ export async function POST(request) {
         artists:artist_id (display_name, stripe_account_id)
       `)
       .eq('id', trackId)
-      .single();
+      .single()
 
     if (trackError || !track) {
-      return NextResponse.json({ error: 'Track not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Track not found' }, { status: 404 })
     }
 
     // Get label details for platform fee
@@ -39,15 +42,15 @@ export async function POST(request) {
       .from('labels')
       .select('stripe_account_id')
       .eq('id', track.label_id)
-      .single();
+      .single()
 
     if (!label?.stripe_account_id) {
-      return NextResponse.json({ error: 'Label Stripe account not found' }, { status: 400 });
+      return NextResponse.json({ error: 'Label Stripe account not found' }, { status: 400 })
     }
 
     // Calculate amounts
-    const unitAmount = Math.round(track.price * 100); // Convert to cents
-    const platformFee = Math.round(unitAmount * 0.10); // 10% platform fee
+    const unitAmount = Math.round(track.price * 100)
+    const platformFee = Math.round(unitAmount * 0.10)
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -79,19 +82,19 @@ export async function POST(request) {
         labelId: track.label_id,
         artistId: track.artist_id
       }
-    });
+    })
 
     return NextResponse.json({
       success: true,
       sessionId: session.id,
       url: session.url
-    });
+    })
 
-  } catch (error) {
-    console.error('Checkout error:', error);
+  } catch (error: any) {
+    console.error('Checkout error:', error)
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
-    );
+    )
   }
 }

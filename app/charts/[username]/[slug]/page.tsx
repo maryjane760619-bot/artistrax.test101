@@ -14,7 +14,7 @@ export default async function ChartDetailPage({ params }: Props) {
   
   // Fetch artist
   const { data: artist } = await supabase
-    .from('artists')
+    .from('public_artist_profiles')
     .select('id, username, display_name, avatar_url')
     .eq('username', username.toLowerCase())
     .single()

@@ -1,31 +1,41 @@
 // LANDR Mastering Payment & Processing
 // Creates LANDR mastering job after payment
 
-import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-const LANDR_API_KEY = process.env.LANDR_MASTERING_API_KEY;
-const LANDR_API_URL = 'https://api.landr.com/mastering/v1';
+const LANDR_API_KEY = process.env.LANDR_MASTERING_API_KEY
+const LANDR_API_URL = 'https://api.landr.com/mastering/v1'
 
-export async function POST(request, { params }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ jobId: string }> }
+) {
   try {
-    const { jobId } = params;
-    const body = await request.json();
-    const { paymentMethodId } = body;
+    const { jobId } = await params
+    const body = await request.json()
+    const { paymentMethodId } = body
+
+    // Lazy init: create clients inside handler
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2026-01-28.clover'
+    })
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Check if LANDR API is configured
     if (!LANDR_API_KEY) {
       return NextResponse.json(
         { error: 'Mastering service not configured' },
         { status: 503 }
-      );
+      )
     }
 
     // Get mastering job details
@@ -37,20 +47,20 @@ export async function POST(request, { params }) {
         tracks:track_id (title, audio_url)
       `)
       .eq('id', jobId)
-      .single();
+      .single()
 
     if (jobError || !job) {
       return NextResponse.json(
         { error: 'Mastering job not found' },
         { status: 404 }
-      );
+      )
     }
 
     if (job.status !== 'pending_payment') {
       return NextResponse.json(
         { error: 'Job already processed or invalid status' },
         { status: 400 }
-      );
+      )
     }
 
     // Create Stripe payment intent
@@ -66,7 +76,7 @@ export async function POST(request, { params }) {
         artistId: job.artist_id,
         service: 'landr-mastering'
       }
-    });
+    })
 
     if (paymentIntent.status === 'succeeded') {
       // Update job to processing
@@ -77,7 +87,7 @@ export async function POST(request, { params }) {
           payment_id: paymentIntent.id,
           paid_at: new Date().toISOString()
         })
-        .eq('id', jobId);
+        .eq('id', jobId)
 
       // Create LANDR mastering job
       try {
@@ -93,11 +103,11 @@ export async function POST(request, { params }) {
             loudness: job.loudness || 'medium',
             format: job.format || 'wav'
           })
-        });
+        })
 
         if (landrResponse.status === 202) {
-          const landrData = await landrResponse.json();
-          
+          const landrData = await landrResponse.json()
+
           // Store LANDR master ID
           await supabase
             .from('mastering_jobs')
@@ -105,7 +115,7 @@ export async function POST(request, { params }) {
               landr_master_id: landrData.id,
               landr_status_url: landrData.location
             })
-            .eq('id', jobId);
+            .eq('id', jobId)
 
           return NextResponse.json({
             success: true,
@@ -113,64 +123,63 @@ export async function POST(request, { params }) {
             jobId: job.id,
             landrJobId: landrData.id,
             estimatedTime: '30-60 seconds'
-          });
+          })
         } else {
-          const errorData = await landrResponse.text();
-          console.error('LANDR API Error:', errorData);
-          
+          const errorData = await landrResponse.text()
+          console.error('LANDR API Error:', errorData)
+
           // Refund the payment since LANDR job failed
           await stripe.refunds.create({
             payment_intent: paymentIntent.id,
             reason: 'requested_by_customer'
-          });
-          
+          })
+
           await supabase
             .from('mastering_jobs')
             .update({
               status: 'failed',
               error_message: 'LANDR service temporarily unavailable. Payment refunded.'
             })
-            .eq('id', jobId);
+            .eq('id', jobId)
 
           return NextResponse.json(
             { error: 'Mastering service temporarily unavailable. Payment refunded.' },
             { status: 503 }
-          );
+          )
         }
       } catch (landrError) {
-        console.error('LANDR API Error:', landrError);
-        
+        console.error('LANDR API Error:', landrError)
+
         // Refund on error
         await stripe.refunds.create({
           payment_intent: paymentIntent.id,
           reason: 'requested_by_customer'
-        });
-        
+        })
+
         await supabase
           .from('mastering_jobs')
           .update({
             status: 'failed',
             error_message: 'Service error. Payment refunded.'
           })
-          .eq('id', jobId);
+          .eq('id', jobId)
 
         return NextResponse.json(
           { error: 'Service error. Payment refunded.' },
           { status: 500 }
-        );
+        )
       }
     } else {
       return NextResponse.json(
         { error: 'Payment failed', status: paymentIntent.status },
         { status: 400 }
-      );
+      )
     }
-
-  } catch (error) {
-    console.error('Mastering Payment Error:', error);
+  } catch (error: any) {
+    console.error('Mastering Payment Error:', error)
     return NextResponse.json(
       { error: 'Payment processing failed', details: error.message },
       { status: 500 }
-    );
+    )
   }
 }

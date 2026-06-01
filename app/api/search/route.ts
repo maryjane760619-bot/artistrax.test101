@@ -15,13 +15,13 @@ export async function GET(request: NextRequest) {
 
   const [artistsRes, labelsRes, tracksRes] = await Promise.all([
     supabase
-      .from('artists')
+      .from('public_artist_profiles')
       .select('id, display_name, username, bio, avatar_url')
       .or(`display_name.ilike.${search},username.ilike.${search},bio.ilike.${search}`)
       .limit(6),
 
     supabase
-      .from('labels')
+      .from('public_label_profiles')
       .select('id, name, slug, description, logo_url')
       .or(`name.ilike.${search},slug.ilike.${search},slug.ilike.${searchWithHyphens},slug.ilike.${searchWithSpaces},description.ilike.${search}`)
       .limit(6),

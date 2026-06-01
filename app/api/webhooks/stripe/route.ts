@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
-  apiVersion: '2024-11-20.acacia',
-})
-import { POINTS_CONFIG } from '@/lib/points-config'
-import { sendSubscriptionNotification } from '@/lib/email-service'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+import { POINTS_CONFIG } from '@/lib/points-config'
+import { sendSubscriptionNotification } from '@/lib/email-service'
+
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+    apiVersion: '2024-11-20.acacia',
+  })
 
   if (!signature) {
     return NextResponse.json({ error: 'No signature' }, { status: 400 })

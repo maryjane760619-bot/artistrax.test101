@@ -15,7 +15,7 @@ export default async function UsernamePage({ params }: Props) {
   
   // Fetch artist
   const { data: artist, error: artistError } = await supabase
-    .from('artists')
+    .from('public_artist_profiles')
     .select('*')
     .eq('username', username.toLowerCase())
     .single()
