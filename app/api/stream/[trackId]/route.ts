@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -14,10 +14,17 @@ export async function GET(
 ) {
   try {
     const { trackId } = params
-    const supabase = createClient()
 
-    // Get authenticated user (fan)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Read auth token from Authorization header (passed by the client)
+    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      token ? { global: { headers: { Authorization: `Bearer ${token}` } } } : {}
+    )
+
+    // Get authenticated user (fan) via token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
       return NextResponse.json(
