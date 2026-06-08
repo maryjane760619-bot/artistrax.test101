@@ -80,25 +80,30 @@ export default function LibraryPage() {
 
       const data = await res.json()
 
+      // Stop any existing playback
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+
       const audio = new Audio(data.streamUrl)
       audioRef.current = audio
 
+      // Attach side-effect listeners before playing
       audio.addEventListener('ended', () => {
         setIsPlaying(false)
         setPlayingId(null)
       })
 
-      audio.addEventListener('canplay', () => {
-        audio.play()
-        setIsPlaying(true)
-      })
-
-      audio.addEventListener('error', () => {
+      audio.addEventListener('error', (e) => {
+        console.error('Audio playback error:', e)
         alert('Failed to play audio')
         setPlayingId(null)
       })
 
-      audio.load()
+      // Play immediately (click = user gesture, autoplay allowed)
+      await audio.play()
+      setIsPlaying(true)
     } catch (err) {
       alert('Failed to load stream')
       setPlayingId(null)

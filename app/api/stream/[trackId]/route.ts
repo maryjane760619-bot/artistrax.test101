@@ -16,15 +16,15 @@ export async function GET(
     const { trackId } = params
 
     // Read auth token from Authorization header (passed by the client)
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    const authToken = request.headers.get('authorization')?.replace('Bearer ', '')
     const supabase = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      token ? { global: { headers: { Authorization: `Bearer ${token}` } } } : {}
+      authToken ? { global: { headers: { Authorization: `Bearer ${authToken}` } } } : {}
     )
 
     // Get authenticated user (fan) via token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    const { data: { user }, error: authError } = await supabase.auth.getUser(authToken)
     
     if (authError || !user) {
       return NextResponse.json(
