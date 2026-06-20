@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabase } from '@/lib/supabase'
+import crypto from 'crypto'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
   apiVersion: '2024-12-18.acacia',
@@ -27,6 +28,12 @@ export async function POST(request: NextRequest) {
       case 'account.updated': {
         const account = event.data.object as Stripe.Account
         await handleAccountUpdated(account)
+        break
+      }
+
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session
+        await handleCheckoutSessionCompleted(session)
         break
       }
 
@@ -60,6 +67,75 @@ export async function POST(request: NextRequest) {
       { error: error.message },
       { status: 500 }
     )
+  }
+}
+
+// Handle checkout.session.completed — confirms ticket purchases
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  try {
+    const eventId = session.metadata?.eventId
+    const tierId = session.metadata?.tierId
+    const buyerName = session.metadata?.buyerName || 'Ticket Buyer'
+    const buyerEmail = session.metadata?.buyerEmail || ''
+    const quantity = parseInt(session.metadata?.quantity || '1')
+    const paymentIntentId = session.payment_intent as string
+
+    if (!eventId || !tierId) return // Not a ticket purchase
+
+    // Update ticket purchase to paid
+    const { data: purchase, error: purchaseError } = await supabase
+      .from('ticket_purchases')
+      .update({
+        status: 'paid',
+        stripe_payment_intent_id: paymentIntentId,
+      })
+      .eq('stripe_session_id', session.id)
+      .select('id')
+      .single()
+
+    if (purchaseError) {
+      console.error('Failed to update ticket purchase:', purchaseError)
+      return
+    }
+
+    // Check if attendee records exist for this purchase
+    const { data: existingAttendees } = await supabase
+      .from('ticket_attendees')
+      .select('id')
+      .eq('purchase_id', purchase?.id)
+      .limit(1)
+
+    // If no attendee records exist, create them (edge case recovery)
+    if (!existingAttendees || existingAttendees.length === 0) {
+      const attendeeRows = []
+      for (let i = 0; i < quantity; i++) {
+        attendeeRows.push({
+          purchase_id: purchase?.id,
+          event_id: eventId,
+          ticket_tier_id: tierId,
+          attendee_name: buyerName,
+          attendee_email: buyerEmail || null,
+          ticket_code: crypto.randomBytes(6).toString('base64url').toUpperCase().slice(0, 8),
+        })
+      }
+      await supabase.from('ticket_attendees').insert(attendeeRows)
+    }
+
+    // Increment quantity_sold on ticket tier
+    const { data: tier } = await supabase
+      .from('ticket_tiers')
+      .select('quantity_sold')
+      .eq('id', tierId)
+      .single()
+
+    if (tier) {
+      await supabase
+        .from('ticket_tiers')
+        .update({ quantity_sold: (tier.quantity_sold || 0) + quantity })
+        .eq('id', tierId)
+    }
+  } catch (error) {
+    console.error('Error handling checkout session completed:', error)
   }
 }
 

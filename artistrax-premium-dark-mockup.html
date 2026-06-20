@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>artistrax — Premium Dark Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #070709;
+    --bg-surface: #0D0D10;
+    --bg-card: #141416;
+    --bg-card-hover: #1A1A1E;
+    --bg-glass: rgba(13, 13, 16, 0.72);
+    --gold: #C9A84C;
+    --gold-light: #E0C66A;
+    --gold-muted: #8A7A3E;
+    --gold-glass: rgba(201, 168, 76, 0.08);
+    --text-primary: #F0EFE9;
+    --text-secondary: #9B998E;
+    --text-muted: #6B6A60;
+    --border: rgba(201, 168, 76, 0.12);
+    --border-active: rgba(201, 168, 76, 0.35);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAVBAR ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 16px 40px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-muted));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--bg-deep);
+  }
+  .nav-logo-text {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+  .nav-logo-text span { color: var(--gold); }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+  .nav-cta {
+    background: var(--gold);
+    color: var(--bg-deep) !important;
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-weight: 600 !important;
+    font-size: 14px;
+  }
+  .nav-cta:hover { background: var(--gold-light); }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 40px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 30% 50%, rgba(201, 168, 76, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 30%, rgba(201, 168, 76, 0.03) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-left { max-width: 560px; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--gold-glass);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(44px, 5vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  .hero h1 .highlight {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 460px;
+  }
+  .hero-ctas {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--gold);
+    color: var(--bg-deep);
+    border: none;
+    border-radius: 100px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.25);
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-secondary:hover {
+    border-color: var(--border-active);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* ===== HERO RIGHT — WAVEFORM ===== */
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    position: relative;
+  }
+  .waveform-container {
+    width: 100%;
+    height: 320px;
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(201,168,76,0.06), transparent);
+    border: 1px solid var(--border);
+  }
+  .waveform-canvas { width: 100%; height: 100%; }
+  .hero-artist-card {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(7,7,9,0.85);
+    backdrop-filter: blur(16px);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+  .hero-artist-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2D1B00, #4A2E10);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .hero-artist-info { flex: 1; }
+  .hero-artist-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .hero-artist-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .hero-artist-play {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .hero-artist-play:hover { transform: scale(1.08); }
+  .hero-artist-play svg { width: 16px; height: 16px; fill: var(--bg-deep); }
+
+  /* ===== TRUST STRIP ===== */
+  .trust-strip {
+    padding: 60px 40px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .trust-strip p {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .trust-logos {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .trust-logo {
+    height: 28px;
+    opacity: 0.3;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== STATS ROW ===== */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 0 40px 80px;
+    border: 1px solid var(--border);
+  }
+  .stat-card {
+    background: var(--bg-surface);
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .stat-number {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+    color: var(--gold);
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ===== SECTION HEADERS ===== */
+  .section {
+    padding: 80px 40px;
+  }
+  .section-header {
+    max-width: 1200px;
+    margin: 0 auto 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .section-header h2 {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .section-header h2 span { color: var(--gold); }
+  .section-header p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-top: 8px;
+  }
+  .section-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .section-link:hover { opacity: 0.8; }
+
+  /* ===== TRACK CARDS ===== */
+  .track-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .track-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .track-card:hover {
+    border-color: var(--border-active);
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+  }
+  .track-art {
+    aspect-ratio: 1;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .track-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+  .track-card:hover .track-art-img { transform: scale(1.05); }
+  .track-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .track-card:hover .track-overlay { opacity: 1; }
+  .track-play-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .track-play-btn:hover { transform: scale(1.12); }
+  .track-play-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--bg-deep);
+    margin-left: 2px;
+  }
+  .track-info {
+    padding: 16px;
+  }
+  .track-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .track-info .artist-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .track-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .track-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .track-format {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ===== GENRE EXPLORER ===== */
+  .genre-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .genre-card {
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .genre-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+  .genre-bg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .genre-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px 12px 14px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .genre-count {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ===== FEATURED ARTIST ===== */
+  .featured-artist {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    padding: 80px 40px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .featured-artist-visual {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    aspect-ratio: 4/5;
+    border: 1px solid var(--border);
+  }
+  .featured-artist-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .featured-artist-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 4px 12px;
+    background: rgba(7,7,9,0.75);
+    backdrop-filter: blur(8px);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+  .featured-artist-info h3 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--gold);
+  }
+  .featured-artist-info h2 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .featured-artist-info p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .featured-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .featured-tag {
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--gold-glass);
+    border: 1px solid rgba(201,168,76,0.15);
+    color: var(--gold-light);
+  }
+  .featured-stats {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 28px;
+  }
+  .featured-stat { text-align: center; }
+  .featured-stat-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .featured-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ===== CTA SECTION ===== */
+  .cta-section {
+    text-align: center;
+    padding: 100px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .cta-section h2 {
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .cta-section h2 span { color: var(--gold); }
+  .cta-section p {
+    color: var(--text-secondary);
+    font-size: 17px;
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .cta-muted {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 16px;
+  }
+
+  /* ===== PLAYER BAR ===== */
+  .player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(7,7,9,0.92);
+    backdrop-filter: blur(20px) saturate(1.3);
+    border-top: 1px solid var(--border);
+    padding: 12px 24px;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    gap: 24px;
+  }
+  .player-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .player-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #2D1B00, #4A2E10);
+    flex-shrink: 0;
+  }
+  .player-track-info h5 {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .player-track-info p {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .player-bar-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .player-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .player-btn:hover { color: var(--text-primary); }
+  .player-btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .player-btn-play {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .player-btn-play:hover { transform: scale(1.08); }
+  .player-btn-play svg { width: 16px; height: 16px; fill: var(--bg-deep); margin-left: 1px; }
+  .player-progress {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .player-progress span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .player-bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .player-bar-track-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 33%;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+  .player-bar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+  }
+  .player-volume {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .player-volume svg { width: 16px; height: 16px; fill: var(--text-muted); }
+  .player-volume-track {
+    width: 80px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .player-volume-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 60%;
+    background: var(--text-secondary);
+    border-radius: 2px;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 40px 100px;
+  }
+  .footer-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+  .footer-brand p {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 280px;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+  .footer-col h5 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .footer-col a {
+    display: block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--text-primary); }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ===== WAVEFORM CANVAS ===== */
+  canvas { display: block; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .track-grid { grid-template-columns: repeat(2, 1fr); }
+    .genre-grid { grid-template-columns: repeat(3, 1fr); }
+    .stats-row { grid-template-columns: repeat(2, 1fr); margin: 0 20px 60px; }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-content { grid-template-columns: 1fr; }
+    .hero-right { max-width: 500px; margin: 0 auto; }
+  }
+  @media (max-width: 640px) {
+    .navbar { padding: 12px 16px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 16px 60px; }
+    .track-grid { grid-template-columns: 1fr; }
+    .genre-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-row { grid-template-columns: 1fr 1fr; margin: 0 16px 40px; }
+    .stats-row .stat-card { padding: 24px; }
+    .stat-number { font-size: 28px; }
+    .section { padding: 60px 16px; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .featured-artist { grid-template-columns: 1fr; padding: 40px 16px; gap: 32px; }
+    .featured-stats { gap: 16px; }
+    .player-bar { padding: 8px 12px; grid-template-columns: 1fr auto; }
+    .player-bar-center { display: none; }
+    .footer { padding: 40px 16px 80px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; }
+    .trust-logos { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">A</div>
+    <span class="nav-logo-text">artis<span>trax</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Browse</a></li>
+    <li><a href="#">Artists</a></li>
+    <li><a href="#">Labels</a></li>
+    <li><a href="#">Charts</a></li>
+    <li><a href="#">For Artists</a></li>
+    <li><a href="#" class="nav-cta">Start Free Trial</a></li>
+  </ul>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-badge">✦ Now in Beta</div>
+      <h1>Buy Once.<br><span class="highlight">Stream Forever.</span></h1>
+      <p>Artists keep <strong style="color:var(--gold)">95%</strong> of every sale. Fans get unlimited streaming + lossless downloads. No hidden fees. No affiliate hustling. Just music the way it should be.</p>
+      <div class="hero-ctas">
+        <a href="#" class="btn-primary">Start Free Trial →</a>
+        <a href="#" class="btn-secondary">Browse Music</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="waveform-container" id="waveform">
+        <canvas class="waveform-canvas" id="waveformCanvas"></canvas>
+        <div class="hero-artist-card">
+          <div class="hero-artist-avatar">🎧</div>
+          <div class="hero-artist-info">
+            <h4>Midnight Signal</h4>
+            <p>Featured Artist — Siesta Records</p>
+          </div>
+          <button class="hero-artist-play" aria-label="Play">
+            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRUST STRIP ===== -->
+<div class="trust-strip">
+  <p>Trusted by independent artists & labels worldwide</p>
+  <div class="trust-logos">
+    <span class="trust-logo">Siesta Records</span>
+    <span class="trust-logo">Mic Check Records</span>
+    <span class="trust-logo">Underground Collective</span>
+    <span class="trust-logo">Pacific Audio</span>
+    <span class="trust-logo">Velvet Groove</span>
+  </div>
+</div>
+
+<!-- ===== STATS ROW ===== -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-number">$2.4M+</div>
+    <div class="stat-label">Paid to Artists</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">12,840</div>
+    <div class="stat-label">Tracks Available</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">3,200+</div>
+    <div class="stat-label">Artists Onboarded</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">95%</div>
+    <div class="stat-label">Artist Revenue Share</div>
+  </div>
+</div>
+
+<!-- ===== TRENDING TRACKS ===== -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h2>Trending <span>Now</span></h2>
+      <p>Discover what's moving in the community</p>
+    </div>
+    <a href="#" class="section-link">View All →</a>
+  </div>
+  <div class="track-grid">
+    <div class="track-card">
+      <div class="track-art">
+        <div class="track-art-img" style="background: linear-gradient(135deg, #1a0a2e, #16213e);"></div>
+        <div class="track-overlay">
+          <button class="track-play-btn" aria-label="Play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></button>
+        </div>
+      </div>
+      <div class="track-info">
+        <h4>Neon Dusk</h4>
+        <div class="artist-name">DJ Mary</div>
+        <div class="track-meta">
+          <span class="track-price">$1.99</span>
+          <span class="track-format">WAV + MP3</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-card">
+      <div class="track-art">
+        <div class="track-art-img" style="background: linear-gradient(135deg, #0a2e1a, #1e3e16);"></div>
+        <div class="track-overlay">
+          <button class="track-play-btn" aria-label="Play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></button>
+        </div>
+      </div>
+      <div class="track-info">
+        <h4>Ocean Floor</h4>
+        <div class="artist-name">Midnight Signal</div>
+        <div class="track-meta">
+          <span class="track-price">$2.49</span>
+          <span class="track-format">WAV + MP3</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-card">
+      <div class="track-art">
+        <div class="track-art-img" style="background: linear-gradient(135deg, #2e1a0a, #3e2e16);"></div>
+        <div class="track-overlay">
+          <button class="track-play-btn" aria-label="Play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></button>
+        </div>
+      </div>
+      <div class="track-info">
+        <h4>Golden Hour</h4>
+        <div class="artist-name">Luna Vega</div>
+        <div class="track-meta">
+          <span class="track-price">$1.49</span>
+          <span class="track-format">FLAC</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-card">
+      <div class="track-art">
+        <div class="track-art-img" style="background: linear-gradient(135deg, #0a0a2e, #16163e);"></div>
+        <div class="track-overlay">
+          <button class="track-play-btn" aria-label="Play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></button>
+        </div>
+      </div>
+      <div class="track-info">
+        <h4>Deep Blue</h4>
+        <div class="artist-name">Siesta Collective</div>
+        <div class="track-meta">
+          <span class="track-price">$3.49</span>
+          <span class="track-format">WAV + FLAC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GENRE EXPLORER ===== -->
+<section class="section" style="padding-top:0;">
+  <div class="section-header">
+    <div>
+      <h2>Explore by <span>Genre</span></h2>
+      <p>Curated collections from the underground up</p>
+    </div>
+    <a href="#" class="section-link">All Genres →</a>
+  </div>
+  <div class="genre-grid">
+    <div class="genre-card">
+      <div class="genre-bg" style="background: linear-gradient(135deg, #1a0a2e, #2d1b4e);">
+        <div class="genre-label">Electronic<div class="genre-count">2,340 tracks</div></div>
+      </div>
+    </div>
+    <div class="genre-card">
+      <div class="genre-bg" style="background: linear-gradient(135deg, #2e1a0a, #4a2e10);">
+        <div class="genre-label">Hip-Hop<div class="genre-count">1,890 tracks</div></div>
+      </div>
+    </div>
+    <div class="genre-card">
+      <div class="genre-bg" style="background: linear-gradient(135deg, #0a2e1a, #1a4a2e);">
+        <div class="genre-label">Ambient<div class="genre-count">960 tracks</div></div>
+      </div>
+    </div>
+    <div class="genre-card">
+      <div class="genre-bg" style="background: linear-gradient(135deg, #2e0a0a, #4e1a1a);">
+        <div class="genre-label">Jazz<div class="genre-count">720 tracks</div></div>
+      </div>
+    </div>
+    <div class="genre-card">
+      <div class="genre-bg" style="background: linear-gradient(135deg, #0a1a2e, #1a2e4e);">
+        <div class="genre-label">Lo-Fi<div class="genre-count">1,450 tracks</div></div>
+      </div>
+    </div>
+    <div class="genre-card">
+      <div class="genre-bg" style="background: linear-gradient(135deg, #2e2e0a, #4a4a1a);">
+        <div class="genre-label">Experimental<div class="genre-count">680 tracks</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURED ARTIST ===== -->
+<section class="featured-artist">
+  <div class="featured-artist-visual">
+    <div style="width:100%;height:100%;background:linear-gradient(135deg, #0D0D10, #1A1410);display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:80px;opacity:0.15;">✦</span>
+    </div>
+    <div class="featured-artist-badge">✦ Featured Artist</div>
+  </div>
+  <div class="featured-artist-info">
+    <h3>DJ Mary</h3>
+    <h2>Siesta Records</h2>
+    <p>Leucadia-based producer and label head bringing warm analog textures to the digital age. Her latest release <em>"Coastal Transmissions"</em> blends beachside nostalgia with forward-facing bass music.</p>
+    <div class="featured-tags">
+      <span class="featured-tag">Electronic</span>
+      <span class="featured-tag">Downtempo</span>
+      <span class="featured-tag">Encinitas</span>
+      <span class="featured-tag">Siesta Records</span>
+    </div>
+    <div class="featured-stats">
+      <div class="featured-stat">
+        <div class="featured-stat-num">14</div>
+        <div class="featured-stat-label">Tracks</div>
+      </div>
+      <div class="featured-stat">
+        <div class="featured-stat-num">2.8K</div>
+        <div class="featured-stat-label">Followers</div>
+      </div>
+      <div class="featured-stat">
+        <div class="featured-stat-num">$14.2K</div>
+        <div class="featured-stat-label">Earned</div>
+      </div>
+    </div>
+    <a href="#" class="btn-primary">View Profile →</a>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+  <h2>Your Music Deserves <span>Better</span></h2>
+  <p>Join thousands of artists earning 95% of every sale. Your fans get unlimited streaming + lossless downloads. No algorithms. No hidden fees. Just pure music commerce.</p>
+  <div class="cta-buttons">
+    <a href="#" class="btn-primary">Start Your Free Trial →</a>
+    <a href="#" class="btn-secondary">See How It Works</a>
+  </div>
+  <div class="cta-muted">No credit card required • 30-day free trial • Cancel anytime</div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--gold-muted));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--bg-deep);">A</div>
+        <span style="font-weight:700;font-size:16px;">artis<span style="color:var(--gold);">trax</span></span>
+      </div>
+      <p>The only platform where artists keep 95% and fans buy once, stream forever. Built for independent music, powered by independent artists.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Discover</h5>
+      <a href="#">Browse Tracks</a>
+      <a href="#">Artists</a>
+      <a href="#">Labels</a>
+      <a href="#">Charts</a>
+      <a href="#">Genres</a>
+    </div>
+    <div class="footer-col">
+      <h5>For Artists</h5>
+      <a href="#">Sell Your Music</a>
+      <a href="#">Pricing</a>
+      <a href="#">Analytics</a>
+      <a href="#">Resources</a>
+      <a href="#">Help Center</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Press</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 artistrax. All rights reserved.</span>
+    <span style="display:flex;gap:16px;">
+      <a href="#" style="color:var(--text-muted);text-decoration:none;">Privacy</a>
+      <a href="#" style="color:var(--text-muted);text-decoration:none;">Terms</a>
+      <a href="#" style="color:var(--text-muted);text-decoration:none;">Cookies</a>
+    </span>
+  </div>
+</footer>
+
+<!-- ===== PLAYER BAR ===== -->
+<div class="player-bar">
+  <div class="player-bar-left">
+    <div class="player-thumb"></div>
+    <div class="player-track-info">
+      <h5>Neon Dusk</h5>
+      <p>DJ Mary</p>
+    </div>
+  </div>
+  <div class="player-bar-center">
+    <div class="player-controls">
+      <button class="player-btn" aria-label="Previous"><svg viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="2" height="16"/></svg></button>
+      <button class="player-btn-play" aria-label="Play/Pause"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></button>
+      <button class="player-btn" aria-label="Next"><svg viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="17" y="4" width="2" height="16"/></svg></button>
+    </div>
+    <div class="player-progress">
+      <span>1:24</span>
+      <div class="player-bar-track">
+        <div class="player-bar-track-fill"></div>
+      </div>
+      <span>4:12</span>
+    </div>
+  </div>
+  <div class="player-bar-right">
+    <div class="player-volume">
+      <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z M15.54 8.46a5 5 0 010 7.07 M19.07 4.93a10 10 0 010 14.14"/></svg>
+      <div class="player-volume-track">
+        <div class="player-volume-fill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== WAVEFORM CANVAS =====
+const canvas = document.getElementById('waveformCanvas');
+const ctx = canvas.getContext('2d');
+let bars = 64;
+let amplitude = [];
+
+function resizeCanvas() {
+  const container = document.getElementById('waveform');
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+  bars = Math.floor(canvas.width / 14);
+  generateAmplitude();
+  drawWaveform();
+}
+
+function generateAmplitude() {
+  amplitude = [];
+  for (let i = 0; i < bars; i++) {
+    // Create a bell-curve-ish waveform with some randomness
+    const position = i / bars;
+    const envelope = Math.sin(position * Math.PI) * 0.6 + 0.4;
+    const random = Math.random() * 0.5 + 0.3;
+    amplitude.push(Math.min(envelope * random * canvas.height * 0.7, canvas.height * 0.7));
+  }
+}
+
+function drawWaveform() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const barWidth = (canvas.width - bars * 4) / bars;
+  const halfHeight = canvas.height / 2;
+
+  for (let i = 0; i < bars; i++) {
+    const x = i * (barWidth + 4);
+    const h = amplitude[i];
+    const y = halfHeight - h / 2;
+
+    // Gradient bar
+    const brightness = 0.3 + (amplitude[i] / (canvas.height * 0.7)) * 0.3;
+    ctx.fillStyle = `rgba(201, 168, 76, ${brightness})`;
+    ctx.beginPath();
+    ctx.roundRect(x, y, barWidth, h, [2, 2]);
+    ctx.fill();
+  }
+}
+
+// Polyfill roundRect if needed
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (r.length === 1) r = [r[0], r[0], r[0], r[0]];
+    else if (r.length === 2) r = [r[0], r[0], r[1], r[1]];
+    else if (r.length === 3) r = [r[0], r[1], r[1], r[1]];
+    this.moveTo(x + r[0], y);
+    this.lineTo(x + w - r[1], y);
+    this.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+    this.lineTo(x + w, y + h - r[2]);
+    this.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+    this.lineTo(x + r[3], y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+    this.lineTo(x, y + r[0]);
+    this.quadraticCurveTo(x, y, x + r[0], y);
+    this.closePath();
+    return this;
+  };
+}
+
+// Animate with subtle pulse
+function animateWaveform() {
+  generateAmplitude();
+  drawWaveform();
+  setTimeout(animateWaveform, 800);
+}
+
+resizeCanvas();
+animateWaveform();
+window.addEventListener('resize', resizeCanvas);
+</script>
+
+</body>
+</html>

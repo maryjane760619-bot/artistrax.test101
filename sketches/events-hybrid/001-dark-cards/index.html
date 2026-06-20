@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>artistrax — Where an artist can be an artist</title>
+<style>
+  :root {
+    --bg: #0b0b0c;
+    --surface: #141415;
+    --surface-hover: #1f1f21;
+    --border: #2a2a2d;
+    --champagne: #e5dfd0;
+    --champagne-muted: #d4cfc0;
+    --text: #faf7f1;
+    --text-muted: #8b8580;
+    --text-muted2: #6b6b6e;
+    --blue: #155dfc;
+    --blue-hover: #3080ff;
+    --green: #00bb7f;
+    --red: #e40014;
+    --gold: #b58a3e;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  .font-serif { font-family: 'Source Serif 4', Georgia, serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+  /* Banner */
+  .banner {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--champagne-muted);
+    text-transform: uppercase;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(11,11,12,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 40px; }
+  .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); text-decoration: none; }
+  .nav { display: flex; gap: 24px; }
+  .nav a {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .nav a:hover, .nav a.active { color: var(--champagne); }
+
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .btn-search {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-search:hover { border-color: var(--text-muted2); color: var(--text); }
+  .btn-login { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .btn-login:hover { color: var(--text); }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--blue-hover); }
+
+  /* Hero */
+  .hero {
+    padding: 80px 24px 60px;
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .hero-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted2);
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1.08;
+    color: var(--champagne);
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+  }
+  .hero p {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Section */
+  .section {
+    padding: 48px 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted2);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .section-link {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .section-link:hover { color: var(--champagne); }
+
+  /* Event Card */
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .event-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .event-card:hover {
+    border-color: var(--champagne-muted);
+    transform: translateY(-2px);
+  }
+  .event-card-image {
+    aspect-ratio: 16/9;
+    background: var(--surface-hover);
+    position: relative;
+    overflow: hidden;
+  }
+  .event-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+  }
+  .event-card:hover .event-card-image img { transform: scale(1.05); }
+  .event-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    color: var(--champagne);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  .event-card-body { padding: 20px; }
+  .event-card-date {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .event-card-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .event-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .event-card-creator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted2);
+  }
+  .event-card-creator-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--surface-hover);
+  }
+  .event-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  .event-card-price {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--champagne);
+  }
+  .event-card-label {
+    font-size: 11px;
+    color: var(--text-muted2);
+  }
+
+  /* Featured Event (hero-style) */
+  .featured-event {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .featured-event-image {
+    aspect-ratio: 4/3;
+    background: var(--surface-hover);
+    overflow: hidden;
+  }
+  .featured-event-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .featured-event-body {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .featured-event-body .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+  .featured-event-body h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .featured-event-body .desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .featured-event-stats {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 24px;
+  }
+  .featured-event-stats .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--champagne);
+  }
+  .featured-event-stats .stat-label {
+    font-size: 11px;
+    color: var(--text-muted2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Artist Cards (from Chris's design) */
+  .artist-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .artist-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .artist-card:hover { border-color: var(--champagne-muted); }
+  .artist-card .rank { font-size: 12px; color: var(--text-muted2); margin-bottom: 8px; }
+  .artist-card .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface-hover);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .artist-card .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .artist-card .name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .artist-card .location { font-size: 11px; color: var(--text-muted2); }
+  .artist-card .genre { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .artist-card .stats { display: flex; gap: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .artist-card .stats .val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
+  .artist-card .stats .lbl { font-size: 10px; color: var(--text-muted2); text-transform: uppercase; }
+
+  /* Trending */
+  .trending-list { display: flex; flex-direction: column; gap: 8px; }
+  .trending-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .trending-item:hover { border-color: var(--champagne-muted); }
+  .trending-item .pos {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted2);
+    width: 24px;
+  }
+  .trending-item .avatar-sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface-hover);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .trending-item .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+  .trending-item .info { flex: 1; }
+  .trending-item .info .name { font-weight: 500; font-size: 14px; }
+  .trending-item .info .detail { font-size: 11px; color: var(--text-muted); }
+  .trending-item .change {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .trending-item .change.up { color: var(--green); background: rgba(0,187,127,0.1); }
+  .trending-item .change.down { color: var(--red); background: rgba(228,0,20,0.1); }
+  .trending-item .change.flat { color: var(--text-muted2); }
+  .trending-item .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--champagne);
+  }
+
+  /* Release Cards */
+  .releases-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .release-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .release-card:hover { border-color: var(--champagne-muted); }
+  .release-card .cover {
+    aspect-ratio: 1;
+    background: var(--surface-hover);
+    overflow: hidden;
+  }
+  .release-card .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .release-card .body { padding: 16px; }
+  .release-card .body .type { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted2); }
+  .release-card .body .title { font-weight: 600; font-size: 15px; margin: 4px 0; }
+  .release-card .body .artist { font-size: 12px; color: var(--text-muted); }
+  .release-card .body .price { font-size: 14px; font-weight: 600; color: var(--champagne); margin-top: 8px; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 24px 40px;
+    background: var(--surface);
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+  .footer-brand p { font-size: 13px; color: var(--text-muted); margin-top: 12px; max-width: 300px; line-height: 1.6; }
+  .footer-col h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted2); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: var(--text-muted); text-decoration: none; margin-bottom: 8px; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--champagne); }
+  .footer-bottom {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted2);
+  }
+
+  /* Genre Chips */
+  .genre-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .genre-chip {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .genre-chip:hover, .genre-chip.active { border-color: var(--champagne-muted); color: var(--champagne); }
+
+  /* Tabs / Filters for events */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px;
+  }
+  .tab-btn {
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--champagne); color: #000; font-weight: 500; }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .events-grid, .artist-grid, .releases-grid { grid-template-columns: repeat(2, 1fr); }
+    .featured-event { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .events-grid, .artist-grid, .releases-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 36px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Banner -->
+<div class="banner">
+  New: 24-bit lossless downloads on every release · Events &amp; ticketing now live
+</div>
+
+<!-- Header -->
+<header class="header container" style="padding-left:0;padding-right:0;max-width:100%;">
+  <div class="header-left" style="padding-left:24px;">
+    <a href="#" class="logo">artistrax</a>
+    <nav class="nav">
+      <a href="#" class="active">Home</a>
+      <a href="#">Events</a>
+      <a href="#">Artists</a>
+      <a href="#">Releases</a>
+      <a href="#">Labels</a>
+      <a href="#">Live</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+  <div class="header-right" style="padding-right:24px;">
+    <button class="btn-search">Search artists</button>
+    <a href="#" class="btn-login">Login</a>
+    <a href="#" class="btn-primary">Submit Music</a>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-tag">Issue №07 · Featured Artist</div>
+  <h1>Where an artist can be an artist.</h1>
+  <p>A direct-to-fan music platform for independent artists. Own your masters, set your prices, keep 85% of every sale. Now with events &amp; ticketing.</p>
+</section>
+
+<!-- EVENTS SECTION (integrated) -->
+<section class="section container">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Live &amp; virtual · coming up</div>
+      <h2 class="section-title">Upcoming Events</h2>
+    </div>
+    <a href="#" class="section-link">View all events →</a>
+  </div>
+
+  <!-- Featured Event -->
+  <div class="featured-event">
+    <div class="featured-event-image">
+      <img src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=900&h=700&q=80" alt="Summer Solstice">
+    </div>
+    <div class="featured-event-body">
+      <div class="label">🎫 Featured event · Next weekend</div>
+      <h2>Summer Solstice: Luna Wave × Velvet Haze</h2>
+      <p class="desc">An immersive evening of ambient electronics and soulful R&B under the stars. Featuring live sets from Luna Wave, Velvet Haze, and special guest Klara Weis.</p>
+      <div class="featured-event-stats">
+        <div>
+          <div class="stat-value">Jun 21</div>
+          <div class="stat-label">Date</div>
+        </div>
+        <div>
+          <div class="stat-value">8PM</div>
+          <div class="stat-label">Start</div>
+        </div>
+        <div>
+          <div class="stat-value">1.2K</div>
+          <div class="stat-label">Attending</div>
+        </div>
+        <div>
+          <div class="stat-value">$25+</div>
+          <div class="stat-label">From</div>
+        </div>
+      </div>
+      <a href="#" class="btn-primary" style="display:inline-block;">Get Tickets</a>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div class="tab-bar">
+      <button class="tab-btn active">Upcoming</button>
+      <button class="tab-btn">All Events</button>
+      <button class="tab-btn">Past</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="font-size:12px;color:var(--text-muted2);">6 events</span>
+    </div>
+  </div>
+
+  <!-- Event Cards Grid -->
+  <div class="events-grid">
+    <!-- Event 1 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&h=400&q=80" alt="Solar Drift Live">
+        <span class="event-card-badge">Sold 342</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Sat, Jul 12 · 9:00 PM</div>
+        <h3 class="event-card-title">Solar Drift: Live at the Moon</h3>
+        <div class="event-card-meta">
+          <span>📍 Blue Note, Tokyo</span>
+          <span>·</span>
+          <span>🎵 Jazz Fusion</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$22.00</div>
+            <div class="event-card-label">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">$55.00</div>
+            <div class="event-card-label">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 2 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=600&h=400&q=80" alt="Velvet Haze">
+        <span class="event-card-badge">🔥 Popular</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Fri, Jul 19 · 8:00 PM</div>
+        <h3 class="event-card-title">Velvet Haze: Intimate Night</h3>
+        <div class="event-card-meta">
+          <span>📍 The Sun Rose, Los Angeles</span>
+          <span>·</span>
+          <span>🎵 R&B · Soul</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$35.00</div>
+            <div class="event-card-label">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">$75.00</div>
+            <div class="event-card-label">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 3 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&h=400&q=80" alt="Virtual">
+        <span class="event-card-badge" style="background:var(--blue);">🎧 Virtual</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Wed, Aug 6 · 7:00 PM</div>
+        <h3 class="event-card-title">The Midnight Echo: Livestream</h3>
+        <div class="event-card-meta">
+          <span>🌐 Virtual · Global</span>
+          <span>·</span>
+          <span>🎵 Indie Rock</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$10.00</div>
+            <div class="event-card-label">Stream</div>
+          </div>
+          <div>
+            <div class="event-card-price">$10.00</div>
+            <div class="event-card-label">+ Donation</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 4 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&h=400&q=80" alt="RYTE">
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Thu, Aug 14 · 10:00 PM</div>
+        <h3 class="event-card-title">RYTE × Dev Sinclair B2B</h3>
+        <div class="event-card-meta">
+          <span>📍 Berghain, Berlin</span>
+          <span>·</span>
+          <span>🎵 Techno · Future Bass</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">€28.00</div>
+            <div class="event-card-label">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">€50.00</div>
+            <div class="event-card-label">Late Entry</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- Artists section (from Chris's design) -->
+<section class="section container">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Browse the roster</div>
+      <h2 class="section-title">All Artists</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:12px;color:var(--text-muted2);">12 artists · sorted by monthly listeners</span>
+    </div>
+  </div>
+
+  <div class="genre-chips">
+    <span class="genre-chip active">All</span>
+    <span class="genre-chip">Electronic</span>
+    <span class="genre-chip">R&amp;B</span>
+    <span class="genre-chip">Ambient</span>
+    <span class="genre-chip">Indie Rock</span>
+    <span class="genre-chip">Jazz Fusion</span>
+    <span class="genre-chip">Techno</span>
+    <span class="genre-chip">Soul</span>
+    <span class="genre-chip">Future Bass</span>
+  </div>
+
+  <div class="artist-grid">
+    <div class="artist-card">
+      <div class="rank">01</div>
+      <div class="avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80" alt="Luna Wave"></div>
+      <div class="name">Luna Wave</div>
+      <div class="location">PT · Electronic, Ambient</div>
+      <div class="stats">
+        <div><div class="val">248.3K</div><div class="lbl">Monthly</div></div>
+        <div><div class="val">1.3M</div><div class="lbl">Downloads</div></div>
+      </div>
+    </div>
+    <div class="artist-card">
+      <div class="rank">02</div>
+      <div class="avatar"><img src="https://images.unsplash.com/photo-1496360166961-10a51d5f367a?auto=format&fit=crop&w=200&h=200&q=80" alt="The Midnight Echo"></div>
+      <div class="name">The Midnight Echo</div>
+      <div class="location">UK · Indie Rock, Alternative</div>
+      <div class="stats">
+        <div><div class="val">412.9K</div><div class="lbl">Monthly</div></div>
+        <div><div class="val">2.1M</div><div class="lbl">Downloads</div></div>
+      </div>
+    </div>
+    <div class="artist-card">
+      <div class="rank">03</div>
+      <div class="avatar"><img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=200&h=200&q=80" alt="Solar Drift"></div>
+      <div class="name">Solar Drift</div>
+      <div class="location">JP · Jazz Fusion, Electronic</div>
+      <div class="stats">
+        <div><div class="val">156.8K</div><div class="lbl">Monthly</div></div>
+        <div><div class="val">892K</div><div class="lbl">Downloads</div></div>
+      </div>
+    </div>
+    <div class="artist-card">
+      <div class="rank">04</div>
+      <div class="avatar"><img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=200&h=200&q=80" alt="Velvet Haze"></div>
+      <div class="name">Velvet Haze</div>
+      <div class="location">NY · R&amp;B, Soul</div>
+      <div class="stats">
+        <div><div class="val">587.4K</div><div class="lbl">Monthly</div></div>
+        <div><div class="val">3.4M</div><div class="lbl">Downloads</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trending This Week (from Chris's design) -->
+<section class="section container">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Updated weekly · June 18</div>
+      <h2 class="section-title">Trending This Week</h2>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);">Most-downloaded artists this week</div>
+  </div>
+
+  <div class="trending-list">
+    <div class="trending-item">
+      <span class="pos">01</span>
+      <div class="avatar-sm"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80" alt="Miro Sun"></div>
+      <div class="info">
+        <div class="name">Miro Sun</div>
+        <div class="detail">Afrobeats · World · Lagos, NG</div>
+      </div>
+      <span class="change down">-1</span>
+      <span class="count">79.2K</span>
+    </div>
+    <div class="trending-item">
+      <span class="pos">02</span>
+      <div class="avatar-sm"><img src="https://images.unsplash.com/photo-1496360166961-10a51d5f367a?auto=format&fit=crop&w=200&h=200&q=80" alt="Velvet Haze"></div>
+      <div class="info">
+        <div class="name">Velvet Haze</div>
+        <div class="detail">R&amp;B · Soul · Brooklyn, NY</div>
+      </div>
+      <span class="change flat">—</span>
+      <span class="count">65.8K</span>
+    </div>
+    <div class="trending-item">
+      <span class="pos">03</span>
+      <div class="avatar-sm"><img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=200&h=200&q=80" alt="RYTE"></div>
+      <div class="info">
+        <div class="name">RYTE</div>
+        <div class="detail">Future Bass · Electronic · Stockholm, SE</div>
+      </div>
+      <span class="change up">+1</span>
+      <span class="count">55.4K</span>
+    </div>
+  </div>
+</section>
+
+<!-- New Releases (from Chris's design) -->
+<section class="section container">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Fresh on artistrax</div>
+      <h2 class="section-title">New Releases</h2>
+    </div>
+    <a href="#" class="section-link">View all →</a>
+  </div>
+
+  <div class="releases-grid">
+    <div class="release-card">
+      <div class="cover"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80" alt="Honey & Smoke"></div>
+      <div class="body">
+        <div class="type">Album</div>
+        <div class="title">Honey &amp; Smoke</div>
+        <div class="artist">Velvet Haze · 2025</div>
+        <div class="price">$11.99</div>
+      </div>
+    </div>
+    <div class="release-card">
+      <div class="cover"><img src="https://images.unsplash.com/photo-1496360166961-10a51d5f367a?auto=format&fit=crop&w=400&h=400&q=80" alt="Glass Psalms"></div>
+      <div class="body">
+        <div class="type">Album</div>
+        <div class="title">Glass Psalms</div>
+        <div class="artist">Klara Weis · 2025</div>
+        <div class="price">$9.99</div>
+      </div>
+    </div>
+    <div class="release-card">
+      <div class="cover"><img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=400&h=400&q=80" alt="Static Bloom"></div>
+      <div class="body">
+        <div class="type">Album</div>
+        <div class="title">Static Bloom</div>
+        <div class="artist">The Midnight Echo · 2024</div>
+        <div class="price">$8.99</div>
+      </div>
+    </div>
+    <div class="release-card">
+      <div class="cover"><img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&h=400&q=80" alt="Modal Futures"></div>
+      <div class="body">
+        <div class="type">Album</div>
+        <div class="title">Modal Futures</div>
+        <div class="artist">Solar Drift · 2024</div>
+        <div class="price">$12.99</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="font-size:20px;font-weight:700;">artistrax</div>
+        <p>A direct-to-fan music platform where independent artists own their masters, set their prices, and keep 85% of every sale.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Browse</h4>
+        <a href="#">All Releases</a>
+        <a href="#">Artists</a>
+        <a href="#">Events</a>
+        <a href="#">Bundles</a>
+        <a href="#">Genres</a>
+      </div>
+      <div class="footer-col">
+        <h4>For Artists</h4>
+        <a href="#">Submit Music</a>
+        <a href="#">Pricing &amp; Royalties</a>
+        <a href="#">Artist Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="#">FAQ</a>
+        <a href="#">Contact</a>
+        <a href="#">Download Help</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 artistrax. Where an artist can be an artist.</span>
+      <span>All systems operational</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

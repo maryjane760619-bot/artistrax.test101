@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Events — artistrax</title>
+<style>
+  :root {
+    --bg: #0b0b0c;
+    --surface: #141415;
+    --surface-hover: #1f1f21;
+    --border: #2a2a2d;
+    --champagne: #e5dfd0;
+    --champagne-muted: #d4cfc0;
+    --text: #faf7f1;
+    --text-muted: #8b8580;
+    --text-muted2: #6b6b6e;
+    --blue: #155dfc;
+    --blue-hover: #3080ff;
+    --green: #00bb7f;
+    --red: #e40014;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(11,11,12,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 40px; }
+  .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); text-decoration: none; }
+  .nav { display: flex; gap: 24px; }
+  .nav a {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .nav a:hover, .nav a.active { color: var(--champagne); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .btn-search {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 8px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-search:hover { border-color: var(--text-muted2); color: var(--text); }
+  .btn-login { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .btn-login:hover { color: var(--text); }
+  .btn-primary {
+    background: var(--blue); color: #fff; padding: 8px 18px; border-radius: 20px;
+    font-size: 13px; font-weight: 500; text-decoration: none; transition: background 0.2s; border: none; cursor: pointer; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--blue-hover); }
+  .btn-outline {
+    background: transparent; color: var(--champagne); padding: 8px 18px; border-radius: 20px;
+    font-size: 13px; font-weight: 500; text-decoration: none; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--champagne-muted); }
+
+  /* Page Hero */
+  .page-hero {
+    padding: 60px 24px 40px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .page-hero h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--champagne);
+    margin-bottom: 12px;
+  }
+  .page-hero p {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 500px;
+  }
+
+  /* Search + Filters */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 0;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    flex: 1;
+    max-width: 360px;
+  }
+  .search-box input {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+  }
+  .search-box input::placeholder { color: var(--text-muted2); }
+  .filter-group { display: flex; gap: 4px; align-items: center; }
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-chip:hover { border-color: var(--champagne-muted); color: var(--champagne); }
+  .filter-chip.active { background: var(--champagne); color: #000; border-color: var(--champagne); font-weight: 500; }
+
+  .view-toggle { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .view-btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .view-btn.active { background: var(--surface-hover); color: var(--text); }
+
+  /* Event Grid (extended) */
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding-bottom: 60px;
+  }
+  .event-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .event-card:hover {
+    border-color: var(--champagne-muted);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .event-card-image {
+    aspect-ratio: 16/9;
+    background: var(--surface-hover);
+    position: relative;
+    overflow: hidden;
+  }
+  .event-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+  }
+  .event-card:hover .event-card-image img { transform: scale(1.05); }
+  .event-card-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    color: var(--champagne);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  .event-card-body { padding: 20px; }
+  .event-card-date {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .event-card-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .event-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .event-card-creator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted2);
+  }
+  .event-card-creator-avatar {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--surface-hover);
+    overflow: hidden;
+  }
+  .event-card-creator-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .event-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  .event-card-price {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--champagne);
+  }
+  .event-card-sublabel {
+    font-size: 10px;
+    color: var(--text-muted2);
+  }
+
+  /* List view */
+  .events-list { display: flex; flex-direction: column; gap: 8px; display: none; }
+  .event-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+  .event-row:hover { border-color: var(--champagne-muted); }
+  .event-row .thumb {
+    width: 56px; height: 40px;
+    border-radius: 6px;
+    background: var(--surface-hover);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .event-row .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .event-row .info { flex: 1; }
+  .event-row .info .title { font-weight: 500; font-size: 14px; }
+  .event-row .info .meta { font-size: 11px; color: var(--text-muted); }
+  .event-row .date { font-size: 12px; color: var(--green); }
+  .event-row .location { font-size: 12px; color: var(--text-muted2); }
+  .event-row .price { font-size: 14px; font-weight: 600; color: var(--champagne); }
+
+  /* Events Map placeholder */
+  .map-section {
+    display: none;
+    height: 200px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted2);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-muted2);
+    grid-column: 1 / -1;
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-family: 'Source Serif 4', Georgia, serif; font-size: 24px; color: var(--text-muted); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; margin-bottom: 20px; }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 32px 0 60px;
+  }
+  .page-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .page-btn:hover { border-color: var(--champagne-muted); color: var(--text); }
+  .page-btn.active { background: var(--champagne); color: #000; border-color: var(--champagne); font-weight: 500; }
+
+  /* Responsive */
+  @media (max-width: 1024px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) {
+    .events-grid { grid-template-columns: 1fr; }
+    .page-hero h1 { font-size: 32px; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .search-box { max-width: 100%; }
+    .nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" style="max-width:100%;padding-left:24px;padding-right:24px;">
+  <div class="header-left">
+    <a href="#" class="logo">artistrax</a>
+    <nav class="nav">
+      <a href="#">Home</a>
+      <a href="#" class="active">Events</a>
+      <a href="#">Artists</a>
+      <a href="#">Releases</a>
+      <a href="#">Labels</a>
+      <a href="#">Live</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <button class="btn-search">Search artists</button>
+    <a href="#" class="btn-login">Login</a>
+    <a href="#" class="btn-primary">Submit Music</a>
+  </div>
+</header>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <h1>Events</h1>
+  <p>Live shows, virtual performances, and community gatherings from the artists &amp; labels you love.</p>
+</section>
+
+<!-- Filters -->
+<div class="container">
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-chip active">Upcoming</span>
+      <span class="filter-chip">All Events</span>
+      <span class="filter-chip">Past</span>
+      <span class="filter-chip">Virtual</span>
+      <span class="filter-chip">In Person</span>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div class="search-box">
+        <span style="font-size:14px;color:var(--text-muted2);">🔍</span>
+        <input type="text" placeholder="Search events...">
+      </div>
+      <div style="font-size:12px;color:var(--text-muted2);">9 events</div>
+      <div class="view-toggle">
+        <button class="view-btn active">▦ Grid</button>
+        <button class="view-btn">☰ List</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="events-grid">
+    <!-- Event 1 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=600&h=400&q=80" alt="Summer Solstice">
+        <span class="event-card-badge">🔥 1.2K attending</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Sat, Jun 21 · 8:00 PM</div>
+        <h3 class="event-card-title">Summer Solstice: Luna Wave × Velvet Haze</h3>
+        <div class="event-card-meta">
+          <span>📍 Outdoor Amphitheatre, Lisbon</span>
+          <span>·</span>
+          <span>🎵 Electronic · R&B</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>Luna Wave</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$25.00</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">$65.00</div>
+            <div class="event-card-sublabel">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 2 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&h=400&q=80" alt="Solar Drift">
+        <span class="event-card-badge">🎸 342 sold</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Sat, Jul 12 · 9:00 PM</div>
+        <h3 class="event-card-title">Solar Drift: Live at Blue Note</h3>
+        <div class="event-card-meta">
+          <span>📍 Blue Note, Tokyo</span>
+          <span>·</span>
+          <span>🎵 Jazz Fusion</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>Solar Drift</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">¥3,500</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">¥8,000</div>
+            <div class="event-card-sublabel">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 3: Virtual -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&h=400&q=80" alt="Livestream">
+        <span class="event-card-badge" style="background:var(--blue);">🎧 Virtual</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Wed, Jul 23 · 7:00 PM</div>
+        <h3 class="event-card-title">The Midnight Echo: Livestream Session</h3>
+        <div class="event-card-meta">
+          <span>🌐 Virtual · Global</span>
+          <span>·</span>
+          <span>🎵 Indie Rock</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1496360166961-10a51d5f367a?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>The Midnight Echo</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$10.00</div>
+            <div class="event-card-sublabel">Stream</div>
+          </div>
+          <div>
+            <div class="event-card-price">$10.00</div>
+            <div class="event-card-sublabel">+ Donation</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 4 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&h=400&q=80" alt="RYTE">
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Thu, Aug 14 · 10:00 PM</div>
+        <h3 class="event-card-title">RYTE × Dev Sinclair: B2B Session</h3>
+        <div class="event-card-meta">
+          <span>📍 Berghain, Berlin</span>
+          <span>·</span>
+          <span>🎵 Techno · Future Bass</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>RYTE</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">€28.00</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">€50.00</div>
+            <div class="event-card-sublabel">Late Entry</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 5 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=600&h=400&q=80" alt="Velvet Haze">
+        <span class="event-card-badge">🔥 Popular</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Fri, Aug 22 · 8:00 PM</div>
+        <h3 class="event-card-title">Velvet Haze: Intimate Night Session</h3>
+        <div class="event-card-meta">
+          <span>📍 The Sun Rose, Los Angeles</span>
+          <span>·</span>
+          <span>🎵 R&B · Soul</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>Velvet Haze</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$35.00</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">$75.00</div>
+            <div class="event-card-sublabel">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 6 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=600&h=400&q=80" alt="Klara Weis">
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Sat, Sep 6 · 8:00 PM</div>
+        <h3 class="event-card-title">Klara Weis: Synth Night</h3>
+        <div class="event-card-meta">
+          <span>📍 Volkstheater, Vienna</span>
+          <span>·</span>
+          <span>🎵 Synthpop · Electronic</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>Klara Weis</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">€22.00</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">€42.00</div>
+            <div class="event-card-sublabel">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 7: Virtual -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&h=400&q=80" alt="Masterclass">
+        <span class="event-card-badge" style="background:var(--green);color:#000;">🎓 Workshop</span>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Sun, Sep 14 · 2:00 PM</div>
+        <h3 class="event-card-title">Beat Making Masterclass w/ RYTE</h3>
+        <div class="event-card-meta">
+          <span>🌐 Virtual · Limited to 50</span>
+          <span>·</span>
+          <span>🎵 Production</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>RYTE</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">$40.00</div>
+            <div class="event-card-sublabel">Standard</div>
+          </div>
+          <div>
+            <div class="event-card-price">$75.00</div>
+            <div class="event-card-sublabel">+ Feedback</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 8 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=600&h=400&q=80" alt="Echo Lane">
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Fri, Sep 26 · 9:00 PM</div>
+        <h3 class="event-card-title">Echo Lane: Drone &amp; Ambient Night</h3>
+        <div class="event-card-meta">
+          <span>📍 Harpa, Reykjavik</span>
+          <span>·</span>
+          <span>🎵 Drone · Ambient</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1496360166961-10a51d5f367a?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>Echo Lane</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">ISK 4,900</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Event 9 -->
+    <a href="#" class="event-card">
+      <div class="event-card-image">
+        <img src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=600&h=400&q=80" alt="Miro Sun">
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date">📅 Sat, Oct 4 · 7:00 PM</div>
+        <h3 class="event-card-title">Miro Sun: Afrobeats Festival</h3>
+        <div class="event-card-meta">
+          <span>📍 Fela's Shrine, Lagos</span>
+          <span>·</span>
+          <span>🎵 Afrobeats · World</span>
+        </div>
+        <div class="event-card-creator">
+          <div class="event-card-creator-avatar"><img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=100&h=100&q=80"></div>
+          <span>Miro Sun</span>
+        </div>
+        <div class="event-card-footer">
+          <div>
+            <div class="event-card-price">₦15,000</div>
+            <div class="event-card-sublabel">GA</div>
+          </div>
+          <div>
+            <div class="event-card-price">₦35,000</div>
+            <div class="event-card-sublabel">VIP</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button class="page-btn">‹ Prev</button>
+    <button class="page-btn active">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn">3</button>
+    <button class="page-btn">Next ›</button>
+  </div>
+</div>
+
+</body>
+</html>

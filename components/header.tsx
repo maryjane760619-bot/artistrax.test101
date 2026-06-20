@@ -17,6 +17,7 @@ import {
 
 const navLinks = [
   { href: '/', label: 'Home' },
+  { href: '/events', label: 'Events' },
   { href: '/artists', label: 'Artists' },
   { href: '/labels/siesta-records', label: 'Labels' },
   { href: '/live', label: 'Live' },

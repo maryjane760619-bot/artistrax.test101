@@ -22,6 +22,11 @@ export function Footer() {
             <h4 className="text-sm font-medium uppercase tracking-wider mb-4">Browse</h4>
             <ul className="space-y-2">
               <li>
+                <Link href="/events" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Events
+                </Link>
+              </li>
+              <li>
                 <Link href="/releases" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   All Releases
                 </Link>
