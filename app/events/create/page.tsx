@@ -17,6 +17,12 @@ type TicketTierInput = {
   quantity: string
 }
 
+const inputClassName =
+  'bg-[#141415] border-[#2a2a2d] rounded-lg text-[#faf7f1] placeholder:text-[#8b8580] focus-visible:border-[#b58a3e] focus-visible:ring-[#b58a3e]/20'
+const labelClassName = 'text-sm font-medium text-[#faf7f1] block mb-1.5'
+const tierLabelClassName = 'text-xs font-medium text-[#faf7f1] block mb-1'
+const sectionClassName = 'bg-[#141415] border border-[#2a2a2d] rounded-xl p-6 space-y-4'
+
 export default function CreateEventPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
@@ -170,51 +176,52 @@ export default function CreateEventPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="min-h-screen bg-[#0b0b0c] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8b8580]" />
       </div>
     )
   }
 
   if (!user || !userType) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-[#0b0b0c] flex flex-col">
         <Header />
         <main className="flex-1 pt-24 flex items-center justify-center">
           <div className="text-center">
-            <AlertCircle className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
-            <h2 className="text-2xl font-serif font-bold mb-2">Access Denied</h2>
-            <p className="text-muted-foreground">Only artists and labels can create events.</p>
+            <AlertCircle className="w-16 h-16 mx-auto text-[#8b8580]/40 mb-4" />
+            <h2 className="text-2xl font-serif font-bold mb-2 text-[#e5dfd0]">Access Denied</h2>
+            <p className="text-[#8b8580]">Only artists and labels can create events.</p>
           </div>
         </main>
+        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#0b0b0c] flex flex-col">
       <Header />
       <main className="flex-1 pt-24 md:pt-28 pb-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back */}
-          <Link href="/events" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <Link href="/events" className="inline-flex items-center gap-2 text-sm text-[#8b8580] hover:text-[#faf7f1] mb-6">
             <ArrowLeft className="w-4 h-4" />
             Back to Events
           </Link>
 
-          <h1 className="text-4xl font-serif font-bold mb-2">Create Event</h1>
-          <p className="text-muted-foreground mb-8">List your live show, virtual performance, or community event</p>
+          <h1 className="text-4xl font-serif font-bold mb-2 text-[#e5dfd0]">Create Event</h1>
+          <p className="text-[#8b8580] mb-8">List your live show, virtual performance, or community event</p>
 
           {/* Stripe Warning */}
           {!stripeComplete && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 mb-6 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div className="bg-[#b58a3e]/10 border border-[#b58a3e]/20 rounded-xl p-4 mb-6 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-[#b58a3e] flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-amber-600 dark:text-amber-400">Stripe onboarding required</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Complete your Stripe Connect setup to sell tickets. 
-                  <Link href={userType === 'label' ? '/label/dashboard' : '/artist/dashboard'} 
-                    className="text-primary hover:underline ml-1">
+                <p className="font-medium text-[#b58a3e]">Stripe onboarding required</p>
+                <p className="text-sm text-[#8b8580] mt-1">
+                  Complete your Stripe Connect setup to sell tickets.
+                  <Link href={userType === 'label' ? '/label/dashboard' : '/artist/dashboard'}
+                    className="text-[#faf7f1] hover:underline ml-1">
                     Go to Dashboard
                   </Link>
                 </p>
@@ -224,84 +231,89 @@ export default function CreateEventPage() {
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Event Details */}
-            <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <h2 className="text-lg font-serif font-semibold">Event Details</h2>
+            <section className={sectionClassName}>
+              <h2 className="text-lg font-serif font-semibold text-[#e5dfd0]">Event Details</h2>
 
               <div>
-                <label className="text-sm font-medium block mb-1.5">Event Title *</label>
+                <label className={labelClassName}>Event Title *</label>
                 <Input
                   placeholder="e.g., Summer Breeze Festival"
                   value={form.title}
                   onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
                   required
+                  className={inputClassName}
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium block mb-1.5">Description</label>
+                <label className={labelClassName}>Description</label>
                 <textarea
                   placeholder="Tell attendees what to expect..."
                   value={form.description}
                   onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
                   rows={4}
-                  className="w-full bg-input border border-border rounded-md px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-y"
+                  className="w-full bg-[#141415] border border-[#2a2a2d] rounded-lg px-3 py-2 text-sm text-[#faf7f1] placeholder:text-[#8b8580] focus:outline-none focus:ring-2 focus:ring-[#b58a3e]/20 focus:border-[#b58a3e] resize-y"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium block mb-1.5">Cover Image URL</label>
+                <label className={labelClassName}>Cover Image URL</label>
                 <Input
                   placeholder="https://your-image.com/event-cover.jpg"
                   value={form.cover_url}
                   onChange={e => setForm(prev => ({ ...prev, cover_url: e.target.value }))}
+                  className={inputClassName}
                 />
               </div>
             </section>
 
             {/* Date & Time */}
-            <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <h2 className="text-lg font-serif font-semibold">Date & Time</h2>
+            <section className={sectionClassName}>
+              <h2 className="text-lg font-serif font-semibold text-[#e5dfd0]">Date & Time</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium block mb-1.5">Event Date *</label>
+                  <label className={labelClassName}>Event Date *</label>
                   <Input
                     type="date"
                     value={form.event_date}
                     onChange={e => setForm(prev => ({ ...prev, event_date: e.target.value }))}
                     required
+                    className={inputClassName}
                   />
                 </div>
                 <div />
                 <div>
-                  <label className="text-sm font-medium block mb-1.5">Start Time</label>
+                  <label className={labelClassName}>Start Time</label>
                   <Input
                     type="time"
                     value={form.start_time}
                     onChange={e => setForm(prev => ({ ...prev, start_time: e.target.value }))}
+                    className={inputClassName}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1.5">End Time</label>
+                  <label className={labelClassName}>End Time</label>
                   <Input
                     type="time"
                     value={form.end_time}
                     onChange={e => setForm(prev => ({ ...prev, end_time: e.target.value }))}
+                    className={inputClassName}
                   />
                 </div>
               </div>
             </section>
 
             {/* Location */}
-            <section className="bg-card border border-border rounded-lg p-6 space-y-4">
+            <section className={sectionClassName}>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-serif font-semibold">Location</h2>
-                <label className="flex items-center gap-2 text-sm">
+                <h2 className="text-lg font-serif font-semibold text-[#e5dfd0]">Location</h2>
+                <label className="flex items-center gap-2 text-sm text-[#faf7f1]">
                   <input
                     type="checkbox"
                     checked={form.is_virtual}
                     onChange={e => setForm(prev => ({ ...prev, is_virtual: e.target.checked }))}
-                    className="rounded border-border"
+                    className="rounded border-[#2a2a2d] bg-[#141415] text-[#155dfc] focus:ring-[#155dfc]/30"
                   />
                   Virtual Event
                 </label>
@@ -309,29 +321,32 @@ export default function CreateEventPage() {
 
               {form.is_virtual ? (
                 <div>
-                  <label className="text-sm font-medium block mb-1.5">Streaming URL</label>
+                  <label className={labelClassName}>Streaming URL</label>
                   <Input
                     placeholder="https://twitch.tv/yourstream or https://zoom.us/j/..."
                     value={form.streaming_url}
                     onChange={e => setForm(prev => ({ ...prev, streaming_url: e.target.value }))}
+                    className={inputClassName}
                   />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1.5">Venue Name</label>
+                    <label className={labelClassName}>Venue Name</label>
                     <Input
                       placeholder="e.g., The Fillmore"
                       value={form.venue_name}
                       onChange={e => setForm(prev => ({ ...prev, venue_name: e.target.value }))}
+                      className={inputClassName}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5">Address</label>
+                    <label className={labelClassName}>Address</label>
                     <Input
                       placeholder="123 Main St, City, State"
                       value={form.venue_address}
                       onChange={e => setForm(prev => ({ ...prev, venue_address: e.target.value }))}
+                      className={inputClassName}
                     />
                   </div>
                 </div>
@@ -339,28 +354,34 @@ export default function CreateEventPage() {
             </section>
 
             {/* Ticket Tiers */}
-            <section className="bg-card border border-border rounded-lg p-6 space-y-4">
+            <section className={sectionClassName}>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-serif font-semibold">Ticket Tiers</h2>
-                <Button type="button" variant="outline" size="sm" onClick={addTier}>
+                <h2 className="text-lg font-serif font-semibold text-[#e5dfd0]">Ticket Tiers</h2>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addTier}
+                  className="border-[#2a2a2d] bg-transparent text-[#faf7f1] hover:bg-[#2a2a2d] hover:text-[#faf7f1] rounded-full"
+                >
                   <Plus className="w-4 h-4 mr-1" />
                   Add Tier
                 </Button>
               </div>
 
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#8b8580]">
                 Create different ticket types (GA, VIP, Early Bird, etc.)
               </p>
 
               {ticketTiers.map((tier, index) => (
-                <div key={index} className="border border-border rounded-lg p-4 space-y-3">
+                <div key={index} className="border border-[#2a2a2d] rounded-lg p-4 space-y-3 bg-[#0b0b0c]/30">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Tier {index + 1}</span>
+                    <span className="text-sm font-medium text-[#e5dfd0]">Tier {index + 1}</span>
                     {ticketTiers.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeTier(index)}
-                        className="text-destructive hover:text-destructive/80"
+                        className="text-[#dc2626] hover:text-[#dc2626]/80"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -368,15 +389,16 @@ export default function CreateEventPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium block mb-1">Name</label>
+                      <label className={tierLabelClassName}>Name</label>
                       <Input
                         placeholder="General Admission"
                         value={tier.name}
                         onChange={e => updateTier(index, 'name', e.target.value)}
+                        className={inputClassName}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium block mb-1">Price ($)</label>
+                      <label className={tierLabelClassName}>Price ($)</label>
                       <Input
                         type="number"
                         step="0.01"
@@ -384,24 +406,27 @@ export default function CreateEventPage() {
                         placeholder="20.00"
                         value={tier.price}
                         onChange={e => updateTier(index, 'price', e.target.value)}
+                        className={inputClassName}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium block mb-1">Quantity (0 = unlimited)</label>
+                      <label className={tierLabelClassName}>Quantity (0 = unlimited)</label>
                       <Input
                         type="number"
                         min="0"
                         placeholder="100"
                         value={tier.quantity}
                         onChange={e => updateTier(index, 'quantity', e.target.value)}
+                        className={inputClassName}
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-medium block mb-1">Description</label>
+                      <label className={tierLabelClassName}>Description</label>
                       <Input
                         placeholder="Standard entry with full access"
                         value={tier.description}
                         onChange={e => updateTier(index, 'description', e.target.value)}
+                        className={inputClassName}
                       />
                     </div>
                   </div>
@@ -411,15 +436,20 @@ export default function CreateEventPage() {
 
             {/* Error */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
+              <div className="bg-[#dc2626]/10 border border-[#dc2626]/20 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-[#dc2626] flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-[#dc2626]">{error}</p>
               </div>
             )}
 
             {/* Submit */}
             <div className="flex items-center gap-4">
-              <Button type="submit" size="lg" disabled={submitting || !stripeComplete}>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={submitting || !stripeComplete}
+                className="bg-[#155dfc] text-white rounded-full px-5 py-2 hover:bg-[#155dfc]/90"
+              >
                 {submitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -430,7 +460,13 @@ export default function CreateEventPage() {
                 )}
               </Button>
               <Link href="/events">
-                <Button type="button" variant="ghost">Cancel</Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-[#8b8580] hover:text-[#faf7f1] hover:bg-[#141415]"
+                >
+                  Cancel
+                </Button>
               </Link>
             </div>
           </form>

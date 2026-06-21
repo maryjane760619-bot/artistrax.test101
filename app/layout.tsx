@@ -1,7 +1,8 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Inter, Source_Serif_4, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/lib/auth-context'
 import { CartProvider } from '@/lib/cart-context'
 import { AIChatWrapper } from '@/components/ai-chat-wrapper'
@@ -9,8 +10,9 @@ import { AccessibilityToolbar } from '@/components/accessibility-toolbar'
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
 import './globals.css'
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const sourceSerif = Source_Serif_4({ subsets: ["latin"], variable: "--font-source-serif", display: "swap", weight: ["400", "500", "600", "700"], style: ["normal", "italic"] });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", display: "swap", weight: ["400", "500"] });
 
 export const metadata: Metadata = {
   title: 'artistrax - Own Your Music',
@@ -79,7 +81,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -87,16 +89,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="artistrax" />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-foreground`}>
         <a href="#main-content" className="skip-to-main">
           Skip to main content
         </a>
         <AuthProvider>
           <CartProvider>
+            <ThemeProvider forcedTheme="light" attribute="class">
             <AccessibilityToolbar />
             {children}
             <AIChatWrapper />
             <PWAInstallPrompt />
+            </ThemeProvider>
           </CartProvider>
         </AuthProvider>
         <Analytics />
