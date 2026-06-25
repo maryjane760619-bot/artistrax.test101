@@ -15,6 +15,7 @@ type Artist = {
   display_name: string
   bio: string | null
   avatar_url: string | null
+  banner_url?: string | null
   website?: string | null
   instagram?: string | null
   twitter?: string | null
@@ -161,43 +162,59 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], e
   }
 
   return (
-    <main className="min-h-screen pt-24 pb-16 bg-background">
+    <main className="min-h-screen pb-16 bg-background">
+      {/* Banner */}
+      <div className="pt-24">
+        <div className="relative h-48 sm:h-64 overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-600">
+          {artist.banner_url && (
+            <img
+              src={artist.banner_url}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Artist Header */}
-        <div className="mb-12 text-center">
-          <div className="w-40 h-40 rounded-full overflow-hidden mx-auto mb-6 bg-muted border-4 border-border">
-            {artist.avatar_url ? (
-              <img 
-                src={artist.avatar_url} 
-                alt={artist.display_name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Music2 className="w-16 h-16 text-muted-foreground" />
-              </div>
-            )}
+        <div className="mb-12">
+          <div className="flex items-end gap-4 -mt-12 sm:-mt-16 pb-6">
+            <div className="h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-full border-4 border-background bg-card shadow-lg">
+              {artist.avatar_url ? (
+                <img
+                  src={artist.avatar_url}
+                  alt={artist.display_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <Music2 className="w-10 h-10 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <div className="pb-1">
+              <h1 className="text-2xl sm:text-3xl font-serif font-semibold">
+                {artist.display_name}
+              </h1>
+              <p className="text-sm text-muted-foreground">@{artist.username}</p>
+            </div>
           </div>
-          <h1 className="text-5xl font-serif font-semibold mb-3">
-            {artist.display_name}
-          </h1>
-          <p className="text-xl text-muted-foreground mb-2">
-            @{artist.username}
-          </p>
           {subscriberCount > 0 && (
             <p className="text-sm text-pink-500 font-medium mb-4">
               {subscriberCount} {subscriberCount === 1 ? 'subscriber' : 'subscribers'}
             </p>
           )}
           {artist.bio && (
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-6 whitespace-pre-wrap">
+            <p className="text-muted-foreground max-w-2xl mb-6 whitespace-pre-wrap">
               {artist.bio}
             </p>
           )}
 
           {/* Social Links */}
           {(artist.website || artist.instagram || artist.twitter || artist.soundcloud || artist.spotify || artist.tiktok) && (
-            <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
               {artist.website && (
                 <a
                   href={artist.website.startsWith('http') ? artist.website : `https://${artist.website}`}

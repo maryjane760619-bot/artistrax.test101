@@ -120,34 +120,38 @@ export default function LabelPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div
-        className="relative bg-gradient-to-br from-orange-500 to-pink-500 text-white"
-        style={
-          label.bannerUrl
-            ? {
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${label.bannerUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }
-            : undefined
-        }
-      >
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          {label.logoUrl && (
-            <img
-              src={label.logoUrl}
-              alt={`${label.name} logo`}
-              className="mx-auto mb-4 h-20 w-20 rounded-full border-2 border-white/80 object-cover shadow-lg"
-            />
-          )}
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{label.name}</h1>
-          <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            {label.description || label.bio || 'Independent record label'}
-          </p>
-          <p className="text-sm mt-2 opacity-75">
-            {tracks?.length || 0} tracks · Lossless formats
-          </p>
+      <div className="relative h-48 sm:h-64 overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-600">
+        {label.bannerUrl && (
+          <img
+            src={label.bannerUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-end gap-4 -mt-12 sm:-mt-16 pb-6">
+          <div className="h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-md border-4 border-background bg-card shadow-lg">
+            {label.logoUrl ? (
+              <img src={label.logoUrl} alt={`${label.name} logo`} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-muted">
+                <Music className="h-10 w-10 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+          <div className="pb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">{label.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {tracks?.length || 0} tracks · Lossless formats
+            </p>
+          </div>
         </div>
+        <p className="max-w-2xl pb-8 text-muted-foreground">
+          {label.description || label.bio || 'Independent record label'}
+        </p>
       </div>
 
       {/* Tracks Grid */}
