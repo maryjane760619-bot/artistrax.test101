@@ -46,6 +46,7 @@ type Product = {
   base_price: number
   images: string[]
   is_active: boolean
+  variants?: { stock_quantity: number }[]
 }
 
 type Video = {
@@ -80,7 +81,9 @@ type Props = {
 
 export function ArtistPublicPage({ artist, tracks, products = [], videos = [], subscriberCount, subscriptionSettings }: Props) {
   const cart = useCart()
-  
+  const vinylProducts = products.filter(p => p.category === 'vinyl')
+  const merchProducts = products.filter(p => p.category !== 'vinyl')
+
   function handleAddToCart(productId: string) {
     const product = products.find(p => p.id === productId)
     if (!product) {
@@ -270,16 +273,16 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
           </div>
         )}
 
-        {/* Tracks Section */}
+        {/* Discography Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-serif font-semibold">
-              Tracks ({tracks.length})
+            <h2 className="font-display text-2xl font-semibold tracking-tight">
+              Discography ({tracks.length})
             </h2>
           </div>
 
           {tracks.length === 0 ? (
-            <div className="bg-card border border-border rounded-lg p-12 text-center">
+            <div className="rounded-sm border border-border bg-card p-12 text-center">
               <Play className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">
                 No tracks uploaded yet. Check back soon!
@@ -288,7 +291,7 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
           ) : (
             <div className="space-y-6">
               {tracks.map((track) => (
-                <div key={track.id} className="bg-card border border-border rounded-lg overflow-hidden">
+                <div key={track.id} className="rounded-sm border border-border bg-card overflow-hidden">
                   <div className="p-6">
                     {/* Track Header */}
                     <div className="flex items-start justify-between mb-4">
@@ -370,16 +373,37 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
         )}
 
         {/* Merch Section */}
-        {products.length > 0 && (
+        {merchProducts.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-serif font-semibold">
-                Merchandise ({products.length})
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                Merchandise ({merchProducts.length})
               </h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {merchProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Vinyl Section */}
+        {vinylProducts.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                Limited Edition Vinyl ({vinylProducts.length})
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vinylProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}

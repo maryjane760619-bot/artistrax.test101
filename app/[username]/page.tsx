@@ -34,7 +34,7 @@ export default async function UsernamePage({ params }: Props) {
   // Fetch artist's products
   const { data: products } = await supabase
     .from('products')
-    .select('*')
+    .select('*, variants:product_variants(stock_quantity)')
     .eq('artist_id', artist.id)
     .eq('is_active', true)
     .order('created_at', { ascending: false})
