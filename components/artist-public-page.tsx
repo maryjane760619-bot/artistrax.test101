@@ -2,7 +2,7 @@
 
 import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
-import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink, ShoppingBag, Video } from 'lucide-react'
+import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink, ShoppingBag, Video, Calendar, MapPin, Ticket } from 'lucide-react'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
 import { VideoPlayer } from '@/components/video-player'
@@ -70,16 +70,28 @@ type SubscriptionSettings = {
   benefits_subscriber_badge: boolean
 }
 
+type EventItem = {
+  id: string
+  slug: string
+  title: string
+  venue_name: string | null
+  venue_address: string | null
+  event_date: string
+  start_time: string | null
+  is_virtual: boolean
+}
+
 type Props = {
   artist: Artist
   tracks: Track[]
   products?: Product[]
   videos?: Video[]
+  events?: EventItem[]
   subscriberCount: number
   subscriptionSettings: SubscriptionSettings | null
 }
 
-export function ArtistPublicPage({ artist, tracks, products = [], videos = [], subscriberCount, subscriptionSettings }: Props) {
+export function ArtistPublicPage({ artist, tracks, products = [], videos = [], events = [], subscriberCount, subscriptionSettings }: Props) {
   const cart = useCart()
   const vinylProducts = products.filter(p => p.category === 'vinyl')
   const merchProducts = products.filter(p => p.category !== 'vinyl')
@@ -409,6 +421,49 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
                   product={product}
                   onAddToCart={handleAddToCart}
                 />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Shows Section */}
+        {events.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                Upcoming Shows
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <div key={event.id} className="rounded-sm border border-border bg-card p-6">
+                  <h3 className="font-display text-lg font-semibold tracking-tight mb-2">
+                    {event.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground mb-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {new Date(event.event_date).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                    {event.start_time && ` · ${event.start_time.slice(0, 5)}`}
+                  </div>
+                  {(event.venue_name || event.is_virtual) && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {event.is_virtual ? 'Virtual event' : event.venue_name}
+                    </div>
+                  )}
+                  <a
+                    href={`/events/${event.slug}`}
+                    className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    Get Tickets
+                  </a>
+                </div>
               ))}
             </div>
           </div>
