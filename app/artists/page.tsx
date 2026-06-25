@@ -1,41 +1,78 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Grid2X2, List, Search } from 'lucide-react'
+import { ArrowRight, Grid2X2, List, Music, Search } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { ArtistCard } from '@/components/artist-card'
 import { CartProvider } from '@/lib/cart-context'
-import { artists } from '@/lib/data'
+import { supabase } from '@/lib/supabase'
+
+interface DirectoryArtist {
+  id: string
+  name: string
+  slug: string
+  bio: string
+  image: string
+  genres: string[]
+}
 
 export default function ArtistsPage() {
+  const [artists, setArtists] = useState<DirectoryArtist[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedGenre, setSelectedGenre] = useState('')
   const [sortBy, setSortBy] = useState<'az' | 'za'>('az')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
-  const genres = Array.from(new Set(artists.flatMap(artist => artist.genres))).sort()
+  useEffect(() => {
+    async function fetchArtists() {
+      try {
+        const { data, error } = await supabase
+          .from('public_artist_profiles')
+          .select('id, username, display_name, bio, avatar_url')
+          .order('display_name', { ascending: true })
+
+        if (error) throw error
+
+        setArtists(
+          (data || []).map(row => ({
+            id: row.id,
+            name: row.display_name || row.username,
+            slug: row.username,
+            bio: row.bio || '',
+            image: row.avatar_url || '',
+            genres: [],
+          }))
+        )
+      } catch (err) {
+        console.error('Failed to load artists:', err)
+        setArtists([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchArtists()
+  }, [])
+
   const filteredArtists = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
     return artists
       .filter(artist => {
-        const matchesSearch =
-          !query ||
+        if (!query) return true
+        return (
           artist.name.toLowerCase().includes(query) ||
-          artist.bio.toLowerCase().includes(query) ||
-          artist.genres.some(genre => genre.toLowerCase().includes(query))
-        const matchesGenre = !selectedGenre || artist.genres.includes(selectedGenre)
-
-        return matchesSearch && matchesGenre
+          artist.bio.toLowerCase().includes(query)
+        )
       })
       .sort((a, b) =>
         sortBy === 'az'
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name)
       )
-  }, [searchQuery, selectedGenre, sortBy])
+  }, [artists, searchQuery, sortBy])
 
   return (
     <CartProvider>
@@ -59,7 +96,7 @@ export default function ArtistsPage() {
                     <input
                       value={searchQuery}
                       onChange={event => setSearchQuery(event.target.value)}
-                      placeholder="Search artists or genres..."
+                      placeholder="Search artists..."
                       className="h-11 w-full rounded-sm border border-border bg-card pl-10 pr-4 text-sm outline-none transition focus:border-foreground/40"
                     />
                   </label>
@@ -102,40 +139,19 @@ export default function ArtistsPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedGenre('')}
-                    className={`shrink-0 rounded-full border px-4 py-2 text-xs transition ${
-                      selectedGenre === ''
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border hover:border-foreground/40'
-                    }`}
-                  >
-                    All genres
-                  </button>
-                  {genres.map(genre => (
-                    <button
-                      key={genre}
-                      type="button"
-                      onClick={() => setSelectedGenre(genre === selectedGenre ? '' : genre)}
-                      className={`shrink-0 rounded-full border px-4 py-2 text-xs transition ${
-                        selectedGenre === genre
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : 'border-border hover:border-foreground/40'
-                      }`}
-                    >
-                      {genre}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="font-mono text-xs text-muted-foreground">
-                  {filteredArtists.length} {filteredArtists.length === 1 ? 'artist' : 'artists'}
-                </p>
+                {!loading && (
+                  <p className="font-mono text-xs text-muted-foreground">
+                    {filteredArtists.length} {filteredArtists.length === 1 ? 'artist' : 'artists'}
+                  </p>
+                )}
               </div>
 
-              {filteredArtists.length === 0 ? (
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-24">
+                  <Music className="w-10 h-10 animate-pulse text-primary mb-4" />
+                  <p className="text-muted-foreground text-sm uppercase tracking-widest font-bold">Loading artists...</p>
+                </div>
+              ) : filteredArtists.length === 0 ? (
                 <div className="rounded-sm border border-dashed border-border py-16 text-center text-muted-foreground">
                   No artists match those filters.
                 </div>
@@ -150,7 +166,7 @@ export default function ArtistsPage() {
                   {filteredArtists.map(artist => (
                     <Link
                       key={artist.id}
-                      href={`/artists/${artist.slug}`}
+                      href={`/${artist.slug}`}
                       className="group flex items-center gap-4 border-b border-border py-4 transition-colors hover:bg-card/50"
                     >
                       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-sm border border-border bg-muted">
@@ -161,9 +177,6 @@ export default function ArtistsPage() {
                       <div className="min-w-0 flex-1 md:grid md:grid-cols-[minmax(12rem,0.35fr)_1fr] md:items-center md:gap-6">
                         <div>
                           <h2 className="font-display text-lg font-semibold">{artist.name}</h2>
-                          <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                            {artist.genres.join(' · ')}
-                          </p>
                         </div>
                         <p className="mt-1 line-clamp-2 text-sm text-muted-foreground md:mt-0">{artist.bio}</p>
                       </div>
