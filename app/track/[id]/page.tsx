@@ -1,15 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Music, ArrowLeft, Loader2, ShoppingCart, CheckCircle, Download } from 'lucide-react'
+import { Music, ArrowLeft, Loader2, ShoppingCart, CheckCircle, Download, Play } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/cart-context'
+
+function formatTime(seconds: number) {
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
 
 export default function TrackPage() {
   const params = useParams()
@@ -21,6 +27,14 @@ export default function TrackPage() {
   const [error, setError] = useState<string | null>(null)
   const [alreadyOwned, setAlreadyOwned] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  const jumpTo = (seconds: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = seconds
+      audioRef.current.play()
+    }
+  }
 
   useEffect(() => {
     if (!id) return
@@ -126,6 +140,41 @@ export default function TrackPage() {
 
               <h1 className="text-3xl font-bold mb-2">{track.title}</h1>
               <p className="text-xl text-muted-foreground mb-6">{artistName}</p>
+
+              {track.is_mix && (
+                <div className="mb-6 rounded-md border border-border bg-card p-4">
+                  <audio ref={audioRef} src={track.audio_url} controls className="w-full" />
+
+                  {Array.isArray(track.tracklist) && track.tracklist.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                        Tracklist
+                      </p>
+                      <div className="divide-y divide-border">
+                        {track.tracklist.map((row: any, i: number) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => jumpTo(row.timestamp_seconds)}
+                            className="group flex w-full items-center gap-3 py-2 text-left hover:bg-accent/5"
+                          >
+                            <Play className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-accent" />
+                            <span className="font-mono text-xs text-muted-foreground w-12 shrink-0">
+                              {formatTime(row.timestamp_seconds)}
+                            </span>
+                            <span className="text-sm truncate">
+                              {row.title}
+                              {row.artist && (
+                                <span className="text-muted-foreground"> — {row.artist}</span>
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {track.is_free ? (
                 <div className="mb-6">
