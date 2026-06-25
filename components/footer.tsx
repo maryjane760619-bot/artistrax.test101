@@ -7,6 +7,7 @@ const BROWSE = [
   { l: 'Artists', href: '/artists' },
   { l: 'Labels', href: '/labels' },
   { l: 'Bundles', href: '/bundles' },
+  { l: 'Events', href: '/events' },
   { l: 'Live', href: '/live' },
 ]
 
