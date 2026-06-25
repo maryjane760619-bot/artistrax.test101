@@ -10,26 +10,27 @@ export default function AboutPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-24 pb-16">
+      <main className="min-h-screen pb-16">
         {/* Hero Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h1 className="text-5xl md:text-6xl font-serif font-semibold mb-6">
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16 sm:py-20 text-center">
+          <div className="text-xs uppercase tracking-[0.2em] text-foreground/60 mb-4">Our story</div>
+          <h1 className="text-5xl md:text-6xl font-display font-semibold tracking-tight mb-6">
             About artistrax
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-4">
             A platform built for independent artists, labels, and music lovers who believe in direct connection and fair compensation.
           </p>
-          <p className="text-lg text-primary italic max-w-3xl mx-auto">
+          <p className="font-display text-lg text-accent italic max-w-3xl mx-auto">
             Where an artist can be an artist
           </p>
         </section>
 
         {/* Mission Section */}
         <section className="bg-card py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl font-serif font-semibold mb-6">
+                <h2 className="text-3xl font-display font-semibold tracking-tight mb-6">
                   Our Mission
                 </h2>
                 <p className="text-lg text-muted-foreground mb-4">
@@ -69,12 +70,12 @@ export default function AboutPage() {
         </section>
 
         {/* Siesta Records Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16">
           <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-8 md:p-12 border border-border">
             <div className="max-w-3xl">
               <div className="flex items-center gap-3 mb-6">
                 <Building2 className="w-10 h-10 text-primary" />
-                <h2 className="text-3xl font-serif font-semibold">
+                <h2 className="text-3xl font-display font-semibold tracking-tight">
                   Powered by Siesta Records
                 </h2>
               </div>
@@ -98,8 +99,8 @@ export default function AboutPage() {
 
         {/* How It Works */}
         <section className="bg-card py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-serif font-semibold text-center mb-12">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+            <h2 className="text-3xl font-display font-semibold tracking-tight text-center mb-12">
               How artistrax Works
             </h2>
             
@@ -107,7 +108,7 @@ export default function AboutPage() {
               {/* For Fans */}
               <div className="bg-background rounded-lg p-8 border border-border">
                 <Heart className="w-12 h-12 text-primary mb-4" />
-                <h3 className="text-2xl font-serif font-semibold mb-4">For Fans</h3>
+                <h3 className="text-2xl font-display font-semibold tracking-tight mb-4">For Fans</h3>
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
@@ -134,7 +135,7 @@ export default function AboutPage() {
               {/* For Artists */}
               <div className="bg-background rounded-lg p-8 border border-border">
                 <Music className="w-12 h-12 text-primary mb-4" />
-                <h3 className="text-2xl font-serif font-semibold mb-4">For Artists</h3>
+                <h3 className="text-2xl font-display font-semibold tracking-tight mb-4">For Artists</h3>
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
@@ -161,7 +162,7 @@ export default function AboutPage() {
               {/* For Labels */}
               <div className="bg-background rounded-lg p-8 border border-border">
                 <Building2 className="w-12 h-12 text-primary mb-4" />
-                <h3 className="text-2xl font-serif font-semibold mb-4">For Labels</h3>
+                <h3 className="text-2xl font-display font-semibold tracking-tight mb-4">For Labels</h3>
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
@@ -189,9 +190,9 @@ export default function AboutPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-serif font-semibold mb-6">
+            <h2 className="text-3xl font-display font-semibold tracking-tight mb-6">
               Get in Touch
             </h2>
             <p className="text-lg text-muted-foreground mb-8">

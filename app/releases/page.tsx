@@ -6,14 +6,19 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/cart-context'
-import { Music, ShoppingCart, CheckCircle, Play, Pause, X } from 'lucide-react'
+import { ArrowRight, Music, ShoppingCart, CheckCircle, Grid2X2, List, Play, Pause, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GENRES } from '@/lib/genres'
+
+export const dynamic = 'force-dynamic'
 
 export default function ReleasesPage() {
   const [tracks, setTracks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedGenre, setSelectedGenre] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az' | 'price-high' | 'price-low'>('newest')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const { addItem, items } = useCart()
 
   // Player state
@@ -100,18 +105,41 @@ export default function ReleasesPage() {
     return `${m}:${sec.toString().padStart(2, '0')}`
   }
 
+  const filteredTracks = tracks
+    .filter(track => {
+      const query = searchQuery.trim().toLowerCase()
+      if (!query) return true
+
+      return (
+        track.title?.toLowerCase().includes(query) ||
+        track.genre?.toLowerCase().includes(query) ||
+        track.artists?.display_name?.toLowerCase().includes(query) ||
+        track.labels?.name?.toLowerCase().includes(query)
+      )
+    })
+    .sort((a, b) => {
+      if (sortBy === 'oldest') {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      }
+      if (sortBy === 'az') return String(a.title).localeCompare(String(b.title))
+      if (sortBy === 'price-high') return Number(b.price || 0) - Number(a.price || 0)
+      if (sortBy === 'price-low') return Number(a.price || 0) - Number(b.price || 0)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
       <audio ref={audioRef} />
 
-      <main className="pt-20 md:pt-24 pb-32">
-        <section className="py-12 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="pb-32">
+        <section className="py-12 md:py-16">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
             <div className="mb-8">
-              <h1 className="font-serif text-4xl md:text-5xl mb-4">New Releases</h1>
-              <p className="text-muted-foreground text-lg max-w-2xl mb-6">
-                Browse the latest tracks from our artists and labels.
+              <div className="text-xs uppercase tracking-[0.2em] text-foreground/60 mb-2">Browse the catalog</div>
+              <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight mb-3">New Releases</h1>
+              <p className="text-muted-foreground max-w-2xl mb-6">
+                Browse the latest tracks from our artists and labels — lossless, DRM-free, yours forever.
               </p>
               {/* Genre pills */}
               <div className="flex flex-wrap gap-2">
@@ -141,75 +169,189 @@ export default function ReleasesPage() {
               </div>
             </div>
 
+            <div className="mb-8 flex flex-col gap-3 border-y border-border py-4 md:flex-row md:items-center">
+              <label className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={searchQuery}
+                  onChange={event => setSearchQuery(event.target.value)}
+                  placeholder="Search releases, artists, labels..."
+                  className="h-11 w-full rounded-sm border border-border bg-card pl-10 pr-4 text-sm outline-none transition focus:border-foreground/40"
+                />
+              </label>
+
+              <select
+                value={sortBy}
+                onChange={event => setSortBy(event.target.value as typeof sortBy)}
+                className="h-11 rounded-sm border border-border bg-card px-3 text-sm outline-none focus:border-foreground/40"
+                aria-label="Sort releases"
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="az">Title: A–Z</option>
+                <option value="price-high">Price: High to low</option>
+                <option value="price-low">Price: Low to high</option>
+              </select>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`inline-flex h-11 items-center gap-2 rounded-sm px-3 text-xs uppercase tracking-wide transition ${
+                    viewMode === 'grid'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'border border-border hover:bg-accent/10'
+                  }`}
+                >
+                  <Grid2X2 className="h-3.5 w-3.5" />
+                  Grid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`inline-flex h-11 items-center gap-2 rounded-sm px-3 text-xs uppercase tracking-wide transition ${
+                    viewMode === 'list'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'border border-border hover:bg-accent/10'
+                  }`}
+                >
+                  <List className="h-3.5 w-3.5" />
+                  List
+                </button>
+              </div>
+            </div>
+
             {loading ? (
               <div className="text-muted-foreground">Loading...</div>
-            ) : tracks.length === 0 ? (
-              <div className="text-muted-foreground">No tracks yet.</div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {tracks.map(track => (
-                  <div key={track.id} className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary transition-colors group">
+            ) : filteredTracks.length === 0 ? (
+              <div className="rounded-sm border border-dashed border-border py-16 text-center text-muted-foreground">
+                No releases match those filters.
+              </div>
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+                {filteredTracks.map(track => (
+                  <div key={track.id} className="group">
                     {/* Cover art with play overlay */}
                     <div
-                      className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative cursor-pointer"
+                      className="relative aspect-square overflow-hidden rounded-sm border border-border bg-muted flex items-center justify-center cursor-pointer"
                       onClick={() => handlePlay(track)}
                     >
                       {track.cover_url ? (
                         <img
                           src={track.cover_url}
                           alt={track.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="img-zoom h-full w-full object-cover"
                         />
                       ) : (
-                        <Music className="w-12 h-12 text-muted-foreground" />
+                        <Music className="w-12 h-12 text-foreground/20" />
                       )}
-                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        {currentTrack?.id === track.id && isPlaying ? (
-                          <Pause className="w-10 h-10 text-white drop-shadow" />
-                        ) : (
-                          <Play className="w-10 h-10 text-white drop-shadow" />
-                        )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+                      <div className="absolute bottom-3 right-3 translate-y-2 opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg">
+                          {currentTrack?.id === track.id && isPlaying ? (
+                            <Pause className="w-4 h-4 fill-current" />
+                          ) : (
+                            <Play className="w-4 h-4 fill-current" />
+                          )}
+                        </span>
                       </div>
                       {currentTrack?.id === track.id && (
-                        <div className="absolute bottom-2 left-2 right-2 h-0.5 bg-white/30 rounded">
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/30">
                           <div
-                            className="h-full bg-primary rounded"
+                            className="h-full bg-accent"
                             style={{ width: duration ? `${(progress / duration) * 100}%` : '0%' }}
                           />
                         </div>
                       )}
                     </div>
 
-                    <div className="p-3">
+                    <div className="mt-3 px-0.5">
                       <Link href={`/track/${track.id}`}>
-                        <p className="font-semibold text-sm truncate hover:underline">{track.title}</p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="font-display text-base font-semibold tracking-tight truncate group-hover:text-accent transition-colors">{track.title}</p>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
                           {track.artists?.display_name || track.labels?.name || 'Unknown'}
                         </p>
                         {(track.bpm || track.musical_key) && (
-                          <p className="text-xs text-muted-foreground/70 mt-0.5">
+                          <p className="font-mono text-[11px] tabular-nums text-muted-foreground/70 mt-1">
                             {[track.bpm && `${track.bpm} BPM`, track.musical_key].filter(Boolean).join(' · ')}
                           </p>
                         )}
-                        <p className="text-xs font-medium text-primary mt-1">
-                          {track.is_free ? 'Free' : `$${Number(track.price).toFixed(2)}`}
-                        </p>
                       </Link>
-                      {!track.is_free && (
-                        <Button
-                          size="sm"
-                          variant={isInCart(track.id) ? 'outline' : 'default'}
-                          className="w-full mt-2 h-8 text-xs"
-                          onClick={() => handleAddToCart(track)}
-                        >
-                          {isInCart(track.id) ? (
-                            <><CheckCircle className="w-3 h-3 mr-1" />In Cart</>
-                          ) : (
-                            <><ShoppingCart className="w-3 h-3 mr-1" />Add to Cart</>
-                          )}
-                        </Button>
-                      )}
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="font-mono text-xs font-medium tabular-nums">
+                          {track.is_free ? 'Free' : `$${Number(track.price).toFixed(2)}`}
+                        </span>
+                        {!track.is_free && (
+                          <button
+                            onClick={() => handleAddToCart(track)}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                              isInCart(track.id) ? 'text-emerald-600' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                            }`}
+                            aria-label="Add to cart"
+                          >
+                            {isInCart(track.id) ? <CheckCircle className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border-t border-border">
+                {filteredTracks.map(track => (
+                  <div
+                    key={track.id}
+                    className="group flex items-center gap-4 border-b border-border py-4 transition-colors hover:bg-card/50"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handlePlay(track)}
+                      className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-muted"
+                      aria-label={`Play ${track.title}`}
+                    >
+                      {track.cover_url ? (
+                        <img src={track.cover_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <Music className="h-5 w-5 text-muted-foreground" />
+                      )}
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 transition group-hover:opacity-100">
+                        {currentTrack?.id === track.id && isPlaying ? (
+                          <Pause className="h-4 w-4 fill-current text-white" />
+                        ) : (
+                          <Play className="h-4 w-4 fill-current text-white" />
+                        )}
+                      </span>
+                    </button>
+
+                    <Link href={`/track/${track.id}`} className="min-w-0 flex-1 md:grid md:grid-cols-[minmax(12rem,0.45fr)_1fr_auto] md:items-center md:gap-6">
+                      <div className="min-w-0">
+                        <h2 className="truncate font-display text-lg font-semibold group-hover:text-accent">{track.title}</h2>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {track.artists?.display_name || track.labels?.name || 'Unknown'}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground md:mt-0">
+                        {[track.genre, track.bpm && `${track.bpm} BPM`, track.musical_key].filter(Boolean).join(' · ')}
+                      </p>
+                      <span className="mt-2 block font-mono text-sm font-bold md:mt-0">
+                        {track.is_free ? 'Free' : `$${Number(track.price).toFixed(2)}`}
+                      </span>
+                    </Link>
+
+                    {!track.is_free && (
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(track)}
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+                          isInCart(track.id) ? 'text-emerald-600' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
+                        aria-label={`Add ${track.title} to cart`}
+                      >
+                        {isInCart(track.id) ? <CheckCircle className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                      </button>
+                    )}
+                    <ArrowRight className="hidden h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-accent sm:block" />
                   </div>
                 ))}
               </div>
