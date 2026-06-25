@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
         *,
         artists:artist_id (id, display_name, avatar_url, username),
         labels:label_id (id, name, logo_url, slug),
+        promoters:promoter_id (id, display_name, avatar_url),
         ticket_tiers (*)
       `)
 
@@ -93,32 +94,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title, slug, and event_date are required' }, { status: 400 })
     }
 
-    // Check if user is an artist or label
+    // Check if user is an artist, label, or promoter
     const { data: artist } = await supabase
       .from('artists')
       .select('id, stripe_account_id')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     const { data: label } = await supabase
       .from('labels')
       .select('id, stripe_account_id')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (!artist && !label) {
-      return NextResponse.json({ error: 'Only artists and labels can create events' }, { status: 403 })
-    }
+    const { data: promoter } = await supabase
+      .from('promoters')
+      .select('id, stripe_account_id')
+      .eq('id', user.id)
+      .maybeSingle()
 
     const isArtist = !!artist
-    const creatorId = isArtist ? artist.id : label!.id
-    const stripeAccountId = isArtist ? artist.stripe_account_id : label!.stripe_account_id
+    const isLabel = !!label
+    const isPromoter = !!promoter
+    const isFan = !isArtist && !isLabel && !isPromoter
 
-    if (!stripeAccountId) {
-      return NextResponse.json(
-        { error: 'Complete Stripe onboarding before creating paid events' },
-        { status: 400 }
-      )
+    if (isFan && ticket_tiers && Array.isArray(ticket_tiers) && ticket_tiers.length > 0) {
+      return NextResponse.json({ error: 'Only artists, labels, and promoters can create paid events with ticket tiers' }, { status: 403 })
     }
 
     // Generate unique slug if not provided
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
       finalSlug = `${finalSlug}-${Date.now().toString(36)}`
     }
 
-    // Create event
+    // Build event data based on role
     const eventData: any = {
       title,
       slug: finalSlug,
@@ -148,14 +149,44 @@ export async function POST(request: NextRequest) {
       end_time: end_time || null,
       is_virtual: is_virtual || false,
       streaming_url: streaming_url || null,
-      stripe_account_id: stripeAccountId,
-      status: 'draft',
     }
 
     if (isArtist) {
-      eventData.artist_id = creatorId
+      // Artist-created event
+      if (!artist!.stripe_account_id) {
+        return NextResponse.json(
+          { error: 'Complete Stripe onboarding before creating paid events' },
+          { status: 400 }
+        )
+      }
+      eventData.artist_id = artist!.id
+      eventData.stripe_account_id = artist!.stripe_account_id
+      eventData.status = 'draft'
+    } else if (isLabel) {
+      // Label-created event
+      if (!label!.stripe_account_id) {
+        return NextResponse.json(
+          { error: 'Complete Stripe onboarding before creating paid events' },
+          { status: 400 }
+        )
+      }
+      eventData.label_id = label!.id
+      eventData.stripe_account_id = label!.stripe_account_id
+      eventData.status = 'draft'
+    } else if (isPromoter) {
+      // Promoter-created event
+      if (!promoter!.stripe_account_id) {
+        return NextResponse.json(
+          { error: 'Complete Stripe onboarding before creating paid events' },
+          { status: 400 }
+        )
+      }
+      eventData.promoter_id = promoter!.id
+      eventData.stripe_account_id = promoter!.stripe_account_id
+      eventData.status = 'draft'
     } else {
-      eventData.label_id = creatorId
+      // Fan-created event (no ticket tiers, free listing)
+      eventData.status = 'published'
     }
 
     const { data: event, error: eventError } = await supabase

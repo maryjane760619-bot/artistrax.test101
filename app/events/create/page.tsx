@@ -26,11 +26,12 @@ const sectionClassName = 'bg-[#141415] border border-[#2a2a2d] rounded-xl p-6 sp
 export default function CreateEventPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
-  const [userType, setUserType] = useState<'artist' | 'label' | null>(null)
+  const [userType, setUserType] = useState<'artist' | 'label' | 'promoter' | 'fan' | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [stripeComplete, setStripeComplete] = useState(false)
+  const [stripeAccountId, setStripeAccountId] = useState('')
 
   const [form, setForm] = useState({
     title: '',
@@ -62,34 +63,52 @@ export default function CreateEventPage() {
 
     setUser(session.user)
 
-    // Check if user is artist or label
+    // Check if user is artist, label, or promoter
     const { data: artist } = await supabase
       .from('artists')
-      .select('id, stripe_charges_enabled')
+      .select('id, stripe_charges_enabled, stripe_account_id')
       .eq('id', session.user.id)
       .single()
 
     if (artist) {
       setUserType('artist')
       setStripeComplete(!!artist.stripe_charges_enabled)
+      setStripeAccountId(artist.stripe_account_id || '')
       setLoading(false)
       return
     }
 
     const { data: label } = await supabase
       .from('labels')
-      .select('id, stripe_charges_enabled')
+      .select('id, stripe_charges_enabled, stripe_account_id')
       .eq('id', session.user.id)
       .single()
 
     if (label) {
       setUserType('label')
       setStripeComplete(!!label.stripe_charges_enabled)
+      setStripeAccountId(label.stripe_account_id || '')
       setLoading(false)
       return
     }
 
-    setError('Only artists and labels can create events')
+    const { data: promoter } = await supabase
+      .from('promoters')
+      .select('id, stripe_charges_enabled, stripe_account_id')
+      .eq('id', session.user.id)
+      .single()
+
+    if (promoter) {
+      setUserType('promoter')
+      setStripeComplete(!!promoter.stripe_charges_enabled)
+      setStripeAccountId(promoter.stripe_account_id || '')
+      setLoading(false)
+      return
+    }
+
+    // Fall through to fan — simplified form, no Stripe needed
+    setUserType('fan')
+    setStripeComplete(true) // No Stripe required for fans
     setLoading(false)
   }
 
@@ -145,12 +164,21 @@ export default function CreateEventPage() {
       end_time: form.end_time || undefined,
       is_virtual: form.is_virtual,
       streaming_url: form.streaming_url || undefined,
-      ticket_tiers: ticketTiers.filter(t => t.name && Number(t.price) >= 0).map(t => ({
+    }
+
+    // Add role-specific fields
+    const isCreator = userType === 'artist' || userType === 'label' || userType === 'promoter'
+    if (isCreator) {
+      body.ticket_tiers = ticketTiers.filter(t => t.name && Number(t.price) >= 0).map(t => ({
         name: t.name,
         description: t.description || undefined,
         price: Number(t.price),
         quantity: Number(t.quantity) || 0,
-      })),
+      }))
+      body.stripe_account_id = stripeAccountId
+      if (userType === 'artist') body.artist_id = user.id
+      else if (userType === 'label') body.label_id = user.id
+      else if (userType === 'promoter') body.promoter_id = user.id
     }
 
     const res = await fetch('/api/events', {
@@ -190,7 +218,7 @@ export default function CreateEventPage() {
           <div className="text-center">
             <AlertCircle className="w-16 h-16 mx-auto text-[#8b8580]/40 mb-4" />
             <h2 className="text-2xl font-serif font-bold mb-2 text-[#e5dfd0]">Access Denied</h2>
-            <p className="text-[#8b8580]">Only artists and labels can create events.</p>
+            <p className="text-[#8b8580]">Please log in to create events.</p>
           </div>
         </main>
         <Footer />
@@ -210,17 +238,35 @@ export default function CreateEventPage() {
           </Link>
 
           <h1 className="text-4xl font-serif font-bold mb-2 text-[#e5dfd0]">Create Event</h1>
-          <p className="text-[#8b8580] mb-8">List your live show, virtual performance, or community event</p>
+          <p className="text-[#8b8580] mb-8">
+            {userType === 'fan'
+              ? 'Create a free community event listing'
+              : 'List your live show, virtual performance, or community event'
+            }
+          </p>
 
-          {/* Stripe Warning */}
-          {!stripeComplete && (
+          {/* Fan info — free listing, no tickets */}
+          {userType === 'fan' && (
+            <div className="bg-[#155dfc]/10 border border-[#155dfc]/20 rounded-xl p-4 mb-6 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-[#155dfc] flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-[#155dfc]">Free Event Listing</p>
+                <p className="text-sm text-[#8b8580] mt-1">
+                  Your event will be published immediately as a free listing. No ticket tiers or Stripe required.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Stripe Warning — only for artists, labels, and promoters */}
+          {userType !== 'fan' && !stripeComplete && (
             <div className="bg-[#b58a3e]/10 border border-[#b58a3e]/20 rounded-xl p-4 mb-6 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-[#b58a3e] flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-[#b58a3e]">Stripe onboarding required</p>
                 <p className="text-sm text-[#8b8580] mt-1">
                   Complete your Stripe Connect setup to sell tickets.
-                  <Link href={userType === 'label' ? '/label/dashboard' : '/artist/dashboard'}
+                  <Link href={userType === 'label' ? '/label/dashboard' : userType === 'promoter' ? '/promoter/dashboard' : '/artist/dashboard'}
                     className="text-[#faf7f1] hover:underline ml-1">
                     Go to Dashboard
                   </Link>
@@ -353,7 +399,8 @@ export default function CreateEventPage() {
               )}
             </section>
 
-            {/* Ticket Tiers */}
+            {/* Ticket Tiers — only for artists, labels, and promoters */}
+            {userType !== 'fan' && (
             <section className={sectionClassName}>
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-serif font-semibold text-[#e5dfd0]">Ticket Tiers</h2>
@@ -433,6 +480,7 @@ export default function CreateEventPage() {
                 </div>
               ))}
             </section>
+            )}
 
             {/* Error */}
             {error && (
@@ -447,7 +495,7 @@ export default function CreateEventPage() {
               <Button
                 type="submit"
                 size="lg"
-                disabled={submitting || !stripeComplete}
+                disabled={submitting || (userType !== 'fan' && !stripeComplete)}
                 className="bg-[#155dfc] text-white rounded-full px-5 py-2 hover:bg-[#155dfc]/90"
               >
                 {submitting ? (

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { FanAuthProvider, useFanAuth } from '@/lib/fan-auth-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Heart, Download, Music, TrendingUp, User } from 'lucide-react'
+import { Heart, Download, Music, TrendingUp, User, CalendarCheck } from 'lucide-react'
 import Link from 'next/link'
 import { PointsBalanceCard } from '@/components/points-balance-card'
 
@@ -200,6 +200,26 @@ function DashboardContent() {
             <Link href="/releases">
               <Button variant="outline">Browse Catalog</Button>
             </Link>
+          </div>
+        </div>
+
+        {/* Become a Promoter */}
+        <div className="mt-8 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-800 flex items-center justify-center">
+              <CalendarCheck className="w-6 h-6 text-purple-700 dark:text-purple-300" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold mb-2">Become a Promoter</h2>
+              <p className="text-muted-foreground mb-4">
+                Create events, sell tickets, and earn commissions. Take your passion to the next level by promoting shows and connecting artists with audiences.
+              </p>
+              <Link href="/promoter/signup">
+                <Button className="bg-purple-700 hover:bg-purple-800">
+                  Get Started as a Promoter
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 

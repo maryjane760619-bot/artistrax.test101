@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { Calendar, MapPin, Music, Building2 } from 'lucide-react'
+import { Calendar, MapPin, Music, Building2, CalendarCheck, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type EventTier = {
@@ -34,6 +34,7 @@ type EventItem = {
   ticket_tiers: EventTier[]
   artists: { id: string; display_name: string; avatar_url: string | null; username: string } | null
   labels: { id: string; name: string; logo_url: string | null; slug: string } | null
+  promoters: { id: string; display_name: string; avatar_url: string | null } | null
 }
 
 export default function EventsPage() {
@@ -55,6 +56,7 @@ export default function EventsPage() {
         *,
         artists:artist_id (id, display_name, avatar_url, username),
         labels:label_id (id, name, logo_url, slug),
+        promoters:promoter_id (id, display_name, avatar_url),
         ticket_tiers (*)
       `)
       .eq('status', 'published')
@@ -214,7 +216,17 @@ export default function EventsPage() {
                           <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
                           <span>{event.labels.name}</span>
                         </>
-                      ) : null}
+                      ) : event.promoters ? (
+                        <>
+                          <CalendarCheck className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>Promoted by {event.promoters.display_name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <User className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>Community event</span>
+                        </>
+                      )}
                     </div>
 
                     <div className="border-t border-border mt-3 pt-3">

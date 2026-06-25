@@ -157,7 +157,7 @@ export default function FanSignupPage() {
         </div>
 
         <div className="mt-6 text-center text-sm text-muted-foreground">
-          <p>Are you an artist or label?</p>
+          <p>Are you an artist, label, or promoter?</p>
           <div className="flex gap-3 justify-center mt-2">
             <Link href="/artist/signup" className="text-primary hover:underline">
               Artist Signup
@@ -165,6 +165,10 @@ export default function FanSignupPage() {
             <span>•</span>
             <Link href="/label/signup" className="text-primary hover:underline">
               Label Signup
+            </Link>
+            <span>•</span>
+            <Link href="/promoter/signup" className="text-primary hover:underline">
+              Promoter Signup
             </Link>
           </div>
         </div>

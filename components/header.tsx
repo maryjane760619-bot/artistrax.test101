@@ -35,6 +35,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [fanUser, setFanUser] = useState<any>(null)
   const [isLabel, setIsLabel] = useState(false)
+  const [isPromoter, setIsPromoter] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Check for fan auth and label membership
+  // Check for fan auth and label/promoter membership
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const user = session?.user ?? null
@@ -54,13 +55,17 @@ export function Header() {
           .then(({ data }) => {
             if (data) setIsLabel(true)
           })
+        supabase.from('promoters').select('id').eq('id', user.id).maybeSingle()
+          .then(({ data }) => {
+            if (data) setIsPromoter(true)
+          })
       }
     })
   }, [artistUser])
 
   const user = artistUser || fanUser
   const isFan = !!fanUser && !artistUser
-  const dashboardHref = isFan ? '/fan/dashboard' : isLabel ? '/label/dashboard' : '/artist/dashboard'
+  const dashboardHref = isFan ? '/fan/dashboard' : isPromoter ? '/promoter/dashboard' : isLabel ? '/label/dashboard' : '/artist/dashboard'
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -142,7 +147,7 @@ export function Header() {
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
               >
                 <User className="h-4 w-4" />
-                {isFan ? 'Fan' : isLabel ? 'Label' : 'Artist'}
+                {isFan ? 'Fan' : isPromoter ? 'Promoter' : isLabel ? 'Label' : 'Artist'}
               </Link>
             ) : (
               <Link
