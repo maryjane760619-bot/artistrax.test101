@@ -2,7 +2,7 @@
 
 import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
-import { Download, Globe, Instagram, Twitter, Music2, ExternalLink } from 'lucide-react'
+import { Download, Globe, Instagram, Twitter, Music2, ExternalLink, Calendar, MapPin, Ticket } from 'lucide-react'
 import Link from 'next/link'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
@@ -16,6 +16,7 @@ type Label = {
   name: string
   bio: string | null
   logo_url: string | null
+  banner_url?: string | null
   website?: string | null
   instagram?: string | null
   twitter?: string | null
@@ -50,6 +51,18 @@ type Product = {
   base_price: number
   images: string[]
   is_active: boolean
+  variants?: { stock_quantity: number }[]
+}
+
+type EventItem = {
+  id: string
+  slug: string
+  title: string
+  venue_name: string | null
+  venue_address: string | null
+  event_date: string
+  start_time: string | null
+  is_virtual: boolean
 }
 
 type Video = {
@@ -78,12 +91,15 @@ type Props = {
   tracks: Track[]
   products?: Product[]
   videos?: Video[]
+  events?: EventItem[]
   subscriberCount: number
   subscriptionSettings: SubscriptionSettings | null
 }
 
-export function LabelPublicPage({ label, tracks, products = [], videos = [], subscriberCount, subscriptionSettings }: Props) {
+export function LabelPublicPage({ label, tracks, products = [], videos = [], events = [], subscriberCount, subscriptionSettings }: Props) {
   const { addItem } = useCart()
+  const vinylProducts = products.filter(p => p.category === 'vinyl')
+  const merchProducts = products.filter(p => p.category !== 'vinyl')
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -161,43 +177,59 @@ export function LabelPublicPage({ label, tracks, products = [], videos = [], sub
   }
 
   return (
-    <main className="min-h-screen pt-24 pb-16 bg-background">
+    <main className="min-h-screen pb-16 bg-background">
+      {/* Banner */}
+      <div className="pt-24">
+        <div className="relative h-48 sm:h-64 overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-600">
+          {label.banner_url && (
+            <img
+              src={label.banner_url}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Label Header */}
-        <div className="mb-12 text-center">
-          <div className="w-40 h-40 rounded-lg overflow-hidden mx-auto mb-6 bg-muted border-4 border-border">
-            {label.logo_url ? (
-              <img 
-                src={label.logo_url} 
-                alt={label.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Music2 className="w-16 h-16 text-muted-foreground" />
-              </div>
-            )}
+        <div className="mb-12">
+          <div className="flex items-end gap-4 -mt-12 sm:-mt-16 pb-6">
+            <div className="h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-md border-4 border-background bg-card shadow-lg">
+              {label.logo_url ? (
+                <img
+                  src={label.logo_url}
+                  alt={label.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <Music2 className="w-10 h-10 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <div className="pb-1">
+              <h1 className="text-2xl sm:text-3xl font-serif font-semibold">
+                {label.name}
+              </h1>
+              <p className="text-sm text-muted-foreground">Record Label</p>
+            </div>
           </div>
-          <h1 className="text-5xl font-serif font-semibold mb-3">
-            {label.name}
-          </h1>
-          <p className="text-xl text-muted-foreground mb-2">
-            Record Label
-          </p>
           {subscriberCount > 0 && (
             <p className="text-sm text-pink-500 font-medium mb-4">
               {subscriberCount} {subscriberCount === 1 ? 'subscriber' : 'subscribers'}
             </p>
           )}
           {label.bio && (
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-6 whitespace-pre-wrap">
+            <p className="text-muted-foreground max-w-2xl mb-6 whitespace-pre-wrap">
               {label.bio}
             </p>
           )}
 
           {/* Social Links */}
           {(label.website || label.instagram || label.twitter || label.soundcloud || label.spotify) && (
-            <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
               {label.website && (
                 <a
                   href={label.website.startsWith('http') ? label.website : `https://${label.website}`}
@@ -277,13 +309,13 @@ export function LabelPublicPage({ label, tracks, products = [], videos = [], sub
         {/* Catalog */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-serif font-semibold">
+            <h2 className="font-display text-2xl font-semibold tracking-tight">
               Catalog ({tracks.length})
             </h2>
           </div>
 
           {tracks.length === 0 ? (
-            <div className="bg-card border border-border rounded-lg p-12 text-center">
+            <div className="rounded-sm border border-border bg-card p-12 text-center">
               <Music2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">
                 No releases yet. Check back soon!
@@ -292,7 +324,7 @@ export function LabelPublicPage({ label, tracks, products = [], videos = [], sub
           ) : (
             <div className="space-y-6">
               {tracks.map((track) => (
-                <div key={track.id} className="bg-card border border-border rounded-lg overflow-hidden">
+                <div key={track.id} className="rounded-sm border border-border bg-card overflow-hidden">
                   <div className="p-6">
                     {/* Track Header */}
                     <div className="flex items-start justify-between mb-4">
@@ -382,21 +414,85 @@ export function LabelPublicPage({ label, tracks, products = [], videos = [], sub
         )}
 
         {/* Merchandise */}
-        {products.length > 0 && (
+        {merchProducts.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-serif font-semibold">
-                Merchandise ({products.length})
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                Merchandise ({merchProducts.length})
               </h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {merchProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   onAddToCart={handleAddToCart}
                 />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Vinyl */}
+        {vinylProducts.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                Limited Edition Vinyl ({vinylProducts.length})
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vinylProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Shows */}
+        {events.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                Upcoming Shows
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <div key={event.id} className="rounded-sm border border-border bg-card p-6">
+                  <h3 className="font-display text-lg font-semibold tracking-tight mb-2">
+                    {event.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground mb-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {new Date(event.event_date).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                    {event.start_time && ` · ${event.start_time.slice(0, 5)}`}
+                  </div>
+                  {(event.venue_name || event.is_virtual) && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {event.is_virtual ? 'Virtual event' : event.venue_name}
+                    </div>
+                  )}
+                  <a
+                    href={`/events/${event.slug}`}
+                    className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    Get Tickets
+                  </a>
+                </div>
               ))}
             </div>
           </div>
