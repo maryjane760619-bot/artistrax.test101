@@ -79,6 +79,11 @@ function LoginForm() {
                   required
                   className="mt-1"
                 />
+                <div className="mt-2 text-right">
+                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               <Button

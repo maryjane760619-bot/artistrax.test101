@@ -13,6 +13,7 @@ type Product = {
   base_price: number
   images: string[]
   is_active: boolean
+  variants?: { stock_quantity: number }[]
 }
 
 type Props = {
@@ -25,24 +26,27 @@ export function ProductCard({ product, onAddToCart }: Props) {
 
   if (!product.is_active) return null
 
+  const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock_quantity || 0), 0)
+  const isVinyl = product.category === 'vinyl'
+
   return (
-    <div className="bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="group rounded-sm border border-border bg-card overflow-hidden">
       {/* Product Image */}
-      <div className="aspect-square bg-muted relative group">
+      <div className="relative aspect-square overflow-hidden bg-muted">
         {product.images && product.images.length > 0 ? (
           <>
             <img
               src={product.images[selectedImage]}
               alt={product.title}
-              className="w-full h-full object-cover"
+              className="img-zoom h-full w-full object-cover"
             />
             {product.images.length > 1 && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {product.images.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
+                    className={`h-1.5 w-1.5 rounded-full transition-colors ${
                       index === selectedImage ? 'bg-white' : 'bg-white/50'
                     }`}
                   />
@@ -51,32 +55,41 @@ export function ProductCard({ product, onAddToCart }: Props) {
             )}
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package className="w-16 h-16 text-muted-foreground" />
+          <div className="flex h-full w-full items-center justify-center">
+            <Package className="w-16 h-16 text-muted-foreground/40" />
           </div>
         )}
+        <div className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] backdrop-blur-md">
+          {isVinyl ? 'Vinyl' : product.category}
+        </div>
       </div>
 
       {/* Product Info */}
       <div className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{product.title}</h3>
-        <p className="text-sm text-muted-foreground mb-2 capitalize">
-          {product.category}
-        </p>
+        <h3 className="font-display text-lg font-semibold tracking-tight truncate">
+          {product.title}
+        </h3>
         {product.description && (
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
             {product.description}
           </p>
         )}
-        
-        <div className="flex items-center justify-between">
-          <span className="text-xl font-bold">
+
+        {isVinyl && totalStock !== undefined && (
+          <p
+            className={`mt-2 text-xs font-mono ${
+              totalStock <= 5 ? 'text-accent' : 'text-muted-foreground'
+            }`}
+          >
+            {totalStock > 0 ? `${totalStock} left` : 'Sold out'}
+          </p>
+        )}
+
+        <div className="mt-3 flex items-center justify-between">
+          <span className="font-mono text-lg font-semibold">
             ${product.base_price.toFixed(2)}
           </span>
-          <Button
-            size="sm"
-            onClick={() => onAddToCart(product.id)}
-          >
+          <Button size="sm" onClick={() => onAddToCart(product.id)}>
             <ShoppingCart className="w-4 h-4 mr-2" />
             Add to Cart
           </Button>

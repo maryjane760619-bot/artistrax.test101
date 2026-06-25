@@ -34,7 +34,7 @@ export default async function UsernamePage({ params }: Props) {
   // Fetch artist's products
   const { data: products } = await supabase
     .from('products')
-    .select('*')
+    .select('*, variants:product_variants(stock_quantity)')
     .eq('artist_id', artist.id)
     .eq('is_active', true)
     .order('created_at', { ascending: false})
@@ -61,14 +61,25 @@ export default async function UsernamePage({ params }: Props) {
     .eq('artist_id', artist.id)
     .eq('status', 'active')
 
+  // Fetch upcoming events
+  const today = new Date().toISOString().split('T')[0]
+  const { data: events } = await supabase
+    .from('events')
+    .select('*')
+    .eq('artist_id', artist.id)
+    .eq('status', 'published')
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+
   return (
     <>
       <Header />
-      <ArtistPublicPage 
-        artist={artist} 
-        tracks={tracks || []} 
-        products={products || []} 
+      <ArtistPublicPage
+        artist={artist}
+        tracks={tracks || []}
+        products={products || []}
         videos={videos || []}
+        events={events || []}
         subscriberCount={subscriberCount || 0}
         subscriptionSettings={subscriptionSettings}
       />

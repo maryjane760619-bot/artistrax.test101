@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Music, ExternalLink, DollarSign, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
+import { BrandingEditor } from '@/components/branding-editor'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
@@ -120,6 +121,16 @@ export default function LabelDashboard() {
               Sign Out
             </Button>
           </div>
+
+          {user && (
+            <BrandingEditor
+              table="labels"
+              recordId={user.id}
+              logoUrl={labelData?.logo_url || null}
+              bannerUrl={labelData?.banner_url || null}
+              onUpdated={urls => setLabelData((prev: any) => ({ ...prev, ...urls }))}
+            />
+          )}
 
           {/* Stripe Status */}
           {stripeConnected ? (

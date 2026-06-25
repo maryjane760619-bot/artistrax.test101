@@ -32,7 +32,8 @@ export default function ProfileEditPage() {
   const [twitter, setTwitter] = useState('')
   const [soundcloud, setSoundcloud] = useState('')
   const [spotify, setSpotify] = useState('')
-  
+  const [tiktok, setTiktok] = useState('')
+
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function ProfileEditPage() {
       setTwitter(data.twitter || '')
       setSoundcloud(data.soundcloud || '')
       setSpotify(data.spotify || '')
+      setTiktok(data.tiktok || '')
     }
 
     setLoading(false)
@@ -117,6 +119,7 @@ export default function ProfileEditPage() {
           twitter: twitter || null,
           soundcloud: soundcloud || null,
           spotify: spotify || null,
+          tiktok: tiktok || null,
         })
         .eq('id', user.id)
 
@@ -320,6 +323,19 @@ export default function ProfileEditPage() {
                   value={spotify}
                   onChange={(e) => setSpotify(e.target.value)}
                   placeholder="Artist page URL"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tiktok" className="text-sm text-muted-foreground">
+                  TikTok
+                </Label>
+                <Input
+                  id="tiktok"
+                  value={tiktok}
+                  onChange={(e) => setTiktok(e.target.value)}
+                  placeholder="@username or full URL"
                   className="mt-1"
                 />
               </div>

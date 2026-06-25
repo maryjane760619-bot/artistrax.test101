@@ -45,6 +45,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         name: label.name,
         slug: label.slug,
         description: label.bio,
+        logoUrl: label.logo_url || null,
+        bannerUrl: label.banner_url || null,
         totalTracks: tracks?.length || 0
       },
       tracks: tracks?.map(t => ({

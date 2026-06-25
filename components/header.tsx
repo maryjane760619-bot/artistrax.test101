@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/artists', label: 'Artists' },
   { href: '/releases', label: 'Releases' },
   { href: '/labels', label: 'Labels' },
+  { href: '/events', label: 'Events' },
   { href: '/live', label: 'Live' },
   { href: '/about', label: 'About' },
 ]

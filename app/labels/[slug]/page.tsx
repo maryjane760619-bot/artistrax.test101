@@ -120,8 +120,26 @@ export default function LabelPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-orange-500 to-pink-500 text-white">
+      <div
+        className="relative bg-gradient-to-br from-orange-500 to-pink-500 text-white"
+        style={
+          label.bannerUrl
+            ? {
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${label.bannerUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }
+            : undefined
+        }
+      >
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+          {label.logoUrl && (
+            <img
+              src={label.logoUrl}
+              alt={`${label.name} logo`}
+              className="mx-auto mb-4 h-20 w-20 rounded-full border-2 border-white/80 object-cover shadow-lg"
+            />
+          )}
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{label.name}</h1>
           <p className="text-lg opacity-90 max-w-2xl mx-auto">
             {label.description || label.bio || 'Independent record label'}

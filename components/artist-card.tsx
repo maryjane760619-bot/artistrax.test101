@@ -10,7 +10,7 @@ interface ArtistCardProps {
 
 export function ArtistCard({ artist }: ArtistCardProps) {
   return (
-    <Link href={`/artists/${artist.slug}`} className="group block">
+    <Link href={`/${artist.slug}`} className="group block">
       <div className="relative aspect-square overflow-hidden rounded-sm border border-border bg-muted">
         {artist.image ? (
           <img
@@ -30,9 +30,11 @@ export function ArtistCard({ artist }: ArtistCardProps) {
         <h3 className="font-display text-lg font-semibold tracking-tight truncate group-hover:text-accent transition-colors">
           {artist.name}
         </h3>
-        <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-muted-foreground truncate">
-          {artist.genres?.join(' · ')}
-        </p>
+        {artist.genres && artist.genres.length > 0 && (
+          <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-muted-foreground truncate">
+            {artist.genres.join(' · ')}
+          </p>
+        )}
       </div>
     </Link>
   )
