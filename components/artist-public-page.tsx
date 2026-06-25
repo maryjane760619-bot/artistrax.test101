@@ -2,7 +2,7 @@
 
 import { SimpleAudioPlayer } from '@/components/simple-audio-player'
 import { Button } from '@/components/ui/button'
-import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink, ShoppingBag } from 'lucide-react'
+import { Download, Play, Globe, Instagram, Twitter, Music2, ExternalLink, ShoppingBag, Video } from 'lucide-react'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
 import { VideoPlayer } from '@/components/video-player'
@@ -20,6 +20,7 @@ type Artist = {
   twitter?: string | null
   soundcloud?: string | null
   spotify?: string | null
+  tiktok?: string | null
 }
 
 type Track = {
@@ -130,9 +131,13 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
           ? `https://twitter.com/${value.slice(1)}`
           : `https://twitter.com/${value}`
       case 'soundcloud':
-        return value.includes('soundcloud.com') 
+        return value.includes('soundcloud.com')
           ? `https://${value}`
           : `https://soundcloud.com/${value}`
+      case 'tiktok':
+        return value.startsWith('@')
+          ? `https://tiktok.com/${value}`
+          : `https://tiktok.com/@${value}`
       case 'spotify':
         return value
       default:
@@ -176,7 +181,7 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
           )}
 
           {/* Social Links */}
-          {(artist.website || artist.instagram || artist.twitter || artist.soundcloud || artist.spotify) && (
+          {(artist.website || artist.instagram || artist.twitter || artist.soundcloud || artist.spotify || artist.tiktok) && (
             <div className="flex items-center justify-center gap-3 flex-wrap">
               {artist.website && (
                 <a
@@ -231,6 +236,17 @@ export function ArtistPublicPage({ artist, tracks, products = [], videos = [], s
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span className="text-sm">Spotify</span>
+                </a>
+              )}
+              {artist.tiktok && (
+                <a
+                  href={getSocialLink('tiktok', artist.tiktok)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-md hover:bg-muted transition-colors"
+                >
+                  <Video className="w-4 h-4" />
+                  <span className="text-sm">TikTok</span>
                 </a>
               )}
             </div>

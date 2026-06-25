@@ -11,3 +11,30 @@ ALTER TABLE artists ADD COLUMN IF NOT EXISTS banner_url TEXT;
 ALTER TABLE tracks ADD COLUMN IF NOT EXISTS is_mix BOOLEAN DEFAULT FALSE;
 ALTER TABLE tracks ADD COLUMN IF NOT EXISTS tracklist JSONB;
 -- tracklist shape: [{ "timestamp_seconds": 0, "title": "Track Name", "artist": "Artist Name" }, ...]
+
+-- 4. TikTok social link for artists (instagram/twitter/soundcloud/spotify already exist)
+ALTER TABLE artists ADD COLUMN IF NOT EXISTS tiktok TEXT;
+
+-- 5. public_artist_profiles only exposes an explicit column list (see
+-- supabase-public-views.sql), so banner_url and tiktok need to be added
+-- there too or the public artist page will never see them even after
+-- the ALTER TABLE statements above.
+CREATE OR REPLACE VIEW public_artist_profiles AS
+SELECT
+  id,
+  username,
+  display_name,
+  bio,
+  avatar_url,
+  banner_url,
+  subdomain,
+  website,
+  instagram,
+  twitter,
+  soundcloud,
+  spotify,
+  tiktok,
+  label_id,
+  created_at,
+  updated_at
+FROM artists;
