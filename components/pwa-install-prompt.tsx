@@ -74,6 +74,17 @@ export function PWAInstallPrompt() {
     }
   }
 
+  // Reserve space at the bottom of the page so fixed-position content
+  // (like this banner) doesn't permanently cover the end of the page.
+  useEffect(() => {
+    if (showPrompt && !isStandalone) {
+      document.body.classList.add('pwa-prompt-visible')
+    } else {
+      document.body.classList.remove('pwa-prompt-visible')
+    }
+    return () => document.body.classList.remove('pwa-prompt-visible')
+  }, [showPrompt, isStandalone])
+
   // Don't show if already installed or dismissed
   if (!showPrompt || isStandalone) return null
 
