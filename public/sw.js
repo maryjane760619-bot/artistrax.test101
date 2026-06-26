@@ -1,7 +1,7 @@
 // artistrax Service Worker - PWA Support
-const CACHE_NAME = 'artistrax-v3';
-const AUDIO_CACHE = 'artistrax-audio-v3';
-const STATIC_CACHE = 'artistrax-static-v3';
+const CACHE_NAME = 'artistrax-v4';
+const AUDIO_CACHE = 'artistrax-audio-v4';
+const STATIC_CACHE = 'artistrax-static-v4';
 
 // Never cache these paths - always fetch from network
 const NETWORK_ONLY_PATHS = [
@@ -93,7 +93,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle other requests - cache first, fallback to network
+  // Page navigations: always try the network first. A page should never
+  // look stale or show "offline" just because a cached copy exists --
+  // cache is only a fallback for genuine network failure.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then((cached) => cached || caches.match('/offline'));
+        })
+    );
+    return;
+  }
+
+  // Other requests (static assets, etc.) - cache first, fallback to network
   event.respondWith(
     caches.match(request).then((response) => {
       if (response) {
@@ -111,10 +133,6 @@ self.addEventListener('fetch', (event) => {
         });
         return response;
       }).catch(() => {
-        // Return offline page for navigation requests
-        if (request.mode === 'navigate') {
-          return caches.match('/offline');
-        }
         return new Response('Offline', { status: 503 });
       });
     })
