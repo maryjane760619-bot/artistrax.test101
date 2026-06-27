@@ -8,6 +8,7 @@ import { Music, ExternalLink, DollarSign, AlertCircle, CheckCircle, Loader2 } fr
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { BrandingEditor } from '@/components/branding-editor'
+import { SubscriptionSettingsEditor } from '@/components/subscription-settings-editor'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
@@ -131,6 +132,8 @@ export default function LabelDashboard() {
               onUpdated={urls => setLabelData((prev: any) => ({ ...prev, ...urls }))}
             />
           )}
+
+          <SubscriptionSettingsEditor />
 
           {/* Stripe Status */}
           {stripeConnected ? (

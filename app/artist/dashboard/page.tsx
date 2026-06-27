@@ -10,6 +10,7 @@ import { Upload, Music, TrendingUp, DollarSign, Download, User, Link as LinkIcon
 import Link from 'next/link'
 import { SubscriptionBanner } from '@/components/subscription-banner'
 import StripeConnectOnboarding from '@/components/stripe-connect-onboarding-v2'
+import { SubscriptionSettingsEditor } from '@/components/subscription-settings-editor'
 
 interface Payout {
   id: string
@@ -288,6 +289,8 @@ export default function ArtistDashboard() {
         <div className="mb-8">
           <StripeConnectOnboarding />
         </div>
+
+        <SubscriptionSettingsEditor />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">

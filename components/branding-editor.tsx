@@ -12,9 +12,10 @@ interface BrandingEditorProps {
   logoUrl: string | null
   bannerUrl: string | null
   onUpdated: (urls: { logo_url?: string; banner_url?: string }) => void
+  bannerOnly?: boolean
 }
 
-export function BrandingEditor({ table, recordId, logoUrl, bannerUrl, onUpdated }: BrandingEditorProps) {
+export function BrandingEditor({ table, recordId, logoUrl, bannerUrl, onUpdated, bannerOnly = false }: BrandingEditorProps) {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
   const [error, setError] = useState('')
@@ -58,16 +59,18 @@ export function BrandingEditor({ table, recordId, logoUrl, bannerUrl, onUpdated 
   return (
     <Card className="mb-8">
       <CardContent className="pt-6">
-        <h3 className="text-lg font-semibold mb-1">Branding</h3>
+        <h3 className="text-lg font-semibold mb-1">{bannerOnly ? 'Profile Banner' : 'Branding'}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Your logo and banner appear on your public profile page.
+          {bannerOnly
+            ? 'A wide cover photo shown behind your profile on your public page.'
+            : 'Your logo and banner appear on your public profile page.'}
         </p>
 
         {error && <p className="text-sm text-destructive mb-3">{error}</p>}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className={bannerOnly ? '' : 'grid grid-cols-1 sm:grid-cols-2 gap-6'}>
           {/* Logo */}
-          <div>
+          <div className={bannerOnly ? 'hidden' : ''}>
             <p className="text-sm font-medium mb-2">Logo</p>
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border bg-muted flex items-center justify-center">

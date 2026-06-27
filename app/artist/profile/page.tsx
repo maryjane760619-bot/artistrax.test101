@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { User, Image as ImageIcon, Loader2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { BrandingEditor } from '@/components/branding-editor'
 
 export default function ProfileEditPage() {
   const router = useRouter()
@@ -23,6 +24,7 @@ export default function ProfileEditPage() {
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  const [bannerUrl, setBannerUrl] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   
@@ -59,6 +61,7 @@ export default function ProfileEditPage() {
       setDisplayName(data.display_name || '')
       setBio(data.bio || '')
       setAvatarUrl(data.avatar_url || '')
+      setBannerUrl(data.banner_url || '')
       setWebsite(data.website || '')
       setInstagram(data.instagram || '')
       setTwitter(data.twitter || '')
@@ -228,6 +231,20 @@ export default function ProfileEditPage() {
               className="hidden"
             />
           </div>
+
+          {/* Banner */}
+          {user && (
+            <BrandingEditor
+              table="artists"
+              recordId={user.id}
+              logoUrl={avatarUrl}
+              bannerUrl={bannerUrl}
+              bannerOnly
+              onUpdated={urls => {
+                if (urls.banner_url) setBannerUrl(urls.banner_url)
+              }}
+            />
+          )}
 
           {/* Display Name */}
           <div>
