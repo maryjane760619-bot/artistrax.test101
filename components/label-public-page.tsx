@@ -5,12 +5,13 @@ import Link from 'next/link'
 import {
   Music, Building2, Play, Pause, ShoppingCart, CheckCircle, Disc, Users,
   ChevronRight, Music4, SlidersHorizontal, Globe, Instagram, Twitter,
-  Download, ShoppingBag, Search, Sparkles, Calendar, MapPin, Ticket,
+  Download, Search, Sparkles, Calendar, MapPin, Ticket,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/lib/cart-context'
 import { SubscriptionModal } from '@/components/subscription-modal'
 import { SocialLinksDisplay } from '@/components/social-links-display'
+import { ProductCard } from '@/components/product-card'
 
 type Label = {
   id: string
@@ -51,8 +52,13 @@ type Artist = {
 type Product = {
   id: string
   title: string
+  slug: string
+  description?: string | null
+  category: string
   base_price: number
   images: string[]
+  is_active: boolean
+  variants?: { stock_quantity: number }[]
 }
 
 type Video = {
@@ -104,6 +110,21 @@ export function LabelPublicPage({
 }: Props) {
   const { addItem, items } = useCart()
   const isInCart = (id: string) => items.some(i => i.productId === id)
+  const vinylProducts = products.filter(p => p.category === 'vinyl')
+  const merchProducts = products.filter(p => p.category !== 'vinyl')
+
+  function handleAddProductToCart(productId: string) {
+    const product = products.find(p => p.id === productId)
+    if (!product) return
+    addItem({
+      productId: product.id,
+      productTitle: product.title,
+      price: product.base_price,
+      imageUrl: product.images[0],
+      artistId: label.id,
+      artistName: label.name,
+    })
+  }
 
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -450,6 +471,34 @@ export function LabelPublicPage({
                   </>
                 )}
               </section>
+
+              {/* Merchandise */}
+              {merchProducts.length > 0 && (
+                <div>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight mb-6">
+                    Merchandise ({merchProducts.length})
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {merchProducts.map(product => (
+                      <ProductCard key={product.id} product={product} onAddToCart={handleAddProductToCart} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Vinyl */}
+              {vinylProducts.length > 0 && (
+                <div>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight mb-6">
+                    Limited Edition Vinyl ({vinylProducts.length})
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {vinylProducts.map(product => (
+                      <ProductCard key={product.id} product={product} onAddToCart={handleAddProductToCart} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right sidebar */}
@@ -485,45 +534,6 @@ export function LabelPublicPage({
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-accent transition-colors ml-auto flex-shrink-0" />
                       </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {products.length > 0 && (
-                <div className="rounded-sm border border-border p-6 shadow-xl space-y-4 glass-panel">
-                  <h3 className="font-display font-semibold text-lg text-foreground border-b border-border pb-2">Label Merch</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    {products.slice(0, 3).map(product => (
-                      <div key={product.id} className="flex gap-3 items-center p-2 rounded-xl border border-transparent hover:border-border hover:bg-accent/[0.02] transition-all duration-200">
-                        <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-muted border border-border">
-                          {product.images?.[0] ? (
-                            <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ShoppingBag className="w-6 h-6 text-accent/30" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-xs truncate text-foreground">{product.title}</h4>
-                          <p className="text-[10px] text-accent mt-0.5 font-bold">${Number(product.base_price).toFixed(2)}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="h-8 rounded-lg bg-primary hover:bg-accent/90 text-background text-xs font-bold px-3 flex-shrink-0"
-                          onClick={() => addItem({
-                            productId: product.id,
-                            productTitle: product.title,
-                            price: Number(product.base_price),
-                            artistId: label.id,
-                            artistName: label.name,
-                            imageUrl: product.images?.[0],
-                          })}
-                        >
-                          Buy
-                        </Button>
-                      </div>
                     ))}
                   </div>
                 </div>

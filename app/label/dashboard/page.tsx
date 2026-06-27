@@ -285,6 +285,9 @@ export default function LabelDashboard() {
               <Link href="/label/upload">Upload Track</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
+              <Link href="/label/upload-mix">Upload Mix</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
               <Link href="/labels/siesta-records" target="_blank">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 View Public Page
