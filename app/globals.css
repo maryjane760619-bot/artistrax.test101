@@ -56,6 +56,9 @@
   --foreground: #0B0B0C;
   --muted: #F2EDE1;
   --muted-foreground: #6B6B6E;
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: #E5DFD0;
+  --glass-shadow: rgba(11, 11, 12, 0.06);
   --card: #FFFFFF;
   --card-foreground: #0B0B0C;
   --popover: #FFFFFF;
@@ -230,4 +233,12 @@
       padding-bottom: 180px;
     }
   }
+}
+
+@utility glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px var(--glass-shadow);
 }
