@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(( process.env.STRIPE_SECRET_KEY || '').trim(), {
-  apiVersion: '2024-12-18.acacia'
-});
-
 export async function GET() {
   try {
+    const stripe = new Stripe((process.env.STRIPE_SECRET_KEY || '').trim(), {
+      apiVersion: '2024-12-18.acacia'
+    });
+
     // Test 1: Check if key exists
     const hasKey = !!process.env.STRIPE_SECRET_KEY;
     const keyPrefix = process.env.STRIPE_SECRET_KEY?.substring(0, 7) || 'none';
