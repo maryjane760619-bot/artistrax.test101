@@ -1,7 +1,11 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Falls back to a placeholder so module evaluation never throws during
+// Next.js's build-time page-data-collection step (which can run before
+// env vars are guaranteed available for every route). Real env vars are
+// used at runtime whenever they're actually set.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
 
