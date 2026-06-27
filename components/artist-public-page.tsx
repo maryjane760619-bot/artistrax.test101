@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
 import { VideoPlayer } from '@/components/video-player'
-import { SubscriptionCard } from '@/components/subscribe-button'
+import { SubscriptionModal } from '@/components/subscription-modal'
 import { useCart } from '@/lib/cart-context'
 
 type Artist = {
@@ -500,11 +500,12 @@ export function ArtistPublicPage({
             {/* Right sidebar */}
             <div className="w-full lg:w-1/3 space-y-8">
               {subscriptionSettings?.is_enabled && (
-                <SubscriptionCard
+                <SubscriptionModal
                   artistId={artist.id}
                   price={subscriptionSettings.monthly_price}
                   description={subscriptionSettings.description}
                   subscriberCount={subscriberCount}
+                  name={artist.display_name}
                 />
               )}
 

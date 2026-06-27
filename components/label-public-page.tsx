@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/lib/cart-context'
-import { SubscriptionCard } from '@/components/subscribe-button'
+import { SubscriptionModal } from '@/components/subscription-modal'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 
 type Label = {
@@ -455,11 +455,12 @@ export function LabelPublicPage({
             {/* Right sidebar */}
             <div className="w-full lg:w-1/3 space-y-8">
               {subscriptionSettings?.is_enabled && (
-                <SubscriptionCard
+                <SubscriptionModal
                   labelId={label.id}
                   price={subscriptionSettings.monthly_price}
                   description={subscriptionSettings.description}
                   subscriberCount={subscriberCount}
+                  name={label.name}
                 />
               )}
 
