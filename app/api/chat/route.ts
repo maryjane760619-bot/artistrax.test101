@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { ARTISTRAX_KNOWLEDGE } from '@/lib/ai-knowledge-base';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
-
 export async function POST(request: NextRequest) {
   try {
     const { message, userType } = await request.json();
@@ -16,13 +12,17 @@ export async function POST(request: NextRequest) {
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { 
+        {
           error: 'AI chat is not configured. Please contact support@artistrax.com',
-          reply: 'Sorry, the AI assistant is currently unavailable. Please email support@artistrax.com for help!' 
+          reply: 'Sorry, the AI assistant is currently unavailable. Please email support@artistrax.com for help!'
         },
         { status: 200 }
       );
     }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     // Add user context to the system message
     let contextNote = '';
