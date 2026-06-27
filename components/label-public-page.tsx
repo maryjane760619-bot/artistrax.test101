@@ -90,6 +90,7 @@ type Props = {
 }
 
 const PAGE_SIZE = 12
+const TABLE_PAGE_SIZE = 25
 
 export function LabelPublicPage({
   label,
@@ -110,6 +111,7 @@ export function LabelPublicPage({
 
   const [searchQuery, setSearchQuery] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [tableVisibleCount, setTableVisibleCount] = useState(TABLE_PAGE_SIZE)
 
   useEffect(() => {
     if (!currentTrack || !audioRef.current) return
@@ -156,10 +158,12 @@ export function LabelPublicPage({
   }, [tracks, searchQuery])
 
   const visibleGridTracks = filteredTracks.slice(0, visibleCount)
+  const visibleTableTracks = filteredTracks.slice(0, tableVisibleCount)
 
   // Reset pagination whenever the search changes
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
+    setTableVisibleCount(TABLE_PAGE_SIZE)
   }, [searchQuery])
 
   const bannerImage = label.banner_url || label.logo_url || tracks[0]?.coverArt || null
@@ -422,19 +426,28 @@ export function LabelPublicPage({
                 {filteredTracks.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8 text-sm">No tracks found.</p>
                 ) : (
-                  <div className="space-y-1 max-h-[600px] overflow-y-auto pr-1">
-                    {filteredTracks.map(track => (
-                      <BeatportTrackRow
-                        key={track.id}
-                        track={track}
-                        active={currentTrack?.id === track.id}
-                        playing={currentTrack?.id === track.id && isPlaying}
-                        inCart={isInCart(track.id)}
-                        onPlay={() => handlePlay(track)}
-                        onAddToCart={() => handleAddToCart(track)}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="space-y-1 max-h-[600px] overflow-y-auto pr-1">
+                      {visibleTableTracks.map(track => (
+                        <BeatportTrackRow
+                          key={track.id}
+                          track={track}
+                          active={currentTrack?.id === track.id}
+                          playing={currentTrack?.id === track.id && isPlaying}
+                          inCart={isInCart(track.id)}
+                          onPlay={() => handlePlay(track)}
+                          onAddToCart={() => handleAddToCart(track)}
+                        />
+                      ))}
+                    </div>
+                    {tableVisibleCount < filteredTracks.length && (
+                      <div className="flex justify-center mt-4">
+                        <Button variant="outline" className="rounded-full px-8" onClick={() => setTableVisibleCount(c => c + TABLE_PAGE_SIZE)}>
+                          Load More ({filteredTracks.length - tableVisibleCount} remaining)
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </section>
             </div>
