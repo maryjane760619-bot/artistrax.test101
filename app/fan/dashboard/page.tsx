@@ -132,13 +132,13 @@ function DashboardContent() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card border border-border rounded-lg p-6">
+          <Link href="/fan/favorites" className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-colors block">
             <div className="flex items-center gap-3 mb-2">
               <Heart className="w-5 h-5 text-primary" />
               <span className="text-sm text-muted-foreground">Favorites</span>
             </div>
             <div className="text-3xl font-bold">{stats.favorites}</div>
-          </div>
+          </Link>
 
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">

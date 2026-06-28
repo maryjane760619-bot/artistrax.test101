@@ -11,6 +11,7 @@ import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/cart-context'
 import { RedeemWithPointsButton } from '@/components/redeem-with-points-button'
+import { FavoriteButton } from '@/components/favorite-button'
 import { POINTS_CONFIG } from '@/lib/points-config'
 
 function formatTime(seconds: number) {
@@ -148,7 +149,10 @@ export default function TrackPage() {
                 )}
               </div>
 
-              <h1 className="text-3xl font-bold mb-2">{track.title}</h1>
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <h1 className="text-3xl font-bold">{track.title}</h1>
+                <FavoriteButton trackId={track.id} />
+              </div>
               <p className="text-xl text-muted-foreground mb-6">{artistName}</p>
 
               {track.is_mix && (
