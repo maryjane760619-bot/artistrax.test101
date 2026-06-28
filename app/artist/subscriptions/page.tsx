@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -45,15 +46,20 @@ export default function CreatorSubscriptionsPage() {
 
   const fetchData = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {}
+
       // Fetch settings
-      const settingsRes = await fetch('/api/creator/subscription-settings')
+      const settingsRes = await fetch('/api/creator/subscription-settings', { headers })
       if (settingsRes.ok) {
         const data = await settingsRes.json()
         setSettings(data.settings)
       }
 
       // Fetch subscribers
-      const subscribersRes = await fetch('/api/creator/subscribers')
+      const subscribersRes = await fetch('/api/creator/subscribers', { headers })
       if (subscribersRes.ok) {
         const data = await subscribersRes.json()
         setSubscribers(data.subscribers)
@@ -69,9 +75,13 @@ export default function CreatorSubscriptionsPage() {
   const saveSettings = async () => {
     setSaving(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       const response = await fetch('/api/creator/subscription-settings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify(settings),
       })
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { createClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,11 +44,16 @@ export default function ArtistLinksPage() {
     }
   }, [user, authLoading]);
 
+  const authHeader = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+  };
+
   const loadLinks = async () => {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/links?artistId=${user.id}`);
+      const response = await fetch(`/api/links?artistId=${user.id}`, { headers: await authHeader() });
       const data = await response.json();
       setLinks(data.links || []);
     } catch (error) {
@@ -67,7 +72,7 @@ export default function ArtistLinksPage() {
     try {
       const response = await fetch('/api/links', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
         body: JSON.stringify({
           artistId: user.id,
           title: newTitle,
@@ -99,7 +104,7 @@ export default function ArtistLinksPage() {
     try {
       await fetch('/api/links', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
         body: JSON.stringify({
           id: link.id,
           isVisible: !link.is_visible,
@@ -118,7 +123,7 @@ export default function ArtistLinksPage() {
     if (!confirm('Delete this link?')) return;
 
     try {
-      await fetch(`/api/links?id=${linkId}`, { method: 'DELETE' });
+      await fetch(`/api/links?id=${linkId}`, { method: 'DELETE', headers: await authHeader() });
       setLinks(links.filter(l => l.id !== linkId));
     } catch (error) {
       console.error('Failed to delete link:', error);

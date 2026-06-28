@@ -25,7 +25,9 @@ export default function BatchUploadPage() {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
-  
+  const [isFree, setIsFree] = useState(true)
+  const [price, setPrice] = useState('1.99')
+
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -152,8 +154,8 @@ export default function BatchUploadPage() {
         duration: Math.floor(duration),
         file_size: file.size,
         format: audioExt as 'mp3' | 'flac' | 'wav',
-        price: 0,
-        is_free: true,
+        price: isFree ? 0 : parseFloat(price) || 0,
+        is_free: isFree,
       })
 
       if (dbError) throw dbError
@@ -282,7 +284,7 @@ export default function BatchUploadPage() {
                 <div>
                   <h2 className="text-lg font-semibold mb-1">Ready to Upload</h2>
                   <p className="text-sm text-muted-foreground">
-                    {files.length} tracks • All will be set as free downloads (edit later)
+                    {files.length} tracks • Same price applied to all (edit individually later if needed)
                   </p>
                 </div>
                 {!uploading && pendingCount > 0 && (
@@ -291,6 +293,34 @@ export default function BatchUploadPage() {
                   </Button>
                 )}
               </div>
+
+              {!uploading && (
+                <div className="mt-4 pt-4 border-t border-border flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isFree}
+                      onChange={(e) => setIsFree(e.target.checked)}
+                      className="rounded"
+                    />
+                    Free download
+                  </label>
+                  {!isFree && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span>$</span>
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="w-20 px-2 py-1 rounded border border-border bg-background"
+                      />
+                      <span className="text-muted-foreground">per track</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {(successCount > 0 || errorCount > 0) && (
                 <div className="mt-4 flex gap-4 text-sm">

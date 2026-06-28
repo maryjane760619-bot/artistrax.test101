@@ -1,218 +1,107 @@
-// Universal Label Page - With error recovery
-'use client';
+import { notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
+import { LabelPublicPage } from '@/components/label-public-page'
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { ExternalLink, Music, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+type Props = {
+  params: Promise<{ slug: string }>
+}
 
-export default function LabelPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+export default async function LabelSlugPage({ params }: Props) {
+  const { slug } = await params
+  const supabase = createClient()
 
-  useEffect(() => {
-    if (!slug) {
-      setError('No label specified');
-      setLoading(false);
-      return;
-    }
-    
-    const fetchLabel = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Add cache-busting parameter
-        const cacheBuster = `?t=${Date.now()}`;
-        const res = await fetch(`/api/label/${slug}${cacheBuster}`, {
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        
-        const text = await res.text();
-        
-        // Check if response is HTML (error page)
-        if (text.trim().startsWith('<')) {
-          throw new Error('Server returned HTML instead of JSON. Please try again.');
-        }
-        
-        let json;
-        try {
-          json = JSON.parse(text);
-        } catch (parseErr) {
-          throw new Error('Invalid response from server. Please try again.');
-        }
-        
-        if (!res.ok || json.error) {
-          throw new Error(json.error || 'Failed to load label');
-        }
-        
-        setData(json);
-      } catch (err) {
-        console.error('Label fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchLabel();
-  }, [slug, retryCount]);
+  const { data: label, error: labelError } = await supabase
+    .from('labels')
+    .select('*, owner_artist:owner_artist_id (display_name, username)')
+    .eq('slug', slug)
+    .single()
 
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Music className="w-12 h-12 mx-auto mb-4 animate-pulse text-primary" />
-          <p className="text-muted-foreground">Loading label...</p>
-        </div>
-      </div>
-    );
+  if (labelError || !label) {
+    notFound()
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <p className="text-red-500 mb-4">{error}</p>
-          <div className="space-x-4">
-            <Button onClick={handleRetry} variant="outline">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Try Again
-            </Button>
-            <Button asChild>
-              <Link href="/">Back Home</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const { data: tracks } = await supabase
+    .from('tracks')
+    .select(`
+      id, title, price, is_free, cover_url, audio_url, artist_id, label_id,
+      genre, bpm, musical_key, description, created_at,
+      artists:artist_id (display_name)
+    `)
+    .eq('label_id', label.id)
+    .order('created_at', { ascending: false })
 
-  if (!data || !data.label) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Label not found</p>
-          <Button asChild>
-            <Link href="/">Back Home</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const { data: artists } = await supabase
+    .from('public_artist_profiles')
+    .select('id, username, display_name, avatar_url, bio')
+    .eq('label_id', label.id)
 
-  const { label, tracks } = data;
+  const { data: products } = await supabase
+    .from('products')
+    .select('*, variants:product_variants(id, name, price_modifier, stock_quantity, is_available)')
+    .eq('label_id', label.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  const { data: videos } = await supabase
+    .from('videos')
+    .select('*')
+    .eq('label_id', label.id)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+
+  const { data: subscriptionSettings } = await supabase
+    .from('creator_subscription_settings')
+    .select('*')
+    .eq('label_id', label.id)
+    .maybeSingle()
+
+  const { count: subscriberCount } = await supabase
+    .from('fan_subscriptions')
+    .select('*', { count: 'exact', head: true })
+    .eq('label_id', label.id)
+    .eq('status', 'active')
+
+  const today = new Date().toISOString().split('T')[0]
+  const { data: events } = await supabase
+    .from('events')
+    .select('*')
+    .eq('label_id', label.id)
+    .eq('status', 'published')
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+
+  const mappedTracks = (tracks || []).map((t: any) => ({
+    id: t.id,
+    title: t.title,
+    artist: t.artists?.display_name || 'Unknown',
+    price: Number(t.price),
+    is_free: !!t.is_free,
+    audio_url: t.audio_url,
+    artist_id: t.artist_id,
+    label_id: t.label_id,
+    genre: t.genre,
+    bpm: t.bpm,
+    musical_key: t.musical_key,
+    description: t.description,
+    coverArt: t.cover_url,
+  }))
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div
-        className="relative bg-gradient-to-br from-orange-500 to-pink-500 text-white"
-        style={
-          label.bannerUrl
-            ? {
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${label.bannerUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }
-            : undefined
-        }
-      >
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          {label.logoUrl && (
-            <img
-              src={label.logoUrl}
-              alt={`${label.name} logo`}
-              className="mx-auto mb-4 h-20 w-20 rounded-full border-2 border-white/80 object-cover shadow-lg"
-            />
-          )}
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{label.name}</h1>
-          <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            {label.description || label.bio || 'Independent record label'}
-          </p>
-          <p className="text-sm mt-2 opacity-75">
-            {tracks?.length || 0} tracks · Lossless formats
-          </p>
-        </div>
-      </div>
-
-      {/* Tracks Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-semibold mb-6">Releases</h2>
-        
-        {!tracks || tracks.length === 0 ? (
-          <p className="text-center text-muted-foreground py-12">
-            No releases yet. Check back soon!
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {tracks.map((track: any) => (
-              <Card key={track.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-0">
-                  {/* Cover */}
-                  <div className="relative aspect-square bg-muted">
-                    {track.coverArt || track.cover_url ? (
-                      <img
-                        src={track.coverArt || track.cover_url}
-                        alt={track.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">
-                        🎵
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="font-semibold truncate text-sm" title={track.title}>
-                      {track.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {track.artist}
-                    </p>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="font-semibold text-green-600 text-sm">
-                        ${track.price}
-                      </span>
-                      <Link href={track.buyUrl || `/track/${track.id}`} target="_blank">
-                        <Button size="sm" variant="ghost" className="text-xs">
-                          Buy <ExternalLink className="w-3 h-3 ml-1" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="border-t bg-muted/50 mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Powered by <Link href="/" className="text-primary hover:underline">Artistrax</Link>
-            {' '}· Where an artist can be an artist
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+    <>
+      <Header />
+      <LabelPublicPage
+        label={label}
+        tracks={mappedTracks}
+        artists={artists || []}
+        products={products || []}
+        videos={videos || []}
+        events={events || []}
+        subscriptionSettings={subscriptionSettings}
+        subscriberCount={subscriberCount || 0}
+      />
+      <Footer />
+    </>
+  )
 }

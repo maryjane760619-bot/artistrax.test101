@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { POINTS_CONFIG } from '@/lib/points-config'
-import { sendSubscriptionNotification } from '@/lib/email-service'
+import { sendSubscriptionNotification, sendTrackPurchaseReceipt } from '@/lib/email-service'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -128,6 +128,23 @@ export async function POST(request: NextRequest) {
                 if (pointsError) console.error('Failed to award points:', pointsError)
               }
             }
+          }
+
+          // Send a single receipt email for the whole order (non-blocking)
+          const { data: purchasedTracks } = await supabase
+            .from('tracks')
+            .select('title, artists:artist_id (display_name), labels:label_id (name)')
+            .in('id', ids)
+
+          if (purchasedTracks && purchasedTracks.length > 0) {
+            sendTrackPurchaseReceipt(
+              customerEmail,
+              purchasedTracks.map((t: any) => ({
+                title: t.title,
+                artist: t.artists?.display_name || t.labels?.name || '',
+              })),
+              amountPaid
+            ).catch(err => console.error('Failed to send purchase receipt:', err))
           }
         }
         break

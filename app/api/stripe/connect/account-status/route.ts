@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabase, createClient } from '@/lib/supabase'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
-  apiVersion: '2024-12-18.acacia'
-})
-
 // GET handler - auth-token based (used by dashboard component)
 export async function GET(request: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
+      apiVersion: '2024-12-18.acacia'
+    })
+
     const authHeader = request.headers.get('authorization')
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const token = authHeader.replace('Bearer ', '')
@@ -111,6 +111,10 @@ export async function GET(request: NextRequest) {
 // POST handler - userId/userType based (used by scripts/API)
 export async function POST(request: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
+      apiVersion: '2024-12-18.acacia'
+    })
+
     const { userId, userType } = await request.json()
 
     if (!userId || !userType) {

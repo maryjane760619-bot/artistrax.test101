@@ -10,6 +10,9 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { supabase } from '@/lib/supabase'
 import { useCart } from '@/lib/cart-context'
+import { RedeemWithPointsButton } from '@/components/redeem-with-points-button'
+import { FavoriteButton } from '@/components/favorite-button'
+import { POINTS_CONFIG } from '@/lib/points-config'
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60)
@@ -27,6 +30,7 @@ export default function TrackPage() {
   const [error, setError] = useState<string | null>(null)
   const [alreadyOwned, setAlreadyOwned] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [pointsBalance, setPointsBalance] = useState<number | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
   const jumpTo = (seconds: number) => {
@@ -58,6 +62,13 @@ export default function TrackPage() {
           .eq('buyer_email', session.user.email)
           .single()
         if (purchase) setAlreadyOwned(true)
+
+        const { data: fan } = await supabase
+          .from('fans')
+          .select('points_balance')
+          .eq('id', session.user.id)
+          .single()
+        if (fan) setPointsBalance(fan.points_balance || 0)
       }
 
       setLoading(false)
@@ -138,7 +149,10 @@ export default function TrackPage() {
                 )}
               </div>
 
-              <h1 className="text-3xl font-bold mb-2">{track.title}</h1>
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <h1 className="text-3xl font-bold">{track.title}</h1>
+                <FavoriteButton trackId={track.id} />
+              </div>
               <p className="text-xl text-muted-foreground mb-6">{artistName}</p>
 
               {track.is_mix && (
@@ -235,6 +249,17 @@ export default function TrackPage() {
                   <p className="text-xs text-muted-foreground mt-3 text-center">
                     Secure payment via Stripe · 90% goes directly to the artist
                   </p>
+
+                  {pointsBalance !== null && pointsBalance >= POINTS_CONFIG.POINTS_PER_TRACK && (
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <p className="text-sm text-muted-foreground mb-3 text-center">or</p>
+                      <RedeemWithPointsButton
+                        trackId={track.id}
+                        pointsBalance={pointsBalance}
+                        onSuccess={() => setAlreadyOwned(true)}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

@@ -8,6 +8,9 @@ import { Music, ExternalLink, DollarSign, AlertCircle, CheckCircle, Loader2 } fr
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { BrandingEditor } from '@/components/branding-editor'
+import { SubscriptionSettingsEditor } from '@/components/subscription-settings-editor'
+import { LinkArtistEditor } from '@/components/link-artist-editor'
+import { EmbedCodeButton } from '@/components/embed-code-button'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
@@ -131,6 +134,10 @@ export default function LabelDashboard() {
               onUpdated={urls => setLabelData((prev: any) => ({ ...prev, ...urls }))}
             />
           )}
+
+          <SubscriptionSettingsEditor />
+
+          <LinkArtistEditor />
 
           {/* Stripe Status */}
           {stripeConnected ? (
@@ -282,11 +289,21 @@ export default function LabelDashboard() {
               <Link href="/label/upload">Upload Track</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/labels/siesta-records" target="_blank">
+              <Link href="/label/upload-mix">Upload Mix</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/label/bundles/new">Create Bundle</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/label/links">Manage Links</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href={`/labels/${labelData?.slug || ''}`} target="_blank">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 View Public Page
               </Link>
             </Button>
+            {labelData?.slug && <EmbedCodeButton slug={labelData.slug} />}
             <Button asChild variant="outline" size="lg">
               <Link href="/label/billing">Billing</Link>
             </Button>

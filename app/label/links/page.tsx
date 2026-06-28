@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LabelAuthProvider, useLabelAuth } from '@/lib/label-auth-context';
-import { createClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,11 +43,16 @@ function LinksContent() {
     }
   }, [user, authLoading]);
 
+  const authHeader = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+  };
+
   const loadLinks = async () => {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/links?labelId=${user.id}`);
+      const response = await fetch(`/api/links?labelId=${user.id}`, { headers: await authHeader() });
       const data = await response.json();
       setLinks(data.links || []);
     } catch (error) {
@@ -66,7 +71,7 @@ function LinksContent() {
     try {
       const response = await fetch('/api/links', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
         body: JSON.stringify({
           labelId: user.id,
           title: newTitle,
@@ -98,7 +103,7 @@ function LinksContent() {
     try {
       await fetch('/api/links', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
         body: JSON.stringify({
           id: link.id,
           isVisible: !link.is_visible,
@@ -117,7 +122,7 @@ function LinksContent() {
     if (!confirm('Delete this link?')) return;
 
     try {
-      await fetch(`/api/links?id=${linkId}`, { method: 'DELETE' });
+      await fetch(`/api/links?id=${linkId}`, { method: 'DELETE', headers: await authHeader() });
       setLinks(links.filter(l => l.id !== linkId));
     } catch (error) {
       console.error('Failed to delete link:', error);

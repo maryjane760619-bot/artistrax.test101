@@ -6,6 +6,7 @@ const BROWSE = [
   { l: 'All Releases', href: '/releases' },
   { l: 'Artists', href: '/artists' },
   { l: 'Labels', href: '/labels' },
+  { l: 'Merch', href: '/merch' },
   { l: 'Bundles', href: '/bundles' },
   { l: 'Events', href: '/events' },
   { l: 'Live', href: '/live' },

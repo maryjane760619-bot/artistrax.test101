@@ -33,6 +33,8 @@ function LabelBatchUploadContent() {
   const [artists, setArtists] = useState<Artist[]>([])
   const [defaultArtistId, setDefaultArtistId] = useState<string>('')
   const [uploading, setUploading] = useState(false)
+  const [isFree, setIsFree] = useState(true)
+  const [price, setPrice] = useState('1.99')
   const [currentIndex, setCurrentIndex] = useState(0)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -66,19 +68,18 @@ function LabelBatchUploadContent() {
   }
 
   const loadArtists = async () => {
-    // Load all artists (labels can assign tracks to any artist)
+    if (!user) return
+
+    // Only artists on this label's own roster, not every artist on the platform
     const { data } = await supabase
       .from('artists')
       .select('id, display_name, username')
+      .eq('label_id', user.id)
       .order('display_name')
 
     if (data) {
       setArtists(data)
-      // Set DJ Halo as default if available
-      const djHalo = data.find(a => a.username === 'halo')
-      if (djHalo) {
-        setDefaultArtistId(djHalo.id)
-      } else if (data.length > 0) {
+      if (data.length > 0) {
         setDefaultArtistId(data[0].id)
       }
     }
@@ -199,8 +200,8 @@ function LabelBatchUploadContent() {
         duration: Math.floor(duration),
         file_size: file.size,
         format: audioExt as 'mp3' | 'flac' | 'wav',
-        price: 0,
-        is_free: true,
+        price: isFree ? 0 : parseFloat(price) || 0,
+        is_free: isFree,
       })
 
       if (dbError) throw dbError
@@ -329,7 +330,7 @@ function LabelBatchUploadContent() {
                 <div>
                   <h2 className="text-lg font-semibold mb-1">Ready to Upload</h2>
                   <p className="text-sm text-muted-foreground">
-                    {files.length} tracks • All will be set as free downloads (edit later)
+                    {files.length} tracks • Same price applied to all (edit individually later if needed)
                   </p>
                 </div>
                 {!uploading && pendingCount > 0 && (
@@ -359,6 +360,34 @@ function LabelBatchUploadContent() {
                       </option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {!uploading && (
+                <div className="flex items-center gap-4 pt-4 border-t border-border">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isFree}
+                      onChange={(e) => setIsFree(e.target.checked)}
+                      className="rounded"
+                    />
+                    Free download
+                  </label>
+                  {!isFree && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span>$</span>
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="w-20 px-2 py-1 rounded border border-border bg-background"
+                      />
+                      <span className="text-muted-foreground">per track</span>
+                    </div>
+                  )}
                 </div>
               )}
 

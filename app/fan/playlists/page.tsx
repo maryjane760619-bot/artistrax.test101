@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { FanAuthProvider, useFanAuth } from '@/lib/fan-auth-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Music, Plus, Trash2, PlayCircle } from 'lucide-react'
+import { Music, Plus, Trash2, PlayCircle, Globe, Lock, Check } from 'lucide-react'
 import Link from 'next/link'
 
 type Playlist = {
@@ -26,6 +26,7 @@ function PlaylistsContent() {
   const [newPlaylistName, setNewPlaylistName] = useState('')
   const [newPlaylistDesc, setNewPlaylistDesc] = useState('')
   const [creating, setCreating] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -99,6 +100,26 @@ function PlaylistsContent() {
     if (!error) {
       setPlaylists(playlists.filter(p => p.id !== playlistId))
     }
+  }
+
+  const handleTogglePublic = async (playlist: Playlist) => {
+    const newValue = !playlist.is_public
+    const { error } = await supabase
+      .from('playlists')
+      .update({ is_public: newValue })
+      .eq('id', playlist.id)
+
+    if (!error) {
+      setPlaylists(prev =>
+        prev.map(p => (p.id === playlist.id ? { ...p, is_public: newValue } : p))
+      )
+    }
+  }
+
+  const handleCopyLink = (playlistId: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/fan/playlists/${playlistId}`)
+    setCopiedId(playlistId)
+    setTimeout(() => setCopiedId(null), 1500)
   }
 
   const handleSignOut = async () => {
@@ -249,7 +270,7 @@ function PlaylistsContent() {
                     {playlist.track_count} tracks
                   </p>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-2">
                     <Link href={`/fan/playlists/${playlist.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
                         <PlayCircle className="w-4 h-4 mr-2" />
@@ -263,6 +284,35 @@ function PlaylistsContent() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => handleTogglePublic(playlist)}
+                      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {playlist.is_public ? (
+                        <>
+                          <Globe className="w-3.5 h-3.5" /> Public
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-3.5 h-3.5" /> Private
+                        </>
+                      )}
+                    </button>
+                    {playlist.is_public && (
+                      <button
+                        onClick={() => handleCopyLink(playlist.id)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {copiedId === playlist.id ? (
+                          <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Copied</span>
+                        ) : (
+                          'Copy link'
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,15 +1,20 @@
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Get videos the user has access to (via subscription or purchase)
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+    const authHeader = request.headers.get('authorization')
+    const token = authHeader?.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -19,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Get active subscriptions for this fan
     const { data: subscriptions } = await supabase
-      .from('subscriptions')
+      .from('fan_subscriptions')
       .select('artist_id, label_id')
       .eq('fan_id', user.id)
       .eq('status', 'active')

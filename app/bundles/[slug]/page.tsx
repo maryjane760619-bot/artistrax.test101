@@ -1,197 +1,123 @@
-'use client'
-
-import { use, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingCart, Check, Play } from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { Button } from '@/components/ui/button'
-import { CartProvider, useCart } from '@/lib/cart-context'
-import { getBundleBySlug, getReleaseById } from '@/lib/data'
-import { notFound } from 'next/navigation'
-import type { Bundle } from '@/lib/types'
+import { BundleBuyButton } from '@/components/bundle-buy-button'
+import { ArrowLeft, Music, Package } from 'lucide-react'
 
-interface BundlePageProps {
+type Props = {
   params: Promise<{ slug: string }>
 }
 
-function BundleContent({ bundle }: { bundle: Bundle }) {
-  const { addItem, items } = useCart()
-  const [selectedFormat, setSelectedFormat] = useState<'mp3' | 'flac' | 'wav'>('mp3')
-  const [addedToCart, setAddedToCart] = useState(false)
+export default async function BundleDetailPage({ params }: Props) {
+  const { slug } = await params
+  const supabase = createClient()
 
-  const bundleReleases = bundle.releases
-    .map(id => getReleaseById(id))
-    .filter(Boolean)
+  const { data: bundle, error } = await supabase
+    .from('bundles')
+    .select(`
+      id, title, slug, description, cover_url, discount_percent,
+      artists (display_name, username),
+      labels (name, slug),
+      bundle_tracks (
+        tracks (id, title, price, cover_url, duration)
+      )
+    `)
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single()
 
-  const handleAddAllToCart = () => {
-    bundleReleases.forEach(release => {
-      if (release) addItem(release, selectedFormat)
-    })
-    setAddedToCart(true)
-    setTimeout(() => setAddedToCart(false), 2000)
+  if (error || !bundle) {
+    notFound()
   }
 
-  const allInCart = bundleReleases.every(
-    release => release && items.some(item => item.releaseId === release.id)
-  )
-
-  const formatPricing = {
-    mp3: bundle.discountedPrice,
-    flac: bundle.discountedPrice * 1.4,
-    wav: bundle.discountedPrice * 1.4
-  }
+  const tracks = (bundle.bundle_tracks || []).map((bt: any) => bt.tracks).filter(Boolean)
+  const fullPrice = tracks.reduce((sum: number, t: any) => sum + Number(t.price), 0)
+  const discountedPrice = fullPrice * (1 - bundle.discount_percent / 100)
+  const sellerName = (bundle.artists as any)?.display_name || (bundle.labels as any)?.name || 'Unknown'
+  const sellerHref = bundle.artists
+    ? `/${(bundle.artists as any).username}`
+    : bundle.labels
+    ? `/labels/${(bundle.labels as any).slug}`
+    : undefined
 
   return (
-    <main className="pt-20 md:pt-24">
-      <section className="py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link 
-            href="/bundles"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
-          >
+    <div className="min-h-screen bg-background text-foreground">
+      <Header />
+      <main className="pb-16">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
+          <Link href="/bundles" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             All Bundles
           </Link>
 
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-            {/* Bundle Image */}
-            <div>
-              <div className="aspect-square rounded-lg overflow-hidden bg-card border border-border">
-                <div className="w-full h-full bg-gradient-to-br from-muted-foreground/30 to-muted flex items-center justify-center">
-                  <div className="grid grid-cols-2 gap-2 p-8 w-full h-full">
-                    {bundleReleases.slice(0, 4).map(release => release && (
-                      <div key={release.id} className="rounded-lg bg-muted overflow-hidden">
-                        <div className="w-full h-full bg-gradient-to-br from-muted-foreground/20 to-muted" />
-                      </div>
-                    ))}
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="aspect-square rounded-sm overflow-hidden border border-border bg-muted">
+              {bundle.cover_url ? (
+                <img src={bundle.cover_url} alt={bundle.title} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Package className="w-20 h-20 text-muted-foreground/40" />
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* Bundle Info */}
             <div>
-              <div className="mb-6">
-                <span className="text-sm uppercase tracking-wider text-muted-foreground">
-                  Bundle • {bundleReleases.length} Releases
+              <div className="text-xs uppercase tracking-[0.18em] text-accent">
+                Bundle · {tracks.length} Tracks
+              </div>
+              <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight mt-2">
+                {bundle.title}
+              </h1>
+              {sellerHref ? (
+                <Link href={sellerHref} className="text-sm text-muted-foreground hover:text-accent hover:underline">
+                  by {sellerName}
+                </Link>
+              ) : (
+                <p className="text-sm text-muted-foreground">by {sellerName}</p>
+              )}
+              {bundle.description && (
+                <p className="text-muted-foreground mt-4 leading-relaxed">{bundle.description}</p>
+              )}
+
+              <div className="mt-6 flex items-center gap-3 rounded-sm border border-border bg-card p-4">
+                <span className="font-mono text-2xl font-semibold">${discountedPrice.toFixed(2)}</span>
+                <span className="font-mono text-base text-muted-foreground line-through">${fullPrice.toFixed(2)}</span>
+                <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
+                  Save ${(fullPrice - discountedPrice).toFixed(2)}
                 </span>
-                <h1 className="font-serif text-4xl md:text-5xl mt-2 mb-3">{bundle.title}</h1>
-                <p className="text-lg text-muted-foreground">{bundle.description}</p>
               </div>
 
-              {/* Pricing */}
-              <div className="flex items-center gap-4 mb-6 p-4 bg-card rounded-lg border border-border">
-                <span className="text-3xl font-medium">${formatPricing[selectedFormat].toFixed(2)}</span>
-                <span className="text-xl text-muted-foreground line-through">${bundle.originalPrice.toFixed(2)}</span>
-                <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm">
-                  Save ${(bundle.originalPrice - bundle.discountedPrice).toFixed(2)}
-                </span>
-              </div>
+              <BundleBuyButton bundleId={bundle.id} />
 
-              {/* Format Selection */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium uppercase tracking-wider mb-3">Select Format</h3>
-                <div className="flex flex-wrap gap-2">
-                  {(['mp3', 'flac', 'wav'] as const).map(format => (
-                    <button
-                      key={format}
-                      onClick={() => setSelectedFormat(format)}
-                      className={`px-4 py-2 rounded-lg border text-sm transition-colors ${
-                        selectedFormat === format
-                          ? 'border-foreground bg-foreground text-background'
-                          : 'border-border bg-card hover:border-muted-foreground'
-                      }`}
-                    >
-                      {format.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Add to Cart */}
-              <div className="flex gap-3 mb-8">
-                <Button 
-                  size="lg" 
-                  className="flex-1"
-                  onClick={handleAddAllToCart}
-                  disabled={allInCart && !addedToCart}
-                >
-                  {addedToCart ? (
-                    <>
-                      <Check className="w-4 h-4 mr-2" />
-                      Added to Cart
-                    </>
-                  ) : allInCart ? (
-                    <>
-                      <Check className="w-4 h-4 mr-2" />
-                      All Items in Cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Add Bundle to Cart
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Included Releases */}
-              <div>
-                <h3 className="text-sm font-medium uppercase tracking-wider mb-4">
-                  Included Releases
+              <div className="mt-8">
+                <h3 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
+                  Included Tracks
                 </h3>
-                <div className="space-y-3">
-                  {bundleReleases.map(release => release && (
-                    <Link
-                      key={release.id}
-                      href={`/releases/${release.slug}`}
-                      className="flex items-center gap-4 p-3 rounded-lg hover:bg-card transition-colors group"
-                    >
-                      <div className="w-14 h-14 rounded bg-muted overflow-hidden flex-shrink-0">
-                        <div className="w-full h-full bg-gradient-to-br from-muted-foreground/20 to-muted flex items-center justify-center">
-                          <Play className="w-4 h-4 text-muted-foreground/50" />
-                        </div>
+                <div className="space-y-1">
+                  {tracks.map((track: any) => (
+                    <div key={track.id} className="flex items-center gap-3 py-2.5 border-b border-border">
+                      <div className="w-10 h-10 rounded-sm overflow-hidden bg-muted shrink-0">
+                        {track.cover_url ? (
+                          <img src={track.cover_url} alt={track.title} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <Music className="w-4 h-4 text-muted-foreground/40" />
+                          </div>
+                        )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate group-hover:text-muted-foreground transition-colors">
-                          {release.title}
-                        </p>
-                        <p className="text-sm text-muted-foreground">{release.artistName}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm text-muted-foreground">
-                          {release.tracks.length} tracks
-                        </p>
-                        <p className="text-sm">${release.pricing[selectedFormat].toFixed(2)}</p>
-                      </div>
-                    </Link>
+                      <span className="flex-1 text-sm font-medium truncate">{track.title}</span>
+                      <span className="font-mono text-xs text-muted-foreground">${Number(track.price).toFixed(2)}</span>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-    </main>
-  )
-}
-
-export default function BundlePage({ params }: BundlePageProps) {
-  const { slug } = use(params)
-  const bundle = getBundleBySlug(slug)
-
-  if (!bundle) {
-    notFound()
-  }
-
-  return (
-    <CartProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        <BundleContent bundle={bundle} />
-        <Footer />
-      </div>
-    </CartProvider>
+      </main>
+      <Footer />
+    </div>
   )
 }

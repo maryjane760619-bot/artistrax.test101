@@ -17,7 +17,7 @@ export default function LabelEmbed() {
   useEffect(() => {
     if (!slug) return;
     
-    fetch(`/api/label/${slug}/tracks`)
+    fetch(`/api/label/${slug}`)
       .then(res => res.json())
       .then(data => {
         setData(data);
@@ -48,9 +48,9 @@ export default function LabelEmbed() {
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        {label.avatar && (
-          <img 
-            src={label.avatar} 
+        {label.logoUrl && (
+          <img
+            src={label.logoUrl}
             alt={label.name}
             style={styles.avatar}
           />

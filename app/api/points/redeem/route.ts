@@ -1,19 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { POINTS_CONFIG } from '@/lib/points-config';
 
 export async function POST(request: NextRequest) {
   try {
-    const { trackId, fanId } = await request.json();
+    const { trackId } = await request.json();
 
-    if (!trackId || !fanId) {
+    if (!trackId) {
       return NextResponse.json(
-        { error: 'Missing trackId or fanId' },
+        { error: 'Missing trackId' },
         { status: 400 }
       );
     }
 
-    const supabase = createClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Identify the fan from their own session -- never trust a client-supplied
+    // fanId, or any caller could redeem points from someone else's balance.
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const fanId = user.id;
 
     // Get fan's current points balance
     const { data: fan, error: fanError } = await supabase

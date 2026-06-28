@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
-  apiVersion: '2024-12-18.acacia',
-})
+// Webhooks are server-to-server with no user session -- must use the
+// service-role client to bypass RLS, same lesson as the main stripe webhook.
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 const webhookSecret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET!
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
+      apiVersion: '2024-12-18.acacia',
+    })
+
     const body = await request.text()
     const signature = request.headers.get('stripe-signature')!
 

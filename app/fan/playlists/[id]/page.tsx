@@ -51,27 +51,35 @@ function PlaylistViewContent() {
   const [playlistTracks, setPlaylistTracks] = useState<PlaylistTrack[]>([])
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [queue, setQueue] = useState<any[]>([])
+  const [notFound, setNotFound] = useState(false)
 
+  // Public playlists (is_public = true) are viewable by anyone, including
+  // signed-out visitors -- RLS already enforces this at the DB level
+  // (auth.uid() = fan_id OR is_public = true). This page used to redirect
+  // every signed-out visitor to /fan/login before even attempting to load
+  // the playlist, which made public playlist sharing impossible.
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/fan/login')
-    }
-
-    if (user && playlistId) {
+    if (!loading && playlistId) {
       loadPlaylist()
       loadTracks()
     }
-  }, [user, loading, playlistId])
+  }, [loading, playlistId])
+
+  const isOwner = !!user && !!playlist && user.id === playlist.fan_id
 
   const loadPlaylist = async () => {
     const { data } = await supabase
       .from('playlists')
       .select('*')
       .eq('id', playlistId)
-      .single()
+      .maybeSingle()
 
     if (data) {
       setPlaylist(data)
+    } else {
+      // RLS returned nothing -- either it doesn't exist, or it's private
+      // and this isn't the owner. Either way, not viewable.
+      setNotFound(true)
     }
   }
 
@@ -117,6 +125,7 @@ function PlaylistViewContent() {
   }
 
   const handleRemoveTrack = async (playlistTrackId: string) => {
+    if (!isOwner) return
     if (!confirm('Remove this track from the playlist?')) return
 
     const { error } = await supabase
@@ -141,7 +150,24 @@ function PlaylistViewContent() {
     )
   }
 
-  if (!user || !playlist) return null
+  if (notFound) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Music className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-xl font-semibold mb-2">Playlist not found</h2>
+          <p className="text-muted-foreground mb-6">
+            It may be private, or the link may be incorrect.
+          </p>
+          <Link href="/">
+            <Button>Back Home</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!playlist) return null
 
   return (
     <div className="min-h-screen bg-background">
@@ -269,13 +295,15 @@ function PlaylistViewContent() {
                         </div>
                       </div>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveTrack(playlistTrack.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveTrack(playlistTrack.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )

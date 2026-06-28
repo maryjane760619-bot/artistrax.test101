@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
 
 interface Track {
   id: string
@@ -73,8 +74,12 @@ export function StreamingAudioPlayer({
   const fetchStreamUrl = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch(`/api/stream/${track.id}`)
-      
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {}
+      const response = await fetch(`/api/stream/${track.id}`, { headers })
+
       if (!response.ok) {
         const error = await response.json()
         console.error('Failed to fetch stream URL:', error)
@@ -204,9 +209,13 @@ export function StreamingAudioPlayer({
     if (mode !== 'stream') return
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       await fetch('/api/stream/log', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({
           trackId: track.id,
           durationSeconds,
