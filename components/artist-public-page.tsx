@@ -7,6 +7,7 @@ import {
   Sparkles, Calendar, MapPin, Ticket, ExternalLink, Building2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { FollowButton } from '@/components/follow-button'
 import { SocialLinksDisplay } from '@/components/social-links-display'
 import { ProductCard } from '@/components/product-card'
 import { VideoPlayer } from '@/components/video-player'
@@ -271,6 +272,10 @@ export function ArtistPublicPage({
                 {artist.bio && (
                   <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">{artist.bio}</p>
                 )}
+
+                <div className="flex justify-center md:justify-start">
+                  <FollowButton type="artist" id={artist.id} />
+                </div>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 pt-2">
                   <div className="text-center md:text-left">

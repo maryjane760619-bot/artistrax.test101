@@ -8,6 +8,7 @@ import {
   Download, Search, Sparkles, Calendar, MapPin, Ticket,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { FollowButton } from '@/components/follow-button'
 import { useCart } from '@/lib/cart-context'
 import { SubscriptionModal } from '@/components/subscription-modal'
 import { SocialLinksDisplay } from '@/components/social-links-display'
@@ -254,6 +255,10 @@ export function LabelPublicPage({
                 <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
                   {label.bio || 'Independent music label.'}
                 </p>
+
+                <div className="flex justify-center md:justify-start">
+                  <FollowButton type="label" id={label.id} />
+                </div>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 pt-2">
                   <div className="text-center md:text-left">
