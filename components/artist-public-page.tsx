@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Music, Music2, Music4, Disc, Play, Pause, ShoppingCart, CheckCircle,
   Globe, Instagram, Twitter, Video, Download, SlidersHorizontal, Search,
-  Sparkles, Calendar, MapPin, Ticket, ExternalLink,
+  Sparkles, Calendar, MapPin, Ticket, ExternalLink, Building2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SocialLinksDisplay } from '@/components/social-links-display'
@@ -82,12 +82,19 @@ type SubscriptionSettings = {
   description: string
 } | null
 
+type OwnedLabel = {
+  name: string
+  slug: string
+  logo_url: string | null
+}
+
 type Props = {
   artist: Artist
   tracks: Track[]
   products?: Product[]
   videos?: Video[]
   events?: EventItem[]
+  ownedLabels?: OwnedLabel[]
   subscriberCount: number
   subscriptionSettings: SubscriptionSettings
 }
@@ -101,6 +108,7 @@ export function ArtistPublicPage({
   products = [],
   videos = [],
   events = [],
+  ownedLabels = [],
   subscriberCount,
   subscriptionSettings,
 }: Props) {
@@ -244,6 +252,21 @@ export function ArtistPublicPage({
                   {artist.display_name}
                 </h1>
                 <p className="text-sm text-muted-foreground">@{artist.username}</p>
+
+                {ownedLabels.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                    {ownedLabels.map(label => (
+                      <a
+                        key={label.slug}
+                        href={`/labels/${label.slug}`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+                      >
+                        <Building2 className="w-3 h-3" />
+                        Also runs {label.name}
+                      </a>
+                    ))}
+                  </div>
+                )}
 
                 {artist.bio && (
                   <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">{artist.bio}</p>

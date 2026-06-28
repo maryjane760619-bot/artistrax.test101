@@ -71,6 +71,12 @@ export default async function UsernamePage({ params }: Props) {
     .gte('event_date', today)
     .order('event_date', { ascending: true })
 
+  // Fetch label(s) this artist owns/runs (separate from labels they're signed to)
+  const { data: ownedLabels } = await supabase
+    .from('labels')
+    .select('name, slug, logo_url')
+    .eq('owner_artist_id', artist.id)
+
   return (
     <>
       <Header />
@@ -80,6 +86,7 @@ export default async function UsernamePage({ params }: Props) {
         products={products || []}
         videos={videos || []}
         events={events || []}
+        ownedLabels={ownedLabels || []}
         subscriberCount={subscriberCount || 0}
         subscriptionSettings={subscriptionSettings}
       />

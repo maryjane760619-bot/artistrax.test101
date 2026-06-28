@@ -14,7 +14,7 @@ export default async function LabelSlugPage({ params }: Props) {
 
   const { data: label, error: labelError } = await supabase
     .from('labels')
-    .select('*')
+    .select('*, owner_artist:owner_artist_id (display_name, username)')
     .eq('slug', slug)
     .single()
 

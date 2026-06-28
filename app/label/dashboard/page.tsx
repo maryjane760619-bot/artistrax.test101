@@ -9,6 +9,7 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { BrandingEditor } from '@/components/branding-editor'
 import { SubscriptionSettingsEditor } from '@/components/subscription-settings-editor'
+import { LinkArtistEditor } from '@/components/link-artist-editor'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
@@ -134,6 +135,8 @@ export default function LabelDashboard() {
           )}
 
           <SubscriptionSettingsEditor />
+
+          <LinkArtistEditor />
 
           {/* Stripe Status */}
           {stripeConnected ? (

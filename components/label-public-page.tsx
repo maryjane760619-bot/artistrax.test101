@@ -24,6 +24,7 @@ type Label = {
   instagram?: string | null
   twitter?: string | null
   soundcloud?: string | null
+  owner_artist?: { display_name: string; username: string } | null
 }
 
 type Track = {
@@ -239,6 +240,16 @@ export function LabelPublicPage({
                 <h1 className="text-3xl sm:text-5xl font-display font-semibold tracking-tight text-foreground">
                   {label.name}
                 </h1>
+
+                {label.owner_artist && (
+                  <Link
+                    href={`/${label.owner_artist.username}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+                  >
+                    <Users className="w-3 h-3" />
+                    Run by {label.owner_artist.display_name}
+                  </Link>
+                )}
 
                 <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
                   {label.bio || 'Independent music label.'}
