@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { detectPlatform, isValidUrl } from '@/lib/link-platforms';
 
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+async function getAuthedUser(request: NextRequest, supabase: ReturnType<typeof createClient>) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  const { data: { user } } = await supabase.auth.getUser(token);
+  return user;
+}
+
 // GET - Fetch links for an artist or label
+// Public visitors only see visible links; the owner viewing their own
+// dashboard editor (verified via Bearer token) sees all of them, including
+// hidden ones -- otherwise hiding a link made it impossible to un-hide.
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -16,12 +32,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = getServiceClient();
+    const user = await getAuthedUser(request, supabase);
+    const isOwner = !!user && user.id === (artistId || labelId);
+
     let query = supabase
       .from('social_links')
       .select('*')
-      .eq('is_visible', true)
       .order('position', { ascending: true });
+
+    if (!isOwner) {
+      query = query.eq('is_visible', true);
+    }
 
     if (artistId) {
       query = query.eq('artist_id', artistId);
@@ -72,7 +94,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = getServiceClient();
+
+    // Caller must be the artist/label they're claiming to create a link for --
+    // otherwise anyone could plant links on someone else's public profile.
+    const user = await getAuthedUser(request, supabase);
+    if (!user || user.id !== (artistId || labelId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Get current max position
     let maxPosQuery = supabase
@@ -138,7 +167,26 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = getServiceClient();
+
+    const user = await getAuthedUser(request, supabase);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: existing } = await supabase
+      .from('social_links')
+      .select('artist_id, label_id')
+      .eq('id', id)
+      .single();
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+    }
+
+    if (existing.artist_id !== user.id && existing.label_id !== user.id) {
+      return NextResponse.json({ error: 'Not your link' }, { status: 403 });
+    }
 
     const updates: any = { updated_at: new Date().toISOString() };
     if (title !== undefined) updates.title = title;
@@ -179,7 +227,26 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Link ID required' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = getServiceClient();
+
+    const user = await getAuthedUser(request, supabase);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: existing } = await supabase
+      .from('social_links')
+      .select('artist_id, label_id')
+      .eq('id', id)
+      .single();
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+    }
+
+    if (existing.artist_id !== user.id && existing.label_id !== user.id) {
+      return NextResponse.json({ error: 'Not your link' }, { status: 403 });
+    }
 
     const { error } = await supabase.from('social_links').delete().eq('id', id);
 

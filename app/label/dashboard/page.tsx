@@ -294,7 +294,10 @@ export default function LabelDashboard() {
               <Link href="/label/bundles/new">Create Bundle</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/labels/siesta-records" target="_blank">
+              <Link href="/label/links">Manage Links</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href={`/labels/${labelData?.slug || ''}`} target="_blank">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 View Public Page
               </Link>
