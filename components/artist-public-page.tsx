@@ -51,7 +51,7 @@ type Product = {
   base_price: number
   images: string[]
   is_active: boolean
-  variants?: { stock_quantity: number }[]
+  variants?: { id: string; name: string; price_modifier: number; stock_quantity: number; is_available: boolean }[]
 }
 
 type Video = {
@@ -151,13 +151,16 @@ export function ArtistPublicPage({
     })
   }
 
-  function handleAddProductToCart(productId: string) {
+  function handleAddProductToCart(productId: string, variantId?: string) {
     const product = products.find(p => p.id === productId)
     if (!product) return
+    const variant = variantId ? product.variants?.find(v => v.id === variantId) : undefined
     cart.addItem({
       productId: product.id,
+      variantId,
       productTitle: product.title,
-      price: product.base_price,
+      variantName: variant?.name,
+      price: product.base_price + (variant?.price_modifier || 0),
       imageUrl: product.images[0],
       artistId: artist.id,
       artistName: artist.display_name,
