@@ -306,6 +306,12 @@ export default function ArtistDashboard() {
               <span>Upload Mix</span>
             </Button>
           </Link>
+          <Link href="/artist/bundles/new">
+            <Button variant="outline" className="w-full h-auto py-4 flex-col gap-1 text-sm">
+              <ShoppingBag className="w-5 h-5" />
+              <span>Create Bundle</span>
+            </Button>
+          </Link>
           <Link href="/artist/go-live">
             <Button variant="outline" className="w-full h-auto py-4 flex-col gap-1 text-sm border-red-500 text-red-500 hover:bg-red-50">
               <Radio className="w-5 h-5" />
