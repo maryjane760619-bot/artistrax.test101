@@ -1,19 +1,27 @@
 'use client'
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { 
-  LayoutDashboard, 
-  Disc3, 
-  Users, 
-  Package, 
+import { usePathname, useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import {
+  LayoutDashboard,
+  Disc3,
+  Users,
+  Package,
   ShoppingCart,
   Settings,
   Music,
   LogOut
 } from 'lucide-react'
+
+// This entire admin section was leftover boilerplate from a different
+// project template ("siesta life" branding, fake hardcoded stats, no
+// real data) -- it had zero access control, meaning anyone who found
+// /admin could view it. Until it's either rebuilt with real data or
+// removed, gate it to the platform owner's own account.
+const ADMIN_EMAILS = ['support@artistrax.com', 'chris.stas69@gmail.com']
 
 function LeafLogo({ className = "w-8 h-8" }: { className?: string }) {
   return (
@@ -46,6 +54,27 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [authorized, setAuthorized] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        setAuthorized(true)
+      } else {
+        setAuthorized(false)
+        router.push('/')
+      }
+    })
+  }, [router])
+
+  if (authorized !== true) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
