@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
       apiVersion: '2024-12-18.acacia',
     });
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     const body = await request.json();
     const { userId, userType, subscriptionId } = body;
@@ -16,6 +21,15 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    // Caller must be the artist/label they're claiming to cancel for --
+    // otherwise anyone who knew/guessed a userId could cancel someone
+    // else's subscription.
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user || user.id !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Cancel subscription at period end (not immediately)
