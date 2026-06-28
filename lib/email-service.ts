@@ -73,6 +73,19 @@ export async function sendLabelWelcomeEmail(name: string, email: string, slug: s
   );
 }
 
+// Track Purchase Receipt
+export async function sendTrackPurchaseReceipt(
+  email: string,
+  tracks: { title: string; artist: string }[],
+  total: number
+) {
+  await sendEmail(
+    email,
+    EMAIL_SUBJECTS.trackPurchaseReceipt,
+    emailTemplates.trackPurchaseReceipt(tracks, total)
+  );
+}
+
 // Subscription Notification (to admin only)
 export async function sendSubscriptionNotification(
   accountType: string,

@@ -28,7 +28,7 @@ export const emailTemplates = {
       <h2>What's Next?</h2>
       <ul>
         <li><strong>Discover Music</strong> - Browse tracks from independent artists and labels</li>
-        <li><strong>Earn Rewards</strong> - Get 10 points for every $1 you spend (500 points = 1 free track!)</li>
+        <li><strong>Earn Rewards</strong> - Get 2 points for every $1 you spend (100 points = 1 free track!)</li>
         <li><strong>Create Playlists</strong> - Build your personal music library</li>
         <li><strong>Support Artists</strong> - 95% of your purchase goes directly to artists</li>
       </ul>
@@ -103,6 +103,36 @@ export const emailTemplates = {
       
       <p style="color: #666; font-size: 14px; margin-top: 32px;">
         Questions? We're here to help.<br/>
+        - The Artistrax Team
+      </p>
+    </div>
+  `,
+
+  // Track Purchase Receipt
+  trackPurchaseReceipt: (tracks: { title: string; artist: string }[], total: number) => `
+    <div style="${baseStyles}">
+      <h1 style="color: #1F4E3D;">Thanks for your purchase! 🎵</h1>
+
+      <p>Your order is complete and your music is ready to stream and download.</p>
+
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin-top: 0;">Tracks</h3>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          ${tracks.map(t => `
+            <li style="margin-bottom: 8px;">
+              <strong>${t.title}</strong>${t.artist ? ` <span style="color: #666;">— ${t.artist}</span>` : ''}
+            </li>
+          `).join('')}
+        </ul>
+        <div style="border-top: 2px solid #ddd; padding-top: 10px; margin-top: 10px;">
+          <p style="font-size: 18px; margin: 0;"><strong>Total: $${total.toFixed(2)}</strong></p>
+        </div>
+      </div>
+
+      <a href="https://music-download-store-2.vercel.app/fan/library" style="${buttonStyles}">Open Your Library</a>
+
+      <p style="color: #666; font-size: 14px; margin-top: 32px;">
+        Thank you for supporting independent artists!<br/>
         - The Artistrax Team
       </p>
     </div>

@@ -18,6 +18,7 @@ export const EMAIL_SUBJECTS = {
   adminNewArtist: '🎨 New Artist Signup',
   adminNewLabel: '🏢 New Label Signup',
   adminNewSubscription: '💳 New Subscription',
+  trackPurchaseReceipt: 'Your Artistrax order is ready 🎵',
   pointsEarned: 'You earned points! ⭐',
   trialEnding: 'Your trial ends in 7 days ⏰',
 } as const;
