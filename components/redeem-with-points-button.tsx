@@ -3,18 +3,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { POINTS_CONFIG } from '@/lib/points-config';
+import { supabase } from '@/lib/supabase';
 import { Sparkles, Loader2 } from 'lucide-react';
 
 interface RedeemWithPointsButtonProps {
   trackId: string;
-  fanId: string;
   pointsBalance: number;
   onSuccess?: () => void;
 }
 
 export function RedeemWithPointsButton({
   trackId,
-  fanId,
   pointsBalance,
   onSuccess,
 }: RedeemWithPointsButtonProps) {
@@ -29,10 +28,14 @@ export function RedeemWithPointsButton({
     setError('');
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch('/api/points/redeem', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trackId, fanId }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ trackId }),
       });
 
       const data = await response.json();
