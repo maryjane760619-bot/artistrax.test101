@@ -27,9 +27,11 @@ type Product = {
 type Props = {
   product: Product
   onAddToCart: (productId: string, variantId?: string) => void
+  sellerName?: string
+  sellerHref?: string
 }
 
-export function ProductCard({ product, onAddToCart }: Props) {
+export function ProductCard({ product, onAddToCart, sellerName, sellerHref }: Props) {
   if (!product.is_active) return null
 
   const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock_quantity || 0), 0)
@@ -61,6 +63,19 @@ export function ProductCard({ product, onAddToCart }: Props) {
           <h3 className="font-display text-lg font-semibold tracking-tight truncate">
             {product.title}
           </h3>
+          {sellerName && (
+            sellerHref ? (
+              <a
+                href={sellerHref}
+                onClick={e => e.stopPropagation()}
+                className="text-xs text-muted-foreground hover:text-accent hover:underline"
+              >
+                {sellerName}
+              </a>
+            ) : (
+              <p className="text-xs text-muted-foreground">{sellerName}</p>
+            )
+          )}
           {product.description && (
             <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
               {product.description}
