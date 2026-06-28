@@ -25,9 +25,14 @@ export default function FanSubscriptionsPage() {
     fetchSubscriptions()
   }, [])
 
+  const authHeader = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}
+  }
+
   const fetchSubscriptions = async () => {
     try {
-      const response = await fetch('/api/subscriptions')
+      const response = await fetch('/api/subscriptions', { headers: await authHeader() })
       if (response.ok) {
         const data = await response.json()
         setSubscriptions(data.subscriptions || [])
@@ -45,6 +50,7 @@ export default function FanSubscriptionsPage() {
     try {
       const response = await fetch(`/api/subscriptions/${id}`, {
         method: 'DELETE',
+        headers: await authHeader(),
       })
 
       if (response.ok) {

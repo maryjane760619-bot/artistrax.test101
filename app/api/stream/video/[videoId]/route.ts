@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
@@ -14,11 +14,15 @@ export async function GET(
 ) {
   try {
     const { videoId } = params
-    const supabase = createClient()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+    const authToken = request.headers.get('authorization')?.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(authToken)
+
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized - please log in' },
@@ -76,7 +80,7 @@ export async function GET(
 
     // Also check if they have an active subscription to the artist/label
     const { data: subscription } = await supabase
-      .from('subscriptions')
+      .from('fan_subscriptions')
       .select('id')
       .or(`artist_id.eq.${video.artist_id},label_id.eq.${video.label_id}`)
       .eq('fan_id', user.id)

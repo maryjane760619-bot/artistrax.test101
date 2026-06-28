@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Play, Pause, Volume2, VolumeX, Maximize, Download, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
+import { supabase } from '@/lib/supabase'
 
 interface Video {
   id: string
@@ -43,8 +44,12 @@ export function VideoPlayer({ video, mode = 'stream', onClose, className }: Vide
   const fetchStreamUrl = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/stream/video/${video.id}`)
-      
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {}
+      const response = await fetch(`/api/stream/video/${video.id}`, { headers })
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to load video')

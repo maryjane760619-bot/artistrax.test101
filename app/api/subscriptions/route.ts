@@ -1,12 +1,20 @@
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 // GET /api/subscriptions - Get all fan's subscriptions
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const supabase = getServiceClient();
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -37,9 +45,10 @@ export async function GET(request: NextRequest) {
 // POST /api/subscriptions - Create new subscription
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const supabase = getServiceClient();
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const { data: { user } } = await supabase.auth.getUser(token);
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

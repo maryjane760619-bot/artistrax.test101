@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Heart, Star, Sparkles, Check } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 interface SubscribeButtonProps {
   artistId?: string
@@ -27,9 +28,16 @@ export function SubscribeButton({
   const handleSubscribe = async () => {
     setLoading(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('Sign in as a fan to subscribe')
+      }
       const response = await fetch('/api/subscriptions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
           artist_id: artistId,
           label_id: labelId,
