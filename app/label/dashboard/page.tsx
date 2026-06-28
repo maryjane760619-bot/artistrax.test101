@@ -10,6 +10,7 @@ import { Footer } from '@/components/footer'
 import { BrandingEditor } from '@/components/branding-editor'
 import { SubscriptionSettingsEditor } from '@/components/subscription-settings-editor'
 import { LinkArtistEditor } from '@/components/link-artist-editor'
+import { EmbedCodeButton } from '@/components/embed-code-button'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
@@ -302,6 +303,7 @@ export default function LabelDashboard() {
                 View Public Page
               </Link>
             </Button>
+            {labelData?.slug && <EmbedCodeButton slug={labelData.slug} />}
             <Button asChild variant="outline" size="lg">
               <Link href="/label/billing">Billing</Link>
             </Button>
