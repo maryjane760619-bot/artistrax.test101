@@ -43,7 +43,8 @@ CREATE INDEX IF NOT EXISTS idx_promoters_stripe ON promoters(stripe_charges_enab
 CREATE INDEX IF NOT EXISTS idx_promoters_display_name ON promoters(display_name);
 
 -- 5. Triggers
-CREATE TRIGGER IF NOT EXISTS update_promoters_updated_at BEFORE UPDATE ON promoters
+DROP TRIGGER IF EXISTS update_promoters_updated_at ON promoters;
+CREATE TRIGGER update_promoters_updated_at BEFORE UPDATE ON promoters
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- 6. Enable RLS
