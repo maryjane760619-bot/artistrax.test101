@@ -29,6 +29,7 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS promoter_id UUID REFERENCES promoter
 
 -- 3. Drop old CHECK constraint, add new one allowing promoters
 ALTER TABLE events DROP CONSTRAINT IF EXISTS events_artist_id_label_id_check;
+ALTER TABLE events DROP CONSTRAINT IF EXISTS events_creator_check;
 ALTER TABLE events ADD CONSTRAINT events_creator_check
   CHECK (
     (artist_id IS NOT NULL AND label_id IS NULL AND promoter_id IS NULL)
