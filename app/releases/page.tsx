@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic'
 export default function ReleasesPage() {
   const [tracks, setTracks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedGenre, setSelectedGenre] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az' | 'price-high' | 'price-low'>('newest')
@@ -82,6 +83,14 @@ export default function ReleasesPage() {
 
   useEffect(() => {
     setLoading(true)
+    setError(null)
+
+    // Safety timeout: prevent infinite spinner
+    const timeoutId = setTimeout(() => {
+      setError('Request timed out. Please try again.')
+      setLoading(false)
+    }, 15000)
+
     let q = supabase
       .from('tracks')
       .select(`
@@ -92,10 +101,26 @@ export default function ReleasesPage() {
       `)
       .order('created_at', { ascending: false })
     if (selectedGenre) q = q.eq('genre', selectedGenre)
-    q.then(({ data }) => {
-      setTracks(data || [])
+
+    q.then(({ data, error: fetchError }) => {
+      clearTimeout(timeoutId)
+      if (fetchError) {
+        console.error('[Releases] Supabase query error:', fetchError)
+        setError(fetchError.message)
+        setTracks([])
+      } else {
+        setTracks(data || [])
+      }
+      setLoading(false)
+    }).catch((err: unknown) => {
+      clearTimeout(timeoutId)
+      const message = err instanceof Error ? err.message : 'Failed to load releases'
+      console.error('[Releases] Fetch failed:', message)
+      setError(message)
       setLoading(false)
     })
+
+    return () => clearTimeout(timeoutId)
   }, [selectedGenre])
 
   const formatTime = (s: number) => {
@@ -221,7 +246,12 @@ export default function ReleasesPage() {
               </div>
             </div>
 
-            {loading ? (
+            {error ? (
+              <div className="rounded-sm border border-dashed border-destructive/30 py-16 text-center">
+                <p className="text-destructive font-medium mb-2">Failed to load releases</p>
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+            ) : loading ? (
               <div className="text-muted-foreground">Loading...</div>
             ) : filteredTracks.length === 0 ? (
               <div className="rounded-sm border border-dashed border-border py-16 text-center text-muted-foreground">
