@@ -18,6 +18,13 @@ const FOR_ARTISTS = [
   { l: 'Pricing & Royalties', href: '/about' },
 ]
 
+const FOR_PROMOTERS = [
+  { l: 'Promoter Signup', href: '/promoter/signup' },
+  { l: 'Promoter Dashboard', href: '/promoter/dashboard' },
+  { l: 'Create Event', href: '/events/create' },
+  { l: 'Payout Setup', href: '/promoter/billing' },
+]
+
 const SUPPORT = [
   { l: 'FAQ', href: '/faq' },
   { l: 'Download Help', href: '/downloads' },
@@ -79,6 +86,19 @@ export function Footer() {
             <h4 className="text-xs uppercase tracking-[0.2em] text-primary-foreground/60">For Artists</h4>
             <ul className="mt-4 space-y-2.5 text-sm">
               {FOR_ARTISTS.map((item) => (
+                <li key={item.l}>
+                  <Link href={item.href} className="link-underline text-primary-foreground/80 hover:text-primary-foreground">
+                    {item.l}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="md:col-span-2">
+            <h4 className="text-xs uppercase tracking-[0.2em] text-primary-foreground/60">For Promoters</h4>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {FOR_PROMOTERS.map((item) => (
                 <li key={item.l}>
                   <Link href={item.href} className="link-underline text-primary-foreground/80 hover:text-primary-foreground">
                     {item.l}

@@ -6,6 +6,7 @@ import {
   Heart,
   Music,
   Building2,
+  CalendarCheck,
   Play,
   Pause,
   ShoppingCart,
@@ -505,12 +506,13 @@ export default function HomePage() {
 
         {/* Join CTA */}
         <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
-          <SectionHeader eyebrow="Get started" title="Join artistrax" subtitle="Three ways in — as a fan, an artist, or a label." />
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-px overflow-hidden rounded-sm border border-border bg-border">
+          <SectionHeader eyebrow="Get started" title="Join artistrax" subtitle="Four ways in — as a fan, an artist, a label, or a promoter." />
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-sm border border-border bg-border">
             {[
               { href: '/fan/signup', icon: Heart, title: 'Join as Fan', copy: 'Discover music, build your lossless collection, and follow your favorite producers.', cta: 'Sign Up Free' },
               { href: '/artist/signup', icon: Music, title: 'Join as Artist', copy: 'Upload your tracks, manage your catalogue, and keep 95% of every sale.', cta: 'Get Started' },
               { href: '/label/signup', icon: Building2, title: 'Join as Label', copy: 'Register your label, distribute catalogs, and coordinate artist accounts.', cta: 'Get Started' },
+              { href: '/promoter/signup', icon: CalendarCheck, title: 'Join as Promoter', copy: 'Create events, sell tickets, and keep 95% of revenue — no monthly fees.', cta: 'Get Started' },
             ].map(({ href, icon: Icon, title, copy, cta }) => (
               <Link key={href} href={href} className="group flex flex-col bg-card p-8 transition hover:bg-muted">
                 <span className="flex h-12 w-12 items-center justify-center rounded-sm bg-secondary text-foreground">

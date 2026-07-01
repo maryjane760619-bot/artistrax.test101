@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { Music, Heart, Users, Sparkles, Building2, Zap } from 'lucide-react'
+import { Music, Heart, Users, Sparkles, Building2, Zap, CalendarCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -104,7 +104,7 @@ export default function AboutPage() {
               How artistrax Works
             </h2>
             
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {/* For Fans */}
               <div className="bg-background rounded-lg p-8 border border-border">
                 <Heart className="w-12 h-12 text-primary mb-4" />
@@ -183,6 +183,33 @@ export default function AboutPage() {
                 </ul>
                 <Link href="/label/signup">
                   <Button variant="outline" className="w-full mt-6">Join as Label</Button>
+                </Link>
+              </div>
+
+              {/* For Promoters */}
+              <div className="bg-background rounded-lg p-8 border border-border">
+                <CalendarCheck className="w-12 h-12 text-primary mb-4" />
+                <h3 className="text-2xl font-display font-semibold tracking-tight mb-4">For Promoters</h3>
+                <ul className="space-y-3 text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Create events with ticket tiers in minutes</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Sell tickets and keep 95% of revenue</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Promote shows for any artist on the platform</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>No monthly fees — pay as you grow</span>
+                  </li>
+                </ul>
+                <Link href="/promoter/signup">
+                  <Button variant="outline" className="w-full mt-6">Join as Promoter</Button>
                 </Link>
               </div>
             </div>
