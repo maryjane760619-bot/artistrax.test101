@@ -112,7 +112,8 @@ export default function TrackPage() {
     )
   }
 
-  const artistName = track.labels?.name || track.artists?.display_name || 'Unknown Artist'
+  const artistName = track.artists?.display_name || track.labels?.name || 'Unknown Artist'
+  const labelName = track.artists?.display_name ? track.labels?.name : null
 
   return (
     <>
@@ -141,7 +142,14 @@ export default function TrackPage() {
               </div>
 
               <h1 className="text-3xl font-bold mb-2">{track.title}</h1>
-              <p className="text-xl text-muted-foreground mb-6">{artistName}</p>
+              <p className={`text-xl text-muted-foreground ${labelName ? 'mb-1' : 'mb-6'}`}>{artistName}</p>
+              {labelName && (
+                <p className="text-sm text-muted-foreground/70 mb-6">
+                  {track.labels?.slug ? (
+                    <Link href={`/labels/${track.labels.slug}`} className="hover:underline">{labelName}</Link>
+                  ) : labelName}
+                </p>
+              )}
 
               {track.is_mix && (
                 <div className="mb-6 rounded-md border border-border bg-card p-4">
@@ -235,7 +243,7 @@ export default function TrackPage() {
                   )}
 
                   <p className="text-xs text-muted-foreground mt-3 text-center">
-                    Secure payment via Stripe · 90% goes directly to the artist
+                    Secure payment via Stripe · {track.label_id ? '90% goes directly to the label' : '95% goes directly to the artist'}
                   </p>
                 </div>
               )}

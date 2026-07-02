@@ -38,7 +38,12 @@ export default function CartPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Checkout failed. Please try again.')
+        console.error('Checkout error:', data.error)
+        // Only surface errors written for fans; everything else gets a friendly fallback
+        const fanFacing = typeof data.error === 'string' && data.error.includes('Stripe onboarding')
+        setError(fanFacing
+          ? 'This seller isn\'t set up to receive payments yet. Please check back soon.'
+          : 'Something went wrong on our end — you have not been charged. Please try again in a moment.')
         setCheckingOut(false)
         return
       }
