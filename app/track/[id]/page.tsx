@@ -40,16 +40,18 @@ export default function TrackPage() {
     if (!id) return
 
     const fetchTrack = async () => {
-      const { data } = await supabase
-        .from('tracks')
-        .select(`*, artists:artist_id (display_name), labels:label_id (name)`)
-        .eq('id', id)
-        .single()
+      const [{ data }, { data: { session } }] = await Promise.all([
+        supabase
+          .from('tracks')
+          .select(`*, artists:artist_id (display_name), labels:label_id (name, slug)`)
+          .eq('id', id)
+          .single(),
+        supabase.auth.getSession(),
+      ])
 
       setTrack(data)
 
       // Check if logged-in fan already owns this track
-      const { data: { session } } = await supabase.auth.getSession()
       if (session?.user && data) {
         const { data: purchase } = await supabase
           .from('purchases')
@@ -117,7 +119,7 @@ export default function TrackPage() {
       <Header />
       <main className="min-h-screen pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-4">
-          <Link href={track.label_id ? `/labels/siesta-records` : `/artists`}>
+          <Link href={track.labels?.slug ? `/labels/${track.labels.slug}` : `/artists`}>
             <Button variant="ghost" className="mb-6">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back

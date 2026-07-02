@@ -13,7 +13,7 @@ export default function SubscriptionCard({ userId, userType }: SubscriptionCardP
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<any>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [canceling, set Canceling] = useState(false);
+  const [canceling, setCanceling] = useState(false);
 
   useEffect(() => {
     loadSubscription();

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { supabase, createClient } from '@/lib/supabase'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
-  apiVersion: '2024-12-18.acacia'
-})
+import { stripe } from '@/lib/stripe'
+import { getAccountStatus } from '@/lib/stripe-account-status'
 
 // GET handler - auth-token based (used by dashboard component)
 export async function GET(request: NextRequest) {
@@ -17,7 +14,7 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // Try labels table first (for label dashboard)
+    // Try labels table first (for label dashboard), then artists
     const { data: label } = await supabaseClient
       .from('labels')
       .select('id, stripe_account_id, stripe_onboarding_complete, stripe_charges_enabled')
@@ -25,39 +22,9 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (label) {
-      if (!label.stripe_account_id) {
-        return NextResponse.json({
-          hasAccount: false,
-          onboardingComplete: false,
-          chargesEnabled: false,
-          payoutsEnabled: false
-        })
-      }
-
-      const dbResponse = {
-        hasAccount: true,
-        accountId: label.stripe_account_id,
-        onboardingComplete: label.stripe_onboarding_complete ?? false,
-        chargesEnabled: label.stripe_charges_enabled ?? false,
-        payoutsEnabled: label.stripe_charges_enabled ?? false,
-      }
-
-      try {
-        const account = await stripe.accounts.retrieve(label.stripe_account_id)
-        return NextResponse.json({
-          ...dbResponse,
-          onboardingComplete: account.details_submitted,
-          chargesEnabled: account.charges_enabled,
-          payoutsEnabled: account.payouts_enabled,
-          requirements: account.requirements,
-          email: account.email,
-        })
-      } catch {
-        return NextResponse.json(dbResponse)
-      }
+      return NextResponse.json(await getAccountStatus(label))
     }
 
-    // Try artists table (for artist dashboard)
     const { data: artist, error: artistError } = await supabaseClient
       .from('artists')
       .select('id, stripe_account_id, stripe_onboarding_complete, stripe_charges_enabled')
@@ -68,36 +35,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Artist or Label not found' }, { status: 404 })
     }
 
-    if (!artist.stripe_account_id) {
-      return NextResponse.json({
-        hasAccount: false,
-        onboardingComplete: false,
-        chargesEnabled: false,
-        payoutsEnabled: false
-      })
-    }
-
-    const artistDbResponse = {
-      hasAccount: true,
-      accountId: artist.stripe_account_id,
-      onboardingComplete: artist.stripe_onboarding_complete ?? false,
-      chargesEnabled: artist.stripe_charges_enabled ?? false,
-      payoutsEnabled: artist.stripe_charges_enabled ?? false,
-    }
-
-    try {
-      const account = await stripe.accounts.retrieve(artist.stripe_account_id)
-      return NextResponse.json({
-        ...artistDbResponse,
-        onboardingComplete: account.details_submitted,
-        chargesEnabled: account.charges_enabled,
-        payoutsEnabled: account.payouts_enabled,
-        requirements: account.requirements,
-        email: account.email,
-      })
-    } catch {
-      return NextResponse.json(artistDbResponse)
-    }
+    return NextResponse.json(await getAccountStatus(artist))
 
   } catch (error: any) {
     console.error('Stripe account status error:', error)

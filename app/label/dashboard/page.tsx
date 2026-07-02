@@ -26,7 +26,7 @@ export default function LabelDashboard() {
 
     supabase
       .from('labels')
-      .select('*')
+      .select('name, track_count, stripe_account_id, stripe_charges_enabled')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {

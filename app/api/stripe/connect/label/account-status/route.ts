@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { createClient } from "@/lib/supabase"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
-  apiVersion: '2024-12-18.acacia',
-})
+import { getAccountStatus } from '@/lib/stripe-account-status'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,9 +8,9 @@ export async function GET(request: NextRequest) {
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const token = authHeader.replace('Bearer ', '')
     const supabase = createClient()
-    
+
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
+
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -35,39 +31,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    if (!label.stripe_account_id) {
-      return NextResponse.json({
-        hasAccount: false,
-        onboardingComplete: false,
-        chargesEnabled: false,
-        payoutsEnabled: false
-      })
-    }
-
-    // Use DB values as primary source of truth — Stripe API as optional enhancement
-    const dbResponse = {
-      hasAccount: true,
-      accountId: label.stripe_account_id,
-      onboardingComplete: label.stripe_onboarding_complete ?? false,
-      chargesEnabled: label.stripe_charges_enabled ?? false,
-      payoutsEnabled: label.stripe_charges_enabled ?? false,
-    }
-
-    // Try to enrich with live Stripe data, but don't fail if unavailable
-    try {
-      const account = await stripe.accounts.retrieve(label.stripe_account_id)
-      return NextResponse.json({
-        ...dbResponse,
-        onboardingComplete: account.details_submitted,
-        chargesEnabled: account.charges_enabled,
-        payoutsEnabled: account.payouts_enabled,
-        requirements: account.requirements,
-        email: account.email,
-      })
-    } catch {
-      // Stripe API unavailable or account mismatch — return DB state
-      return NextResponse.json(dbResponse)
-    }
+    return NextResponse.json(await getAccountStatus(label))
 
   } catch (error: any) {
     console.error('Stripe account status error:', error)
