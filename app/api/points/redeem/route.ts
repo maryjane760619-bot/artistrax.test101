@@ -13,7 +13,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify the caller owns this fan account
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized — Bearer token required' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
     const supabase = createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized — invalid token' }, { status: 401 });
+    }
+
+    if (user.id !== fanId) {
+      return NextResponse.json({ error: 'Forbidden — you can only redeem points for your own account' }, { status: 403 });
+    }
 
     // Get fan's current points balance
     const { data: fan, error: fanError } = await supabase

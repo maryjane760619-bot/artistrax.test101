@@ -30,7 +30,22 @@ export async function POST(request: NextRequest) {
     }
 
     // All tracks must go to the same connected account for one Stripe session
-    const recipientAccount = tracks[0].label_id
+    const firstLabelId = tracks[0].label_id
+    const firstArtistId = tracks[0].artist_id
+
+    // Validate: all tracks must belong to the same seller
+    const allSameSeller = tracks.every(t => 
+      (firstLabelId && t.label_id === firstLabelId) ||
+      (firstArtistId && !t.label_id && t.artist_id === firstArtistId)
+    )
+
+    if (!allSameSeller) {
+      return NextResponse.json({
+        error: 'All tracks in a purchase must belong to the same artist or label. Please checkout each seller separately.'
+      }, { status: 400 })
+    }
+
+    const recipientAccount = firstLabelId
       ? tracks[0].labels?.stripe_account_id
       : tracks[0].artists?.stripe_account_id
 

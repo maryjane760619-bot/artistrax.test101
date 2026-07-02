@@ -32,6 +32,8 @@ function LabelBatchUploadContent() {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [artists, setArtists] = useState<Artist[]>([])
   const [defaultArtistId, setDefaultArtistId] = useState<string>('')
+  const [defaultIsFree, setDefaultIsFree] = useState(true)
+  const [defaultPrice, setDefaultPrice] = useState('1.99')
   const [uploading, setUploading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   
@@ -199,8 +201,8 @@ function LabelBatchUploadContent() {
         duration: Math.floor(duration),
         file_size: file.size,
         format: audioExt as 'mp3' | 'flac' | 'wav',
-        price: 0,
-        is_free: true,
+        price: defaultIsFree ? 0 : parseFloat(defaultPrice) || 0,
+        is_free: defaultIsFree,
       })
 
       if (dbError) throw dbError
@@ -329,15 +331,45 @@ function LabelBatchUploadContent() {
                 <div>
                   <h2 className="text-lg font-semibold mb-1">Ready to Upload</h2>
                   <p className="text-sm text-muted-foreground">
-                    {files.length} tracks • All will be set as free downloads (edit later)
+                    {files.length} tracks{defaultIsFree ? ' • Free downloads' : ` • $${defaultPrice} each`} (edit later)
                   </p>
                 </div>
                 {!uploading && pendingCount > 0 && (
-                  <Button onClick={() => fileInputRef.current?.click()} variant="outline">
-                    Add More Files
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button onClick={() => fileInputRef.current?.click()} variant="outline">
+                      Add More Files
+                    </Button>
+                  </div>
                 )}
               </div>
+
+              {/* Pricing Controls */}
+              {!uploading && pendingCount > 0 && (
+                <div className="flex items-center gap-4 pt-4 border-t border-border">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={defaultIsFree}
+                      onChange={(e) => setDefaultIsFree(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    Free downloads
+                  </label>
+                  {!defaultIsFree && (
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-muted-foreground">Price:</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={defaultPrice}
+                        onChange={(e) => setDefaultPrice(e.target.value)}
+                        className="w-24 px-3 py-1.5 bg-background border border-border rounded-md text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Apply Artist to All */}
               {!uploading && pendingCount > 0 && artists.length > 0 && (

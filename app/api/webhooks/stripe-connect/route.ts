@@ -95,7 +95,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     if (purchaseError) {
       console.error('Failed to update ticket purchase:', purchaseError)
-      return
+      throw purchaseError
     }
 
     // Check if attendee records exist for this purchase
@@ -118,38 +118,45 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           ticket_code: crypto.randomBytes(6).toString('base64url').toUpperCase().slice(0, 8),
         })
       }
-      await supabase.from('ticket_attendees').insert(attendeeRows)
+      const { error: attendeeError } = await supabase.from('ticket_attendees').insert(attendeeRows)
+      if (attendeeError) throw attendeeError
     }
 
     // Increment quantity_sold on ticket tier
-    const { data: tier } = await supabase
+    const { data: tier, error: tierFetchError } = await supabase
       .from('ticket_tiers')
       .select('quantity_sold')
       .eq('id', tierId)
       .single()
 
+    if (tierFetchError) throw tierFetchError
+
     if (tier) {
-      await supabase
+      const { error: tierUpdateError } = await supabase
         .from('ticket_tiers')
         .update({ quantity_sold: (tier.quantity_sold || 0) + quantity })
         .eq('id', tierId)
+      if (tierUpdateError) throw tierUpdateError
     }
   } catch (error) {
     console.error('Error handling checkout session completed:', error)
+    throw error // Propagate so Stripe retries
   }
 }
 
 async function handleAccountUpdated(account: Stripe.Account) {
   try {
     // Find which user this account belongs to (check artists then labels)
-    const { data: artist } = await supabase
+    const { data: artist, error: artistFetchError } = await supabase
       .from('artists')
       .select('id')
       .eq('stripe_account_id', account.id)
       .single()
 
+    if (artistFetchError && artistFetchError.code !== 'PGRST116') throw artistFetchError
+
     if (artist) {
-      await supabase
+      const { error: updateError } = await supabase
         .from('artists')
         .update({
           stripe_charges_enabled: account.charges_enabled,
@@ -157,17 +164,20 @@ async function handleAccountUpdated(account: Stripe.Account) {
           stripe_onboarding_complete: account.details_submitted
         })
         .eq('id', artist.id)
+      if (updateError) throw updateError
       return
     }
 
-    const { data: label } = await supabase
+    const { data: label, error: labelFetchError } = await supabase
       .from('labels')
       .select('id')
       .eq('stripe_account_id', account.id)
       .single()
 
+    if (labelFetchError && labelFetchError.code !== 'PGRST116') throw labelFetchError
+
     if (label) {
-      await supabase
+      const { error: updateError } = await supabase
         .from('labels')
         .update({
           stripe_charges_enabled: account.charges_enabled,
@@ -175,9 +185,11 @@ async function handleAccountUpdated(account: Stripe.Account) {
           stripe_onboarding_complete: account.details_submitted
         })
         .eq('id', label.id)
+      if (updateError) throw updateError
     }
   } catch (error) {
     console.error('Error handling account update:', error)
+    throw error
   }
 }
 
@@ -190,17 +202,18 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     if (!orderId) return
 
     // Update order status
-    await supabase
+    const { error: orderError } = await supabase
       .from('orders')
       .update({
         status: 'processing',
         stripe_payment_intent_id: paymentIntent.id
       })
       .eq('id', orderId)
+    if (orderError) throw orderError
 
     // Record payout entry
     if (sellerId && sellerType) {
-      const amount = paymentIntent.amount / 100 // Convert from cents
+      const amount = paymentIntent.amount / 100
       const platformFee = (paymentIntent.application_fee_amount || 0) / 100
       const netAmount = amount - platformFee
 
@@ -209,7 +222,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         amount: amount,
         platform_fee: platformFee,
         net_amount: netAmount,
-        status: 'paid', // Payment succeeded, money is in Connect account
+        status: 'paid',
         paid_at: new Date().toISOString()
       }
 
@@ -219,10 +232,12 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         payoutData.artist_id = sellerId
       }
 
-      await supabase.from('payouts').insert(payoutData)
+      const { error: payoutError } = await supabase.from('payouts').insert(payoutData)
+      if (payoutError) throw payoutError
     }
   } catch (error) {
     console.error('Error handling payment success:', error)
+    throw error
   }
 }
 

@@ -1,9 +1,10 @@
 'use client'
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { 
   LayoutDashboard, 
   Disc3, 
@@ -12,7 +13,8 @@ import {
   ShoppingCart,
   Settings,
   Music,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react'
 
 function LeafLogo({ className = "w-8 h-8" }: { className?: string }) {
@@ -46,6 +48,26 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) {
+        router.push('/fan/login')
+      } else {
+        setChecking(false)
+      }
+    })
+  }, [router])
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">

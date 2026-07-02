@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim(), {
   apiVersion: '2024-12-18.acacia',
@@ -18,10 +18,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify the caller owns this user ID
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized — Bearer token required' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized — invalid token' }, { status: 401 });
+    }
+
+    if (user.id !== userId) {
+      return NextResponse.json({ error: 'Forbidden — you can only cancel your own subscription' }, { status: 403 });
+    }
+
     // Cancel subscription at period end (not immediately)
     const subscription = await stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });
+
+    const periodEnd = (subscription as any).current_period_end * 1000
 
     // Update database
     const tableName = userType === 'artist' ? 'artists' : 'labels';
@@ -29,7 +49,6 @@ export async function POST(request: NextRequest) {
       .from(tableName)
       .update({
         subscription_status: 'canceled',
-        // Keep subscription_expires_at so they have access until then
       })
       .eq('id', userId);
 
@@ -42,14 +61,14 @@ export async function POST(request: NextRequest) {
       metadata: {
         canceled_at: new Date().toISOString(),
         cancel_at_period_end: true,
-        period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        period_end: new Date(periodEnd).toISOString(),
       },
     });
 
     return NextResponse.json({
       success: true,
       message: 'Subscription canceled successfully',
-      access_until: new Date(subscription.current_period_end * 1000).toISOString(),
+      access_until: new Date(periodEnd).toISOString(),
     });
   } catch (error: any) {
     console.error('Cancel subscription error:', error);

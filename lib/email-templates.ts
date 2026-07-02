@@ -28,7 +28,7 @@ export const emailTemplates = {
       <h2>What's Next?</h2>
       <ul>
         <li><strong>Discover Music</strong> - Browse tracks from independent artists and labels</li>
-        <li><strong>Earn Rewards</strong> - Get 10 points for every $1 you spend (500 points = 1 free track!)</li>
+        <li><strong>Earn Rewards</strong> - Get 2 points for every $1 you spend (100 points = 1 free track!)</li>
         <li><strong>Create Playlists</strong> - Build your personal music library</li>
         <li><strong>Support Artists</strong> - 95% of your purchase goes directly to artists</li>
       </ul>

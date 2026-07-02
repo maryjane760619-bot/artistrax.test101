@@ -2,6 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { detectPlatform, isValidUrl } from '@/lib/link-platforms';
 
+// Verify Bearer token and check that caller owns the artistId or labelId
+async function verifyOwner(request: NextRequest, artistId?: string | null, labelId?: string | null): Promise<{ userId: string } | NextResponse> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized — Bearer token required' }, { status: 401 }) as any;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized — invalid token' }, { status: 401 }) as any;
+  }
+
+  // If modifying, verify ownership
+  if (artistId && user.id !== artistId) {
+    return NextResponse.json({ error: 'Forbidden — you do not own this artist account' }, { status: 403 }) as any;
+  }
+  if (labelId && user.id !== labelId) {
+    return NextResponse.json({ error: 'Forbidden — you do not own this label account' }, { status: 403 }) as any;
+  }
+
+  return { userId: user.id };
+}
+
 // GET - Fetch links for an artist or label
 export async function GET(request: NextRequest) {
   try {
@@ -16,12 +42,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check if caller is the owner — if so, show all links including hidden ones
+    const authHeader = request.headers.get('authorization');
+    let isOwner = false;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        if (artistId && user.id === artistId) isOwner = true;
+        if (labelId && user.id === labelId) isOwner = true;
+      }
+    }
+
     const supabase = createClient();
     let query = supabase
       .from('social_links')
       .select('*')
-      .eq('is_visible', true)
       .order('position', { ascending: true });
+
+    // Only filter hidden links for non-owners
+    if (!isOwner) {
+      query = query.eq('is_visible', true);
+    }
 
     if (artistId) {
       query = query.eq('artist_id', artistId);
@@ -71,6 +114,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Verify ownership
+    const ownerCheck = await verifyOwner(request, artistId, labelId);
+    if ('error' in ownerCheck) return ownerCheck as NextResponse;
 
     const supabase = createClient();
 
@@ -140,6 +187,21 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createClient();
 
+    // Fetch the link to check ownership
+    const { data: existingLink, error: fetchError } = await supabase
+      .from('social_links')
+      .select('id, artist_id, label_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existingLink) {
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+    }
+
+    // Verify ownership of the link owner
+    const ownerCheck = await verifyOwner(request, existingLink.artist_id, existingLink.label_id);
+    if ('error' in ownerCheck) return ownerCheck as NextResponse;
+
     const updates: any = { updated_at: new Date().toISOString() };
     if (title !== undefined) updates.title = title;
     if (url !== undefined) updates.url = url;
@@ -180,6 +242,21 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = createClient();
+
+    // Fetch the link to check ownership
+    const { data: existingLink, error: fetchError } = await supabase
+      .from('social_links')
+      .select('id, artist_id, label_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existingLink) {
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+    }
+
+    // Verify ownership of the link owner
+    const ownerCheck = await verifyOwner(request, existingLink.artist_id, existingLink.label_id);
+    if ('error' in ownerCheck) return ownerCheck as NextResponse;
 
     const { error } = await supabase.from('social_links').delete().eq('id', id);
 

@@ -158,7 +158,7 @@ function SearchContent() {
               {results.tracks.map((track: any) => (
                 <Link
                   key={track.id}
-                  href={`/${track.artists?.username}/${track.slug}`}
+                  href={`/track/${track.id}`}
                   className="flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:border-primary transition-colors"
                 >
                   {track.cover_url ? (
